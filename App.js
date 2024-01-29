@@ -1,6 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import SkiaUI from './src/SkiaUI';
+import { bgColor } from './src/utils';
 
 export default function App() {
   return (
@@ -14,7 +15,7 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: bgColor,
     alignItems: 'center',
     justifyContent: 'center',
   },

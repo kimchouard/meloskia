@@ -1,24 +1,28 @@
 import React from "react";
-import { Canvas, Circle, Group } from "@shopify/react-native-skia";
+import { Canvas, Group } from "@shopify/react-native-skia";
 import { Dimensions } from "react-native";
+import PianoKeyboard from "./PianoKeyboard";
+import NoteRoll from "./NoteRoll";
+import { gameHeight, gameWidth, screenHeight, screenWidth } from "./utils";
  
-const HelloSkia = () => {
-  const width = Dimensions.get("window").width;
-  const height = Dimensions.get("window").height;
-  const minSize = Math.min(width, height);
+const PlayingUI = () => {
+  const minSize = Math.min(screenWidth, screenHeight);
   const r = minSize * 0.33;
 
-  console.log('SkiaUI.tsx: width: ', width, ' height: ', height, ' r: ', r, minSize)
+  console.log('SkiaUI.tsx: screenWidth: ', screenWidth, ' screenHeight: ', screenHeight, ' r: ', r, minSize)
 
   return (
-    <Canvas style={{ width, height }}>
-      <Group blendMode="multiply">
-        <Circle cx={r} cy={r} r={r} color="cyan" />
-        <Circle cx={minSize - r} cy={r} r={r} color="magenta" />
-        <Circle cx={minSize / 2} cy={minSize - r} r={r} color="yellow" />
+    <Canvas style={{ width: screenWidth, height: screenHeight }}>
+      <Group transform={[
+        // Center the game 
+        { translateX: (screenWidth - gameWidth) / 2 },
+        { translateY: (screenHeight - gameHeight) / 2 },
+      ]}>
+        <NoteRoll />
+        <PianoKeyboard />
       </Group>
     </Canvas>
   );
 };
  
-export default HelloSkia;
+export default PlayingUI;
