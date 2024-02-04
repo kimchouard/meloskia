@@ -1,7 +1,5 @@
-import PlayingUI from "./PlayingUI"
+import PlayingUI from './PlayingUI';
 
-const SkiaUI = () => {
-  return <PlayingUI />;
-};
+const SkiaUI = () => <PlayingUI />;
 
 export default SkiaUI;

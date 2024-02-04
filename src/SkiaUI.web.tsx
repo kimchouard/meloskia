@@ -2,15 +2,13 @@ import Constants from 'expo-constants';
 import { Text, View, StyleSheet } from 'react-native';
 import { WithSkiaWeb } from '@shopify/react-native-skia/lib/module/web';
 
-const SkiaUI = () => {
-  return <View style={styles.container}>
+const SkiaUI = () => <View style={styles.container}>
     <WithSkiaWeb
-      opts={{ locateFile: () => `/static/js/canvaskit.wasm` }}
+      opts={{ locateFile: () => '/static/js/canvaskit.wasm' }}
       getComponent={() => require('./PlayingUI')}
       fallback={<Text style={{ textAlign: 'center' }}>Loading Skia...</Text>}
     />
-  </View>
-};
+  </View>;
 
 const styles = StyleSheet.create({
   container: {

@@ -1,8 +1,12 @@
-import { Group, LinearGradient, Paint, Paragraph, Rect, RoundedRect, Skia, Text, useFont, useFonts, vec } from '@shopify/react-native-skia';
+import {
+  Group, LinearGradient, Paint, Paragraph, Rect, RoundedRect, Skia, Text, useFont, useFonts, vec,
+} from '@shopify/react-native-skia';
 import { Dimensions } from 'react-native';
 import { Inter_400Regular } from '@expo-google-fonts/inter';
 import { useMemo } from 'react';
-import { blackKeyColor, whiteKeyColor, pianoKeyboardHeight, keyStrokeWidth, numberOfWhiteKeys, gameWidth, gameHeight, bgColor } from './utils';
+import {
+  blackKeyColor, whiteKeyColor, pianoKeyboardHeight, keyStrokeWidth, numberOfWhiteKeys, gameWidth, gameHeight, bgColor, screenWidth,
+} from './utils';
 
 const PianoKeyboard = () => {
   const keyWidth = gameWidth / numberOfWhiteKeys;
@@ -14,7 +18,7 @@ const PianoKeyboard = () => {
 
   return <Group>
     {/* BG */}
-    <Rect x={-keyStrokeWidth / 2} y={gameHeight - pianoKeyboardHeight - keyStrokeWidth / 2} width={gameWidth + keyStrokeWidth / 2} height={pianoKeyboardHeight + keyStrokeWidth / 2} color={ bgColor } />
+    <Rect x={-(screenWidth - gameWidth) / 2 } y={gameHeight - pianoKeyboardHeight - keyStrokeWidth / 2} width={screenWidth} height={pianoKeyboardHeight + keyStrokeWidth / 2} color={ bgColor } />
 
     {/* Draw 11 White keys using a loop */}
     { [...Array(numberOfWhiteKeys)].map((_, i) => {
@@ -25,7 +29,7 @@ const PianoKeyboard = () => {
       const keyNumber = i % 7;
       const hasAnAccidentalBefore = keyNumber === 1 || keyNumber === 2 || keyNumber === 4 || keyNumber === 5 || keyNumber === 6;
 
-      const accidentalName = accidentalNames[i]
+      const accidentalName = accidentalNames[i];
 
       return <Group key={`pianokey_${i}`}>
         <RoundedRect x={xPos} y={yPos} width={keyWidth} height={pianoKeyboardHeight} r={5}>
@@ -41,7 +45,7 @@ const PianoKeyboard = () => {
         {<Text x={xPos + keyWidth / 2 - noteNameFontSize / 4} y={gameHeight - noteNameFontSize / 2} text={keyNames[i]} font={noteNameFont} />}
       </Group>;
     }) }
-  </Group>
+  </Group>;
 };
 
 export default PianoKeyboard;
