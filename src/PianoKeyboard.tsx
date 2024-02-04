@@ -22,7 +22,7 @@ const PianoKeyboard = () => {
 
     {/* Draw 11 White keys using a loop */}
     { [...Array(numberOfWhiteKeys)].map((_, i) => {
-      const xPos = i * gameWidth / numberOfWhiteKeys;
+      const xPos = i * (gameWidth / numberOfWhiteKeys);
       const yPos = gameHeight - pianoKeyboardHeight;
       const keyName = keyNames[i];
 
@@ -41,8 +41,10 @@ const PianoKeyboard = () => {
           />
         </RoundedRect>
         { hasAnAccidentalBefore && <RoundedRect x={xPos - keyWidth / 4} y={yPos} width={keyWidth / 2} height={pianoKeyboardHeight / 2} r={5} color={ blackKeyColor } /> }
-        { hasAnAccidentalBefore && <Text x={xPos - noteNameFontSize / 2.5} y={gameHeight - pianoKeyboardHeight / 2 - noteNameFontSize / 2} text={accidentalName} font={noteNameFont} color={whiteKeyColor} /> }
-        {<Text x={xPos + keyWidth / 2 - noteNameFontSize / 4} y={gameHeight - noteNameFontSize / 2} text={keyNames[i]} font={noteNameFont} />}
+        { (screenWidth > 600) && <Group>
+          { hasAnAccidentalBefore && <Text x={xPos - noteNameFontSize / 2.5} y={gameHeight - pianoKeyboardHeight / 2 - noteNameFontSize / 2} text={accidentalName} font={noteNameFont} color={whiteKeyColor} /> }
+          {<Text x={xPos + keyWidth / 2 - noteNameFontSize / 4} y={gameHeight - noteNameFontSize / 2} text={keyNames[i]} font={noteNameFont} />}
+        </Group>}
       </Group>;
     }) }
   </Group>;

@@ -19,7 +19,7 @@ const NoteRoll = ({ playMode }:{ playMode: PlayMode }) => {
 
   useEffect(() => {
     if (playMode === 'playing') {
-      rollY.value = withTiming(2 * screenHeight, {
+      rollY.value = withTiming(2.5 * screenHeight, {
         duration: 4000,
         easing: Easing.linear,
       });
