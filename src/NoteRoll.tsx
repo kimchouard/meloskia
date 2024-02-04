@@ -11,7 +11,7 @@ const NoteRoll = () => {
     { translateY: gameHeight - pianoKeyboardHeight },
 
     // Apply the perspective effect
-    { perspective: 600 },
+    { perspective: 400 },
     { rotateX: Math.PI / 10},
 
     // Go back to the top of the screen
