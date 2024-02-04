@@ -58,6 +58,7 @@ const styles = StyleSheet.create({
     left: screenWidth / 2 - 100,
     justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: 10,
   },
 });
 
