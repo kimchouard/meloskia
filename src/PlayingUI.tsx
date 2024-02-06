@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { memo, useState } from 'react';
 import { Canvas, Group } from '@shopify/react-native-skia';
 import {
   Pressable, Text, StyleSheet,
@@ -9,11 +9,14 @@ import {
   bgColor,
   gameHeight, gameWidth, screenHeight, screenWidth,
 } from './utils';
+import useKeyboard from './useKeyboard';
 
 export type PlayMode = 'start' | 'playing' | 'restart';
 
 const PlayingUI = () => {
   const [playMode, setPlayMode] = useState<PlayMode>('start');
+
+  const { keysState } = useKeyboard({ keyboardType: 'laptop' });
 
   const restart = () => {
     setPlayMode('start');
@@ -41,7 +44,7 @@ const PlayingUI = () => {
           { translateY: (screenHeight - gameHeight) / 2 },
         ]}>
           <NoteRoll playMode={playMode} />
-          <PianoKeyboard />
+          <PianoKeyboard keysState={keysState} />
         </Group>
       </Canvas>
     </>
@@ -62,4 +65,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PlayingUI;
+export default memo(PlayingUI);

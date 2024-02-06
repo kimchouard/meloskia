@@ -4,7 +4,7 @@ import {
 import {
   Easing, useDerivedValue, useSharedValue, withTiming,
 } from 'react-native-reanimated';
-import { useEffect } from 'react';
+import { memo, useEffect } from 'react';
 import {
   gameWidth, gameHeight, pianoKeyboardHeight, screenHeight, bgColor, keyNoteColors,
 } from './utils';
@@ -68,4 +68,4 @@ const NoteRoll = ({ playMode }:{ playMode: PlayMode }) => {
   </Group>;
 };
 
-export default NoteRoll;
+export default memo(NoteRoll);
