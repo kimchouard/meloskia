@@ -28,3 +28,16 @@ export const keyNoteColors = [
   '#FFB5D9',
   '#FFB5B5',
 ];
+
+export const accidentalNoteColors = [
+  '#FF7A7A',
+  '#FFA94D',
+  '#FFD747',
+  '#9DFFB0',
+  '#7ABDFF',
+  '#6A8AFF',
+  '#8A6AFF',
+  '#FF6AFF',
+  '#FF6ACD',
+  '#FF6A6A',
+];

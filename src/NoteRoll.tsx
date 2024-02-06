@@ -6,14 +6,22 @@ import {
 } from 'react-native-reanimated';
 import { memo, useEffect } from 'react';
 import {
-  gameWidth, gameHeight, pianoKeyboardHeight, screenHeight, bgColor, keyNoteColors,
+  gameWidth, gameHeight, pianoKeyboardHeight, screenHeight, bgColor, keyNoteColors, accidentalNoteColors,
 } from './utils';
 import { PlayMode } from './PlayingUI';
+import { KeysState } from './useKeyboard';
+import { accidentalNames, keyNames } from './PianoKeyboard';
 
 const noteHeight = 100;
 const noteStrokeWidth = 8;
 
-const NoteRoll = ({ playMode }:{ playMode: PlayMode }) => {
+const NoteRoll = ({
+  playMode,
+  keysState,
+}:{
+  playMode: PlayMode,
+  keysState: KeysState
+}) => {
   const rollY = useSharedValue(0);
   const rollTransform = useDerivedValue(() => [{ translateY: rollY.value }]);
 
@@ -45,10 +53,23 @@ const NoteRoll = ({ playMode }:{ playMode: PlayMode }) => {
   ]}>
     <Rect x={0} y={0} width={gameWidth} height={2 * gameHeight - pianoKeyboardHeight} color={ bgColor } />
 
-    {/* Create a line at the center of each piano key */}
+    {/* Create a line at the center of each piano key black key and a colored bg if need be ! */}
     { [...Array(11)].map((_, i) => {
       const xPos = i * (gameWidth / 10);
-      return <Rect key={`line_${i}`} x={xPos} y={0} width={1} height={2 * gameHeight - pianoKeyboardHeight} color={'#555'} />;
+
+      const keyPressed = keysState[keyNames[i]];
+      const accidentalPressed = keysState[accidentalNames[i]];
+
+      // Highlight the lines with a black key (accidental)
+      const defaultAccidentalColor = (i === 10 || accidentalNames[i] === '') ? '#333' : '#666';
+
+      return <>
+        {/* Lines */}
+        <Rect key={`line_${i}`} x={xPos} y={0} width={(accidentalPressed) ? 2 : 1} height={2 * gameHeight - pianoKeyboardHeight} color={(accidentalPressed) ? accidentalNoteColors[i] : defaultAccidentalColor} />
+
+        {/* BG (onPress) */}
+        { keyPressed && <Rect key={`bg_${i}`} x={xPos} y={0} width={gameWidth / 10} height={2 * gameHeight - pianoKeyboardHeight} color={ keyNoteColors[i] } opacity={0.1} /> }
+      </>;
     }) }
 
     {/* Create a rounded rect representing a note for each white key */}

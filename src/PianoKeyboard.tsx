@@ -54,7 +54,7 @@ const PianoKeyboard = ({
           <LinearGradient
             start={vec(xPos, yPos)}
             end={vec(xPos, yPos + pianoKeyboardHeight)}
-            colors={[bgColor, (accidentalState) ? '#222222' : '#444444']}
+            colors={[bgColor, (accidentalState) ? '#222' : '#444']}
           />
         </RoundedRect> }
 

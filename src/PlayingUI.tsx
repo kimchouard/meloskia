@@ -43,7 +43,7 @@ const PlayingUI = () => {
           { translateX: (screenWidth - gameWidth) / 2 },
           { translateY: (screenHeight - gameHeight) / 2 },
         ]}>
-          <NoteRoll playMode={playMode} />
+          <NoteRoll playMode={playMode} keysState={keysState} />
           <PianoKeyboard keysState={keysState} />
         </Group>
       </Canvas>
