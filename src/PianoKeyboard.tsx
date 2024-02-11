@@ -3,7 +3,7 @@ import {
 } from '@shopify/react-native-skia';
 import { memo } from 'react';
 import {
-  blackKeyColor, whiteKeyColor, pianoKeyboardHeight, keyStrokeWidth, numberOfWhiteKeys, gameWidth, gameHeight, bgColor, screenWidth,
+  blackKeyColor, whiteKeyColor, pianoKeyboardHeight, keyStrokeWidth, numberOfWhiteKeys, gameWidth, gameHeight, bgColor, screenWidth, keyWidth,
 } from './utils';
 import { KeysState } from './useKeyboard';
 
@@ -37,8 +37,6 @@ const PianoKeyboard = ({
 }:{
   keysState: KeysState
 }) => {
-  const keyWidth = gameWidth / numberOfWhiteKeys;
-
   const noteNameFontSize = 25;
   const noteNameFont = useFont('Inter_600SemiBold.ttf', noteNameFontSize);
 

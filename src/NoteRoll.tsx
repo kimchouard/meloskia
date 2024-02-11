@@ -6,31 +6,35 @@ import {
 } from 'react-native-reanimated';
 import { memo, useEffect } from 'react';
 import {
-  gameWidth, gameHeight, pianoKeyboardHeight, screenHeight, bgColor, keyNoteColors, accidentalNoteColors,
+  gameWidth, gameHeight, pianoKeyboardHeight, screenHeight, bgColor, keyNoteColors, accidentalNoteColors, countdownBars, getDistFromBars, getTimeFromBars, keyWidth,
 } from './utils';
-import { PlayMode } from './PlayingUI';
-import { KeysState } from './useKeyboard';
-import { accidentalNames, keyNames } from './PianoKeyboard';
+import { KeysState, PlayMode } from './useKeyboard';
+import { accidentalNames, keyNames, noteToKeyboardKey } from './PianoKeyboard';
+import { SongData, isGamePlaying } from './PlayingUI';
 
-const noteHeight = 100;
 const noteStrokeWidth = 8;
 
 const NoteRoll = ({
   playMode,
   keysState,
+  songData,
 }:{
   playMode: PlayMode,
-  keysState: KeysState
+  keysState: KeysState,
+  songData: SongData
 }) => {
   const rollY = useSharedValue(0);
   const rollTransform = useDerivedValue(() => [{ translateY: rollY.value }]);
 
   useEffect(() => {
-    if (playMode === 'playing') {
-      rollY.value = withTiming(2.5 * screenHeight, {
-        duration: 4000,
-        easing: Easing.linear,
-      });
+    if (isGamePlaying(playMode)) {
+      rollY.value = withTiming(
+        getDistFromBars(songData.durationInBars + countdownBars, songData.bpm),
+        {
+          duration: getTimeFromBars(songData.durationInBars + countdownBars, songData.bpm),
+          easing: Easing.linear,
+        },
+      );
     } else if (playMode === 'start') {
       rollY.value = withTiming(0, {
         duration: 500,
@@ -49,13 +53,13 @@ const NoteRoll = ({
 
     // Go back to the top of the screen
     { translateX: -gameWidth / 2 },
-    { translateY: -2 * gameHeight + pianoKeyboardHeight },
+    { translateY: -gameHeight + pianoKeyboardHeight },
   ]}>
     <Rect x={0} y={0} width={gameWidth} height={2 * gameHeight - pianoKeyboardHeight} color={ bgColor } />
 
     {/* Create a line at the center of each piano key black key and a colored bg if need be ! */}
     { [...Array(11)].map((_, i) => {
-      const xPos = i * (gameWidth / 10);
+      const xPos = i * (keyWidth);
 
       const keyPressed = keysState[keyNames[i]];
       const accidentalPressed = keysState[accidentalNames[i]];
@@ -63,26 +67,59 @@ const NoteRoll = ({
       // Highlight the lines with a black key (accidental)
       const defaultAccidentalColor = (i === 10 || accidentalNames[i] === '') ? '#333' : '#666';
 
+      const yPos = -2 * gameHeight;
+      const height = 4 * gameHeight;
+
       return <>
         {/* Lines */}
-        <Rect key={`line_${i}`} x={xPos} y={0} width={(accidentalPressed) ? 2 : 1} height={2 * gameHeight - pianoKeyboardHeight} color={(accidentalPressed) ? accidentalNoteColors[i] : defaultAccidentalColor} />
+        <Rect key={`line_${i}`} x={xPos} y={yPos} width={(accidentalPressed) ? 2 : 1} height={height} color={(accidentalPressed) ? accidentalNoteColors[i] : defaultAccidentalColor} />
 
         {/* BG (onPress) */}
-        { keyPressed && <Rect key={`bg_${i}`} x={xPos} y={0} width={gameWidth / 10} height={2 * gameHeight - pianoKeyboardHeight} color={ keyNoteColors[i] } opacity={0.1} /> }
+        { keyPressed && <Rect key={`bg_${i}`} x={xPos} y={yPos} width={keyWidth} height={height} color={ keyNoteColors[i] } opacity={0.1} /> }
       </>;
     }) }
 
     {/* Create a rounded rect representing a note for each white key */}
     <Group transform={rollTransform}>
-      { [...Array(10)].map((_, i) => {
-        const yBase = 1.5 * gameHeight - pianoKeyboardHeight;
+      { songData.notes.map((note, i) => {
+        const yOfKeyboardHeight = gameHeight - pianoKeyboardHeight;
 
-        const xPos = i * (gameWidth / 10) + noteStrokeWidth / 2;
-        const yPos = yBase - (i + 1) * (noteHeight + noteHeight / 2) + noteStrokeWidth / 2;
+        // Get the index of the note in the keyNames array
+        const keyboardKey = noteToKeyboardKey[note.noteName];
+        const noteIndex = keyNames.indexOf(keyboardKey);
+        const noteAccidentalIndex = accidentalNames.indexOf(keyboardKey);
 
-        return <RoundedRect key={`note_${i}`} x={xPos} y={yPos} width={gameWidth / 10 - noteStrokeWidth} height={noteHeight - noteStrokeWidth} r={5}>
-          <Paint color={ keyNoteColors[i] } style="stroke" strokeWidth={noteStrokeWidth} opacity={0.5} />
-          <Paint color={ keyNoteColors[i] } />
+        const roundedRectParams:{
+          xPos?: number,
+          yPos?: number,
+          width?: number,
+          color?: string,
+        } = {
+          yPos: yOfKeyboardHeight - getDistFromBars(countdownBars + note.startAtBar + note.durationInBars, songData.bpm) + noteStrokeWidth / 2,
+        };
+        if (noteIndex !== -1) {
+          roundedRectParams.xPos = noteIndex * keyWidth + noteStrokeWidth / 2;
+          roundedRectParams.width = keyWidth - noteStrokeWidth;
+          roundedRectParams.color = keyNoteColors[noteIndex];
+        } else if (noteAccidentalIndex !== -1) {
+          roundedRectParams.xPos = (noteAccidentalIndex - 1 / 4) * keyWidth + noteStrokeWidth / 2;
+          roundedRectParams.width = gameWidth / (10 * 2) - noteStrokeWidth;
+          roundedRectParams.color = accidentalNoteColors[noteAccidentalIndex];
+        } else {
+          console.error('Uknown note:', note.noteName, note);
+          return <></>;
+        }
+
+        return <RoundedRect
+          key={`note_${i}`}
+          x={roundedRectParams.xPos}
+          y={roundedRectParams.yPos}
+          width={roundedRectParams.width}
+          height={getDistFromBars(note.durationInBars, songData.bpm) - noteStrokeWidth}
+          r={5}
+        >
+          <Paint color={ roundedRectParams.color } style="stroke" strokeWidth={noteStrokeWidth} opacity={0.5} />
+          <Paint color={ roundedRectParams.color } />
         </RoundedRect>;
       }) }
     </Group>

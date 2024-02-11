@@ -6,7 +6,7 @@ const SkiaUI = () => <View style={styles.container}>
     <WithSkiaWeb
       opts={{ locateFile: () => '/static/js/canvaskit.wasm' }}
       getComponent={() => require('./PlayingUI')}
-      fallback={<Text style={{ textAlign: 'center' }}>Loading Skia...</Text>}
+      fallback={<Text style={{ color: 'white', textAlign: 'center' }}>Loading Skia...</Text>}
     />
   </View>;
 

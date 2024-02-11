@@ -3,20 +3,24 @@ import { Platform } from 'react-native';
 import { Gesture } from 'react-native-gesture-handler';
 import { accidentalNames, keyNames } from './PianoKeyboard';
 import {
-  gameHeight, gameWidth, pianoKeyboardHeight, screenWidth,
+  countdownBars,
+  gameHeight, gameWidth, getTimeFromBars, pianoKeyboardHeight, screenWidth,
 } from './utils';
+import { SongData } from './PlayingUI';
 
 const verbose = false;
 
 export type KeysState = { [key:string]: true | false };
 type KeyboardListener = (e: KeyboardEvent) => void;
 
-export type PlayMode = 'start' | 'playing' | 'restart';
+export type PlayMode = 'start' | 'playing' | 'playback' | 'restart';
 
 const useKeyboard = ({
   keyboardType,
+  songData,
 }:{
   keyboardType: 'laptop' | 'midi', // TODO: Add midi keyboard support
+  songData: SongData,
 }) => {
   // ==============================
   //    Playing State
@@ -30,13 +34,13 @@ const useKeyboard = ({
     clearTimeout(playingTimeout.current);
   };
 
-  const startGame = () => {
-    setPlayMode('playing');
+  const startGame = (startMode: 'playing' | 'playback') => {
+    setPlayMode(startMode);
 
     // TEMP: Allow the user to restart the game after the animation
     playingTimeout.current = setTimeout(() => {
       setPlayMode('restart');
-    }, 4500);
+    }, getTimeFromBars(songData.durationInBars + countdownBars, songData.bpm));
   };
 
   // ==============================
@@ -56,8 +60,13 @@ const useKeyboard = ({
 
     // Spacebar pressed (onKeyUp only, to avoid multiple restarts on key hold)
     if (e.code === 'Space' && !keyDown) {
-      if (playMode === 'start') startGame();
+      if (playMode === 'start') startGame('playing');
       else restart();
+    }
+
+    // Spacebar pressed (onKeyUp only, to avoid multiple restarts on key hold)
+    if (e.code === 'Enter' && !keyDown) {
+      if (playMode === 'start') startGame('playback');
     }
 
     const letterName = e.key?.replace('Key', '').toUpperCase();

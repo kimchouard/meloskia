@@ -1,5 +1,7 @@
 import { Dimensions } from 'react-native';
 
+const verbose = false;
+
 export const screenWidth = Dimensions.get('window').width;
 export const screenHeight = Dimensions.get('window').height;
 
@@ -14,6 +16,7 @@ export const pianoKeyboardHeight = 200;
 export const keyStrokeWidth = 4;
 
 export const numberOfWhiteKeys = 10;
+export const keyWidth = gameWidth / numberOfWhiteKeys;
 
 // Create an array of pastel colors for the 10 notes
 export const keyNoteColors = [
@@ -41,3 +44,41 @@ export const accidentalNoteColors = [
   '#FF6ACD',
   '#FF6A6A',
 ];
+
+// ===========================
+//   Tempo and Time
+// ===========================
+
+// Distance between quarter lines & change ratio based on BPM
+export const distanceBetweenBars = 100;
+export const baseBPM = 80;
+export const dynamicDistRatio = 0.2;
+export const countdownBars = 4;
+
+// Get the dynamic distance for 1 bar: 75% fixed and 25% dynamic based on the BPM
+// >> allows for a easier reading on fast BPM
+export const getDistFor1Bar = (BPM: number):number => distanceBetweenBars * ((1 - dynamicDistRatio) + dynamicDistRatio * (baseBPM / BPM));
+
+// Returns the X position (px) based on the number of bars
+export const getDistFromBars = (barCount: number, BPM: number, options: { roundValue: true | false } = { roundValue: true }):number => {
+  // Only return a value if the currentTime && BPM are passsed
+  // console.log('getNoteXPositionBasedOnTime params: ', currentTime, BPM);
+  if (barCount !== undefined && BPM !== undefined
+  && barCount !== null && BPM !== null) {
+    const distXFromBars = barCount * getDistFor1Bar(BPM);
+    return (options.roundValue === true) ? Math.round(distXFromBars) : distXFromBars;
+  }
+
+  console.error('getDistXFromBars called with undefined or null arguments');
+};
+
+// Get time (ms) from the number of bars
+export const getTimeFromBars = (barCount: number, BPM: number, options: { roundValue: true | false } = { roundValue: true }):number => {
+  if (barCount !== undefined && BPM !== undefined
+  && barCount !== null && BPM !== null) {
+    const timeFromBars = barCount * (60 / BPM) * 1000;
+    return (options.roundValue === true) ? Math.round(timeFromBars) : timeFromBars;
+  }
+
+  console.error('getTimeFromBars called with undefined or null arguments');
+};
