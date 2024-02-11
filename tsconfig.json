@@ -2,9 +2,9 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["App.js", "./src/*"]
     }
   },
   "extends": "expo/tsconfig.base",
-  "include": ["global.d.ts", "**/*.ts", "**/*.tsx"]
+  "include": ["global.d.ts", "**/*.ts", "**/*.tsx", "App.js"]
 }

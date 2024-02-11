@@ -52,7 +52,7 @@ const useKeyboard = ({
   const currentKeyboardListener = useRef<{ keydown: KeyboardListener, keyup: KeyboardListener }>();
 
   const onKey = (e: KeyboardEvent, keyDown: boolean) => {
-    console.log('onKey', e, keyDown);
+    verbose && console.log('onKey', e, keyDown);
 
     // Spacebar pressed (onKeyUp only, to avoid multiple restarts on key hold)
     if (e.code === 'Space' && !keyDown) {
