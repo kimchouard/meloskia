@@ -11,6 +11,7 @@ import {
   gameHeight, gameWidth, screenHeight, screenWidth,
 } from './utils';
 import useKeyboard from './useKeyboard';
+import KeyboardAudio from './KeyboardAudio';
 
 const PlayingUI = () => {
   const {
@@ -28,6 +29,10 @@ const PlayingUI = () => {
       { playMode !== 'playing' && <Pressable style={styles.btn} onPress={() => ((playMode === 'start') ? startGame() : restart()) }>
           <Text style={{ color: 'white', fontWeight: '600', fontSize: 24 }}>{(playMode === 'start') ? 'Start Playing' : 'AGAIN!'}</Text>
       </Pressable>}
+
+      {/* Piano sound */}
+      <KeyboardAudio keysState={keysState} />
+
       <GestureDetector gesture={onPressKeyboard}>
         <Canvas style={{ width: screenWidth, height: screenHeight }}>
           <Group transform={[

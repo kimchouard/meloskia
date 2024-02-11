@@ -23,6 +23,8 @@
     "react-native-gesture-handler": "^2.15.0",
     "react-native-reanimated": "^3.6.2",
     "react-native-web": "^0.19.10",
+    "reactronica": "^0.8.1-canary.0",
+    "tone": "^14.7.77",
     "typescript": "^5.3.0"
   },
   "devDependencies": {
