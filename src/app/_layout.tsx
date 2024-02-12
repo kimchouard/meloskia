@@ -1,7 +1,7 @@
 import { SplashScreen, Stack } from 'expo-router';
 
 // Import your global CSS file
-import '../global.css';
+import '../../global.css';
 
 export {
   // Catch any errors thrown by the Layout component.
