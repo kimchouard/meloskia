@@ -82,45 +82,47 @@ const NoteRoll = ({
     {/* Create a rounded rect representing a note for each white key */}
     <Group transform={rollTransform}>
       { songData.notes.map((note, i) => {
-        const yOfKeyboardHeight = gameHeight - pianoKeyboardHeight;
+        if (note.noteName) {
+          const yOfKeyboardHeight = gameHeight - pianoKeyboardHeight;
 
-        // Get the index of the note in the keyNames array
-        const keyboardKey = noteToKeyboardKey[note.noteName];
-        const noteIndex = keyNames.indexOf(keyboardKey);
-        const noteAccidentalIndex = accidentalNames.indexOf(keyboardKey);
+          // Get the index of the note in the keyNames array
+          const keyboardKey = noteToKeyboardKey[note.noteName];
+          const noteIndex = keyNames.indexOf(keyboardKey);
+          const noteAccidentalIndex = accidentalNames.indexOf(keyboardKey);
 
-        const roundedRectParams:{
-          xPos?: number,
-          yPos?: number,
-          width?: number,
-          color?: string,
-        } = {
-          yPos: yOfKeyboardHeight - getDistFromBars(countdownBars + note.startAtBar + note.durationInBars, songData.bpm) + noteStrokeWidth / 2,
-        };
-        if (noteIndex !== -1) {
-          roundedRectParams.xPos = noteIndex * keyWidth + noteStrokeWidth / 2;
-          roundedRectParams.width = keyWidth - noteStrokeWidth;
-          roundedRectParams.color = keyNoteColors[noteIndex];
-        } else if (noteAccidentalIndex !== -1) {
-          roundedRectParams.xPos = (noteAccidentalIndex - 1 / 4) * keyWidth + noteStrokeWidth / 2;
-          roundedRectParams.width = gameWidth / (10 * 2) - noteStrokeWidth;
-          roundedRectParams.color = accidentalNoteColors[noteAccidentalIndex];
-        } else {
-          console.error('Uknown note:', note.noteName, note);
-          return <></>;
+          const roundedRectParams:{
+            xPos?: number,
+            yPos?: number,
+            width?: number,
+            color?: string,
+          } = {
+            yPos: yOfKeyboardHeight - getDistFromBars(countdownBars + note.startAtBar + note.durationInBars, songData.bpm) + noteStrokeWidth / 2,
+          };
+          if (noteIndex !== -1) {
+            roundedRectParams.xPos = noteIndex * keyWidth + noteStrokeWidth / 2;
+            roundedRectParams.width = keyWidth - noteStrokeWidth;
+            roundedRectParams.color = keyNoteColors[noteIndex];
+          } else if (noteAccidentalIndex !== -1) {
+            roundedRectParams.xPos = (noteAccidentalIndex - 1 / 4) * keyWidth + noteStrokeWidth / 2;
+            roundedRectParams.width = gameWidth / (10 * 2) - noteStrokeWidth;
+            roundedRectParams.color = accidentalNoteColors[noteAccidentalIndex];
+          } else {
+            console.error('Uknown note:', note.noteName, note);
+            return <></>;
+          }
+
+          return <RoundedRect
+            key={`note_${i}`}
+            x={roundedRectParams.xPos}
+            y={roundedRectParams.yPos}
+            width={roundedRectParams.width}
+            height={getDistFromBars(note.durationInBars, songData.bpm) - noteStrokeWidth}
+            r={5}
+          >
+            <Paint color={ roundedRectParams.color } style="stroke" strokeWidth={noteStrokeWidth} opacity={0.5} />
+            <Paint color={ roundedRectParams.color } />
+          </RoundedRect>;
         }
-
-        return <RoundedRect
-          key={`note_${i}`}
-          x={roundedRectParams.xPos}
-          y={roundedRectParams.yPos}
-          width={roundedRectParams.width}
-          height={getDistFromBars(note.durationInBars, songData.bpm) - noteStrokeWidth}
-          r={5}
-        >
-          <Paint color={ roundedRectParams.color } style="stroke" strokeWidth={noteStrokeWidth} opacity={0.5} />
-          <Paint color={ roundedRectParams.color } />
-        </RoundedRect>;
       }) }
     </Group>
   </Group>;

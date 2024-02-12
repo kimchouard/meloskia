@@ -3,46 +3,26 @@ import { Platform } from 'react-native';
 import { Gesture } from 'react-native-gesture-handler';
 import { accidentalNames, keyNames } from './PianoKeyboard';
 import {
-  countdownBars,
-  gameHeight, gameWidth, getTimeFromBars, pianoKeyboardHeight, screenWidth,
+  gameHeight, gameWidth, pianoKeyboardHeight, screenWidth,
 } from './utils';
-import { SongData } from './PlayingUI';
+import { PlayMode } from './PlayingUI';
 
 const verbose = false;
 
 export type KeysState = { [key:string]: true | false };
 type KeyboardListener = (e: KeyboardEvent) => void;
 
-export type PlayMode = 'start' | 'playing' | 'playback' | 'restart';
-
 const useKeyboard = ({
   keyboardType,
-  songData,
+  playMode,
+  startGame,
+  restart,
 }:{
   keyboardType: 'laptop' | 'midi', // TODO: Add midi keyboard support
-  songData: SongData,
+  playMode: PlayMode,
+  startGame: (startMode: 'playing' | 'playback') => void,
+  restart: () => void,
 }) => {
-  // ==============================
-  //    Playing State
-  // ==============================
-
-  const playingTimeout = useRef<NodeJS.Timeout>();
-
-  const [playMode, setPlayMode] = useState<PlayMode>('start');
-  const restart = () => {
-    setPlayMode('start');
-    clearTimeout(playingTimeout.current);
-  };
-
-  const startGame = (startMode: 'playing' | 'playback') => {
-    setPlayMode(startMode);
-
-    // TEMP: Allow the user to restart the game after the animation
-    playingTimeout.current = setTimeout(() => {
-      setPlayMode('restart');
-    }, getTimeFromBars(songData.durationInBars + countdownBars, songData.bpm));
-  };
-
   // ==============================
   //    Keyboard State
   // ==============================

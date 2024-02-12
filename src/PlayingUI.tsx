@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useRef, useState } from 'react';
 import { Canvas, Group } from '@shopify/react-native-skia';
 import {
   Pressable, Text, StyleSheet, View,
@@ -8,12 +8,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import PianoKeyboard from './PianoKeyboard';
 import NoteRoll from './NoteRoll';
 import {
-  accidentalNoteColors,
   bgColor,
-  gameHeight, gameWidth, screenHeight, screenWidth,
+  countdownBars,
+  gameHeight, gameWidth, getTimeFromBars, screenHeight, screenWidth,
 } from './utils';
 import useKeyboard from './useKeyboard';
 import KeyboardAudio from './KeyboardAudio';
+import { songs } from './songs';
 
 export interface SongData {
   bpm: number,
@@ -21,37 +22,40 @@ export interface SongData {
   notes: { noteName: string, startAtBar: number, durationInBars: number }[],
 }
 
-const songData = {
-  bpm: 120,
-  durationInBars: 17,
-  notes: [
-    { noteName: 'C3', startAtBar: 0, durationInBars: 1 },
-    { noteName: 'D3', startAtBar: 1, durationInBars: 1 },
-    { noteName: 'E3', startAtBar: 2, durationInBars: 1 },
-    { noteName: 'F3', startAtBar: 3, durationInBars: 1 },
-    { noteName: 'G3', startAtBar: 4, durationInBars: 1 },
-    { noteName: 'A3', startAtBar: 5, durationInBars: 1 },
-    { noteName: 'B3', startAtBar: 6, durationInBars: 1 },
-    { noteName: 'C4', startAtBar: 7, durationInBars: 1 },
-    { noteName: 'D4', startAtBar: 8, durationInBars: 1 },
-    { noteName: 'E4', startAtBar: 9, durationInBars: 1 },
-    { noteName: 'D#4', startAtBar: 10, durationInBars: 1 },
-    { noteName: 'C#4', startAtBar: 11, durationInBars: 1 },
-    { noteName: 'A#3', startAtBar: 12, durationInBars: 1 },
-    { noteName: 'G#3', startAtBar: 13, durationInBars: 1 },
-    { noteName: 'F#3', startAtBar: 14, durationInBars: 1 },
-    { noteName: 'D#3', startAtBar: 15, durationInBars: 1 },
-    { noteName: 'C#3', startAtBar: 16, durationInBars: 1 },
-  ],
-};
+const songData = songs[0];
 
 export const isGamePlaying = (playMode) => playMode === 'playing' || playMode === 'playback';
 
+export type PlayMode = 'start' | 'playing' | 'playback' | 'restart';
+
 const PlayingUI = () => {
+  // ==============================
+  //    Playing State
+
+  const playingTimeout = useRef<NodeJS.Timeout>();
+
+  const [playMode, setPlayMode] = useState<PlayMode>('start');
+  const restart = () => {
+    setPlayMode('start');
+    clearTimeout(playingTimeout.current);
+  };
+
+  const startGame = (startMode: 'playing' | 'playback') => {
+    setPlayMode(startMode);
+
+    // TEMP: Allow the user to restart the game after the animation
+    playingTimeout.current = setTimeout(() => {
+      setPlayMode('restart');
+    }, getTimeFromBars(songData.durationInBars + countdownBars, songData.bpm));
+  };
+
+  // ==============================
+  //    Keyboard Handler
   const {
-    playMode, restart, startGame, // Playing State
     keysState, onPressKeyboard, // Keyboard State
-  } = useKeyboard({ keyboardType: 'laptop', songData });
+  } = useKeyboard({
+    keyboardType: 'laptop', playMode, startGame, restart,
+  });
 
   // ==============================
   //    Skia Canvas and Start Btn
