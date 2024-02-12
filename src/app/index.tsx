@@ -1,15 +1,12 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-
-import SkiaUI from '../components/SkiaUI';
-import { bgColor } from '../utils/utils';
 import PlayingUI from '@/components/PlayingUI';
 
 export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <View style={styles.container}>
+      <View className="flex-1 bg-neutral-950 items-center justify-center">
         <PlayingUI />
 
         <StatusBar style="auto" />
@@ -17,12 +14,3 @@ export default function App() {
     </GestureHandlerRootView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: bgColor,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

@@ -52,7 +52,7 @@ const useKeyboard = ({
     const letterName = e.key?.replace('Key', '').toUpperCase();
     // If the key is included in the keyNames array, then we can use it
     if (keyNames.includes(letterName) || accidentalNames.includes(letterName)) {
-      e.preventDefault();
+      // e.preventDefault();
 
       if (keysState[letterName] === keyDown) return;
 

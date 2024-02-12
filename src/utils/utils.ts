@@ -1,22 +1,20 @@
 import { Dimensions } from 'react-native';
 
-const verbose = false;
-
 export const screenWidth = Dimensions.get('window').width;
 export const screenHeight = Dimensions.get('window').height;
 
 export const gameWidth = Dimensions.get('window').width * ((screenWidth > 1000) ? 0.5 : 0.9);
 export const gameHeight = Dimensions.get('window').height;
 
-export const bgColor = '#101010';
-export const blackKeyColor = '#202020';
-export const whiteKeyColor = '#FEFEFE';
-
 export const pianoKeyboardHeight = 200;
 export const keyStrokeWidth = 4;
 
 export const numberOfWhiteKeys = 10;
 export const keyWidth = gameWidth / numberOfWhiteKeys;
+
+export const bgColor = '#101010';
+export const blackKeyColor = '#202020';
+export const whiteKeyColor = '#FEFEFE';
 
 // Create an array of pastel colors for the 10 notes
 export const keyNoteColors = [

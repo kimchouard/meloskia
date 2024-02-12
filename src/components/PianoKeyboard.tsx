@@ -2,8 +2,9 @@ import {
   Group, LinearGradient, Paint, Rect, RoundedRect, Text, useFont, vec,
 } from '@shopify/react-native-skia';
 import { memo } from 'react';
+import colors from 'tailwindcss/colors';
 import {
-  blackKeyColor, whiteKeyColor, pianoKeyboardHeight, keyStrokeWidth, numberOfWhiteKeys, gameWidth, gameHeight, bgColor, screenWidth, keyWidth,
+  pianoKeyboardHeight, keyStrokeWidth, numberOfWhiteKeys, gameWidth, gameHeight, screenWidth, keyWidth, whiteKeyColor,
 } from '../utils/utils';
 import { KeysState } from '../hooks/useKeyboard';
 
@@ -43,7 +44,7 @@ const PianoKeyboard = ({
   return (
     <Group>
       {/* BG */}
-      <Rect x={-(screenWidth - gameWidth) / 2 } y={gameHeight - pianoKeyboardHeight - keyStrokeWidth / 2} width={screenWidth} height={pianoKeyboardHeight + keyStrokeWidth / 2} color={ bgColor } />
+      <Rect x={-(screenWidth - gameWidth) / 2 } y={gameHeight - pianoKeyboardHeight - keyStrokeWidth / 2} width={screenWidth} height={pianoKeyboardHeight + keyStrokeWidth / 2} color={ colors.neutral[950] } />
 
       {/* Draw 11 White keys using a loop */}
       { [...Array(numberOfWhiteKeys)].map((_, i) => {
@@ -61,7 +62,7 @@ const PianoKeyboard = ({
         return <Group key={`pianokey_${i}`}>
           {/* White Key */}
           <RoundedRect x={xPos} y={yPos} width={keyWidth} height={pianoKeyboardHeight} r={5}>
-            <Paint color={ bgColor } style="stroke" strokeWidth={keyStrokeWidth} />
+            <Paint color={ colors.neutral[950] } style="stroke" strokeWidth={keyStrokeWidth} />
             <LinearGradient
               start={vec(xPos, yPos)}
               end={vec(xPos, yPos + pianoKeyboardHeight)}
@@ -71,11 +72,11 @@ const PianoKeyboard = ({
 
           {/* Accidental (if there's one) */}
           { hasAnAccidentalBefore && <RoundedRect x={xPos - keyWidth / 4} y={yPos} width={keyWidth / 2} height={pianoKeyboardHeight / 2} r={5}>
-            <Paint color={ bgColor } style="stroke" strokeWidth={keyStrokeWidth} />
+            <Paint color={ colors.neutral[950] } style="stroke" strokeWidth={keyStrokeWidth} />
             <LinearGradient
               start={vec(xPos, yPos)}
               end={vec(xPos, yPos + pianoKeyboardHeight)}
-              colors={[bgColor, (accidentalState) ? '#222' : '#444']}
+              colors={[colors.neutral[950], (accidentalState) ? '#222' : '#444']}
             />
           </RoundedRect> }
 

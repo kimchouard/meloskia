@@ -1,14 +1,13 @@
 import React, { memo, useRef, useState } from 'react';
 import { Canvas, Group } from '@shopify/react-native-skia';
 import {
-  Pressable, Text, StyleSheet, View,
+  Pressable, Text, View,
 } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
 import { LinearGradient } from 'expo-linear-gradient';
 import PianoKeyboard from './PianoKeyboard';
 import NoteRoll from './NoteRoll';
 import {
-  bgColor,
   countdownBars,
   gameHeight, gameWidth, getTimeFromBars, screenHeight, screenWidth,
 } from '../utils/utils';
@@ -61,7 +60,7 @@ const PlayingUI = () => {
   //    Skia Canvas and Start Btn
   // ==============================
 
-  const renderCTAs = () => (<View style={styles.CTAs}>
+  const renderCTAs = () => (<View className="flex-1 absolute top-0 left-0 bg-neutral-950/70 w-full h-full flex-col items-center justify-center">
     <Pressable onPress={() => ((playMode === 'start') ? startGame('playing') : restart()) }>
       <LinearGradient
         colors={
@@ -69,19 +68,22 @@ const PlayingUI = () => {
         }
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={[styles.btn, styles.btnMain]}
+        className="content-center items-center rounded-lg py-5 px-10"
       >
-        <Text style={[styles.btnText, styles.btnMainText]}>{(playMode === 'start') ? 'Start Playing' : 'Restart'}</Text>
+        <Text className='text-white font-medium text-2xl'>{(playMode === 'start') ? 'Start Playing' : 'Restart'}</Text>
       </LinearGradient>
     </Pressable>
 
-    { (playMode === 'start') && <Pressable style={[styles.btn, styles.btnSecondary]} onPress={() => startGame('playback')}>
-        <Text style={[styles.btnText, styles.btnSecondaryText]}>Feeling lazy?</Text>
+    { (playMode === 'start') && <Pressable
+      className="content-center items-center rounded-lg py-3"
+      onPress={() => startGame('playback')}
+    >
+        <Text className="text-neutral-400 text-lg">Feeling lazy?</Text>
     </Pressable>}
   </View>);
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1">
       {/* Start button, centered on the screen */}
       { !isGamePlaying(playMode) && renderCTAs()}
 
@@ -103,49 +105,5 @@ const PlayingUI = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  CTAs: {
-    flex: 1,
-    position: 'absolute',
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  btn: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 10,
-  },
-  btnText: {
-    color: 'white',
-  },
-  btnMain: {
-    backgroundColor: bgColor,
-    paddingVertical: 25,
-    paddingHorizontal: 40,
-  },
-  btnMainText: {
-    fontWeight: '600',
-    fontSize: 24,
-  },
-  btnSecondary: {
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-  },
-  btnSecondaryText: {
-    color: '#757575',
-    fontWeight: '500',
-    fontSize: 18,
-  },
-});
 
 export default memo(PlayingUI);

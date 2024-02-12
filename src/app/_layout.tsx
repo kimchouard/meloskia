@@ -1,12 +1,14 @@
 import { SplashScreen, Stack } from 'expo-router';
-import { useEffect } from 'react';
-import { useColorScheme } from 'react-native';
+
+// Import your global CSS file
+import '../global.css';
 
 export {
   // Catch any errors thrown by the Layout component.
   ErrorBoundary,
 } from 'expo-router';
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
   initialRouteName: 'index',
@@ -19,7 +21,7 @@ function RootLayoutNav() {
   return (
       <Stack>
         <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="credits" options={{ presentation: 'modal', headerShown: false }} />
       </Stack>
   );
 }

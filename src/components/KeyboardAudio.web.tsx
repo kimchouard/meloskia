@@ -1,8 +1,8 @@
 import { Song, Track, Instrument } from 'reactronica';
 import { useEffect, useState } from 'react';
-import { KeysState, PlayMode } from '../hooks/useKeyboard';
+import { KeysState } from '../hooks/useKeyboard';
 import { keyboardKeyToNote } from './PianoKeyboard';
-import { SongData, isGamePlaying } from './PlayingUI';
+import { PlayMode, SongData, isGamePlaying } from './PlayingUI';
 import { countdownBars } from '../utils/utils';
 
 const KeyboardAudio = ({

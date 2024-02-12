@@ -5,8 +5,9 @@ import {
   Easing, useDerivedValue, useSharedValue, withTiming,
 } from 'react-native-reanimated';
 import { memo, useEffect } from 'react';
+import colors from 'tailwindcss/colors';
 import {
-  gameWidth, gameHeight, pianoKeyboardHeight, bgColor, keyNoteColors, accidentalNoteColors, countdownBars, getDistFromBars, getTimeFromBars, keyWidth,
+  gameWidth, gameHeight, pianoKeyboardHeight, countdownBars, getDistFromBars, getTimeFromBars, keyWidth, keyNoteColors, accidentalNoteColors,
 } from '../utils/utils';
 import { KeysState } from '../hooks/useKeyboard';
 import { accidentalNames, keyNames, noteToKeyboardKey } from './PianoKeyboard';
@@ -55,8 +56,6 @@ const NoteRoll = ({
     { translateX: -gameWidth / 2 },
     { translateY: -gameHeight + pianoKeyboardHeight },
   ]}>
-    <Rect x={0} y={0} width={gameWidth} height={2 * gameHeight - pianoKeyboardHeight} color={ bgColor } />
-
     {/* Create a line at the center of each piano key black key and a colored bg if need be ! */}
     { [...Array(11)].map((_, i) => {
       const xPos = i * (keyWidth);
@@ -71,17 +70,18 @@ const NoteRoll = ({
       const height = 4 * gameHeight;
 
       return <Group key={`lines_${i}`}>
+        {/* BG */}
+        { (i < 10) && <Rect key={`bg_${i}`} x={xPos} y={yPos} width={keyWidth} height={height} color={ (keyPressed) ? keyNoteColors[i] : colors.neutral[950] } opacity={ (keyPressed) ? 0.1 : 1} /> }
+
         {/* Lines */}
         <Rect key={`line_${i}`} x={xPos} y={yPos} width={(accidentalPressed) ? 2 : 1} height={height} color={(accidentalPressed) ? accidentalNoteColors[i] : defaultAccidentalColor} />
 
-        {/* BG (onPress) */}
-        { keyPressed && <Rect key={`bg_${i}`} x={xPos} y={yPos} width={keyWidth} height={height} color={ keyNoteColors[i] } opacity={0.1} /> }
       </Group>;
     }) }
 
     {/* Create a rounded rect representing a note for each white key */}
     <Group transform={rollTransform}>
-      { songData.notes.map((note, i) => {
+      { songData?.notes?.map((note, i) => {
         if (note.noteName) {
           const yOfKeyboardHeight = gameHeight - pianoKeyboardHeight;
 
@@ -98,6 +98,7 @@ const NoteRoll = ({
           } = {
             yPos: yOfKeyboardHeight - getDistFromBars(countdownBars + note.startAtBar + note.durationInBars, songData.bpm) + noteStrokeWidth / 2,
           };
+
           if (noteIndex !== -1) {
             roundedRectParams.xPos = noteIndex * keyWidth + noteStrokeWidth / 2;
             roundedRectParams.width = keyWidth - noteStrokeWidth;
