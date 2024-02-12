@@ -2908,6 +2908,10 @@ caniuse-lite@^1.0.30001580:
   resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001581.tgz#0dfd4db9e94edbdca67d57348ebc070dece279f4"
   integrity sha512-whlTkwhqV2tUmP3oYhtNfaWGYHDdS3JYFQBKXxcUR9qqPWsRhFHhoISO2Xnl/g0xyKzht9mI1LZpiNWfMzHixQ==
 
+"canvaskit-js@https://bit.ly/canvaskit-js_v210":
+  version "2.1.0"
+  resolved "https://bit.ly/canvaskit-js_v210#fbc8b5eba27e69ec725fefc8ac88cab289d3c469"
+
 canvaskit-wasm@0.39.1:
   version "0.39.1"
   resolved "https://registry.yarnpkg.com/canvaskit-wasm/-/canvaskit-wasm-0.39.1.tgz#c3c8f3962cbabbedf246f7bcf90e859013c7eae9"
