@@ -6,11 +6,11 @@ import {
 } from 'react-native-reanimated';
 import { memo, useEffect } from 'react';
 import {
-  gameWidth, gameHeight, pianoKeyboardHeight, screenHeight, bgColor, keyNoteColors, accidentalNoteColors, countdownBars, getDistFromBars, getTimeFromBars, keyWidth,
+  gameWidth, gameHeight, pianoKeyboardHeight, bgColor, keyNoteColors, accidentalNoteColors, countdownBars, getDistFromBars, getTimeFromBars, keyWidth,
 } from '../utils/utils';
-import { KeysState, PlayMode } from '../hooks/useKeyboard';
+import { KeysState } from '../hooks/useKeyboard';
 import { accidentalNames, keyNames, noteToKeyboardKey } from './PianoKeyboard';
-import { SongData, isGamePlaying } from './PlayingUI';
+import { PlayMode, SongData, isGamePlaying } from './PlayingUI';
 
 const noteStrokeWidth = 8;
 
@@ -70,13 +70,13 @@ const NoteRoll = ({
       const yPos = -2 * gameHeight;
       const height = 4 * gameHeight;
 
-      return <>
+      return <Group key={`lines_${i}`}>
         {/* Lines */}
         <Rect key={`line_${i}`} x={xPos} y={yPos} width={(accidentalPressed) ? 2 : 1} height={height} color={(accidentalPressed) ? accidentalNoteColors[i] : defaultAccidentalColor} />
 
         {/* BG (onPress) */}
         { keyPressed && <Rect key={`bg_${i}`} x={xPos} y={yPos} width={keyWidth} height={height} color={ keyNoteColors[i] } opacity={0.1} /> }
-      </>;
+      </Group>;
     }) }
 
     {/* Create a rounded rect representing a note for each white key */}
@@ -123,6 +123,9 @@ const NoteRoll = ({
             <Paint color={ roundedRectParams.color } />
           </RoundedRect>;
         }
+
+        // ELSE: no noteName, so it's a rest
+        return <></>;
       }) }
     </Group>
   </Group>;
