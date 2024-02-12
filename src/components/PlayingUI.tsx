@@ -9,21 +9,13 @@ import PianoKeyboard from './PianoKeyboard';
 import NoteRoll from './NoteRoll';
 import {
   countdownBars,
-  gameHeight, gameWidth, getTimeFromBars, screenHeight, screenWidth,
+  gameHeight, gameWidth, getTimeFromBars, isGamePlaying, screenHeight, screenWidth,
 } from '../utils/utils';
 import useKeyboard from '../hooks/useKeyboard';
 import KeyboardAudio from './KeyboardAudio';
 import { songs } from '../utils/songs';
 
-export interface SongData {
-  bpm: number,
-  durationInBars: number,
-  notes: { noteName: string, startAtBar: number, durationInBars: number }[],
-}
-
 const songData = songs[0];
-
-export const isGamePlaying = (playMode) => playMode === 'playing' || playMode === 'playback';
 
 export type PlayMode = 'start' | 'playing' | 'playback' | 'restart';
 

@@ -7,11 +7,12 @@ import {
 import { memo, useEffect } from 'react';
 import colors from 'tailwindcss/colors';
 import {
-  gameWidth, gameHeight, pianoKeyboardHeight, countdownBars, getDistFromBars, getTimeFromBars, keyWidth, keyNoteColors, accidentalNoteColors,
+  gameWidth, gameHeight, pianoKeyboardHeight, countdownBars, getDistFromBars, getTimeFromBars, keyWidth, keyNoteColors, accidentalNoteColors, isGamePlaying,
 } from '../utils/utils';
 import { KeysState } from '../hooks/useKeyboard';
 import { accidentalNames, keyNames, noteToKeyboardKey } from './PianoKeyboard';
-import { PlayMode, SongData, isGamePlaying } from './PlayingUI';
+import { PlayMode } from './PlayingUI';
+import { SongData } from '@/utils/songs';
 
 const noteStrokeWidth = 8;
 

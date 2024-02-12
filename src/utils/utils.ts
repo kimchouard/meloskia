@@ -1,5 +1,9 @@
 import { Dimensions } from 'react-native';
 
+// ===========================
+//   Dimensions & Placing
+// ===========================
+
 export const screenWidth = Dimensions.get('window').width;
 export const screenHeight = Dimensions.get('window').height;
 
@@ -11,6 +15,10 @@ export const keyStrokeWidth = 4;
 
 export const numberOfWhiteKeys = 10;
 export const keyWidth = gameWidth / numberOfWhiteKeys;
+
+// ===========================
+//   Colors
+// ===========================
 
 export const bgColor = '#101010';
 export const blackKeyColor = '#202020';
@@ -46,6 +54,8 @@ export const accidentalNoteColors = [
 // ===========================
 //   Tempo and Time
 // ===========================
+
+export const isGamePlaying = (playMode) => playMode === 'playing' || playMode === 'playback';
 
 // Distance between quarter lines & change ratio based on BPM
 export const distanceBetweenBars = 100;
