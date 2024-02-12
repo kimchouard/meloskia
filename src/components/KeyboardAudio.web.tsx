@@ -6,6 +6,8 @@ import { PlayMode } from './PlayingUI';
 import { countdownBars, isGamePlaying } from '../utils/utils';
 import { SongData } from '@/utils/songs';
 
+const verbose = false;
+
 const KeyboardAudio = ({
   playMode,
   keysState,
@@ -34,8 +36,8 @@ const KeyboardAudio = ({
     // Create a null step for each coundown bar
     // Convert the songData to an array of steps
       const newSteps = [...[...Array(countdownBars)].map(() => null), ...songData.notes.map((note) => [{ name: note.noteName, duration: note.durationInBars }])];
+      verbose && console.log('newSteps', newSteps, isGamePlaying(playMode));
       setSteps(newSteps);
-      console.log('newSteps', newSteps, isGamePlaying(playMode));
     } else {
       setSteps([]);
     }
@@ -50,7 +52,7 @@ const KeyboardAudio = ({
         <Track
           steps={steps}
           onStepPlay={(stepNotes, index) => {
-            console.log('onStepPlay', stepNotes, index);
+            verbose && console.log('onStepPlay', stepNotes, index);
           }}
         >
           <Instrument

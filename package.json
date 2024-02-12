@@ -16,6 +16,7 @@
     "@shopify/react-native-skia": "^0.1.237",
     "@types/react": "~18.2.45",
     "canvaskit-js": "https://bit.ly/canvaskit-js_v210",
+    "clsx": "^2.1.0",
     "expo": "~50.0.4",
     "expo-constants": "~15.4.5",
     "expo-linear-gradient": "^12.7.1",
@@ -32,6 +33,7 @@
     "react-native-screens": "~3.29.0",
     "react-native-web": "^0.19.10",
     "reactronica": "^0.8.1-canary.0",
+    "tailwind-merge": "^2.2.1",
     "tailwindcss": "^3.4.1",
     "tone": "^14.7.77",
     "typescript": "^5.3.0"

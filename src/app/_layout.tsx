@@ -21,6 +21,7 @@ function RootLayoutNav() {
   return (
       <Stack>
         <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="play/[songId]" options={{ headerShown: false }} />
         <Stack.Screen name="credits" options={{ presentation: 'modal', headerShown: false }} />
       </Stack>
   );

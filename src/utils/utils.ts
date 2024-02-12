@@ -1,5 +1,10 @@
 import { Dimensions } from 'react-native';
 
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+const verbose = false;
+
 // ===========================
 //   Dimensions & Placing
 // ===========================
@@ -52,6 +57,12 @@ export const accidentalNoteColors = [
 ];
 
 // ===========================
+//   Styles / Tailwind
+// ===========================
+
+export const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs));
+
+// ===========================
 //   Tempo and Time
 // ===========================
 
@@ -89,4 +100,26 @@ export const getTimeFromBars = (barCount: number, BPM: number, options: { roundV
   }
 
   console.error('getTimeFromBars called with undefined or null arguments');
+};
+
+// ===========================
+//   Expo Router
+// ===========================
+
+export const getNumberedUrlParams = (strindId: string):number => {
+  // If the is is new, then we return a 'null' id
+  if (strindId === 'new') return null;
+
+  // If there is a songId
+  if (strindId !== null && strindId !== undefined
+  && typeof strindId === 'string') {
+    // We try to convert it to a number
+    const strindIdNumbered = parseInt(strindId, 10);
+    verbose && console.log('Converting id: ', strindId, strindIdNumbered);
+
+    // And we return it if it's a number
+    if (typeof strindIdNumbered === 'number' && !Number.isNaN(strindIdNumbered)) {
+      return strindIdNumbered;
+    }
+  }
 };

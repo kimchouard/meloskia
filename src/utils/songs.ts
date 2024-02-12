@@ -8,8 +8,8 @@ export interface SongData {
 export const songs = [
   {
     name: 'All-notes Demo',
-    bpm: 60,
-    durationInBars: 34,
+    bpm: 160,
+    durationInBars: 17,
     notes: [
       { noteName: 'C3', startAtBar: 0, durationInBars: 1 },
       { noteName: 'D3', startAtBar: 1, durationInBars: 1 },
@@ -28,6 +28,14 @@ export const songs = [
       { noteName: 'F#3', startAtBar: 14, durationInBars: 1 },
       { noteName: 'D#3', startAtBar: 15, durationInBars: 1 },
       { noteName: 'C#3', startAtBar: 16, durationInBars: 1 },
+    ],
+  },
+  {
+    name: 'E-Z Song',
+    bpm: 60,
+    durationInBars: 34,
+    notes: [
+      { noteName: 'C3', startAtBar: 0, durationInBars: 1 },
     ],
   },
   {

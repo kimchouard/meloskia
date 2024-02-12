@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Platform } from 'react-native';
 import { Gesture } from 'react-native-gesture-handler';
+import { router } from 'expo-router';
 import { accidentalNames, keyNames } from '../components/PianoKeyboard';
 import {
   gameHeight, gameWidth, pianoKeyboardHeight, screenWidth,
@@ -47,6 +48,12 @@ const useKeyboard = ({
     // Spacebar pressed (onKeyUp only, to avoid multiple restarts on key hold)
     if (e.code === 'Enter' && !keyDown) {
       if (playMode === 'start') startGame('playback');
+    }
+
+    // Restart on escape
+    if (e.code === 'Escape' && !keyDown) {
+      if (playMode !== 'start') restart();
+      else router.push('/');
     }
 
     const letterName = e.key?.replace('Key', '').toUpperCase();
