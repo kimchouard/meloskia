@@ -32,9 +32,11 @@ const KeyboardAudio = ({
     if (playMode === 'playback') {
     // Create a null step for each coundown bar
     // Convert the songData to an array of steps
-      const newSteps = [...[...Array(countdownBars)].map(() => null), ...songData.notes.map((note) => [note.noteName])];
+      const newSteps = [...[...Array(countdownBars)].map(() => null), ...songData.notes.map((note) => [{ name: note.noteName, duration: note.durationInBars }])];
       setSteps(newSteps);
       console.log('newSteps', newSteps, isGamePlaying(playMode));
+    } else {
+      setSteps([]);
     }
   }, [songData.notes, playMode]);
 
