@@ -67,7 +67,7 @@ const PianoKeyboard = ({
       <Rect x={-(screenWidth - gameWidth) / 2 } y={gameHeight - pianoKeyboardHeight - keyStrokeWidth / 2} width={screenWidth} height={pianoKeyboardHeight + keyStrokeWidth / 2} color={ colors.neutral[950] } />
 
       {/* Draw 11 White keys using a loop */}
-      { [...Array(numberOfWhiteKeys)].map((_, i) => {
+      { keysState && [...Array(numberOfWhiteKeys)].map((_, i) => {
         const xPos = i * (gameWidth / numberOfWhiteKeys);
         const yPos = gameHeight - pianoKeyboardHeight;
         const keyName = keyNames[i];

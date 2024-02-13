@@ -2,7 +2,7 @@ import {
   Group, Paint, Rect, RoundedRect,
 } from '@shopify/react-native-skia';
 import {
-  Easing, useDerivedValue, useSharedValue, withDelay, withTiming,
+  Easing, SharedValue, useDerivedValue, useSharedValue, withDelay, withTiming,
 } from 'react-native-reanimated';
 import { memo, useEffect } from 'react';
 import colors from 'tailwindcss/colors';
@@ -17,33 +17,15 @@ import { SongData } from '@/utils/songs';
 const noteStrokeWidth = 8;
 
 const NoteRoll = ({
-  playMode,
   keysState,
   songData,
+  noteRollY,
 }:{
-  playMode: PlayMode,
   keysState: KeysState,
   songData: SongData
+  noteRollY: SharedValue<number>,
 }) => {
-  const rollY = useSharedValue(0);
-  const rollTransform = useDerivedValue(() => [{ translateY: rollY.value }]);
-
-  useEffect(() => {
-    if (isGamePlaying(playMode)) {
-      const songDurationWithCountdown = getDurationInBars(songData) + countdownBars;
-      rollY.value = withTiming(
-        getDistFromBars(songDurationWithCountdown, songData.bpm),
-        {
-          duration: getTimeFromBars(songDurationWithCountdown, songData.bpm),
-          easing: Easing.linear,
-        },
-      );
-    } else if (playMode === 'start') {
-      rollY.value = withTiming(0, {
-        duration: 500,
-      });
-    }
-  }, [rollY, playMode]);
+  const noteRollTransform = useDerivedValue(() => [{ translateY: noteRollY?.value }]);
 
   const perspectiveRollIn = useSharedValue(0);
   const threeDRollTransform = useDerivedValue(() => [
@@ -74,7 +56,7 @@ const NoteRoll = ({
 
   return <Group transform={threeDRollTransform}>
     {/* Create a line at the center of each piano key black key and a colored bg if need be ! */}
-    { [...Array(11)].map((_, i) => {
+    { keysState && [...Array(11)].map((_, i) => {
       const xPos = i * (keyWidth);
 
       const keyPressed = keysState[keyNames[i]];
@@ -97,7 +79,7 @@ const NoteRoll = ({
     }) }
 
     {/* Draw the notes for each key (black & white 🎹) */}
-    <Group transform={rollTransform}>
+    <Group transform={noteRollTransform}>
       { songData?.notes?.map((note, i) => {
         if (note.noteName) {
           const yOfKeyboardHeight = gameHeight - pianoKeyboardHeight;

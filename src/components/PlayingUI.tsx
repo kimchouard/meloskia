@@ -1,17 +1,23 @@
-import React, { memo, useRef, useState } from 'react';
+import React, {
+  memo, useEffect, useRef, useState,
+} from 'react';
 import { Canvas, Group } from '@shopify/react-native-skia';
 import {
+  Easing,
   Platform,
   Pressable, Text, View,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
 import { GestureDetector } from 'react-native-gesture-handler';
+import Animated, {
+  useDerivedValue, useSharedValue, withDelay, withTiming,
+} from 'react-native-reanimated';
 import PianoKeyboard from './PianoKeyboard';
 import NoteRoll from './NoteRoll';
 import {
   countdownBars,
-  gameHeight, gameWidth, getDurationInBars, getOnPressKeyboardGestureHandler, getTimeFromBars, isGamePlaying, screenHeight, screenWidth,
+  gameHeight, gameWidth, getDistFromBars, getDurationInBars, getOnPressKeyboardGestureHandler, getTimeFromBars, isGamePlaying, screenHeight, screenWidth,
 } from '../utils/utils';
 import useKeyboard from '../hooks/useKeyboard';
 import KeyboardAudio from './KeyboardAudio';
@@ -56,14 +62,92 @@ const PlayingUI = ({
   });
 
   // ==============================
+  //    Animations
+
+  // CTA Animation
+  const [forceHideCTA, setForceHideCTA] = useState(false);
+  const height = useSharedValue(0);
+  useEffect(() => {
+    height.value = 0;
+    height.value = withDelay(1000, withTiming(85, { duration: 250, easing: Easing.inOut(Easing.ease) }));
+
+    return () => {
+      height.value = 0;
+      setForceHideCTA(false);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [songData.name]);
+
+  // NoteRoll Animation
+  const noteRollY = useSharedValue(0);
+  useEffect(() => {
+    if (isGamePlaying(playMode)) {
+      const songDurationWithCountdown = getDurationInBars(songData) + countdownBars;
+      noteRollY.value = withTiming(
+        getDistFromBars(songDurationWithCountdown, songData.bpm),
+        {
+          duration: getTimeFromBars(songDurationWithCountdown, songData.bpm),
+          easing: Easing.linear,
+        },
+      );
+    } else if (playMode === 'start') {
+      noteRollY.value = withTiming(0, {
+        duration: 500,
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playMode]);
+
+  // ===========================
+  //        Scroll (web)
+
+  const handleScrolling = (e: WheelEvent) => {
+    // Hide the CTA
+    if (!forceHideCTA) {
+      height.value = withTiming(0, { duration: 250, easing: Easing.inOut(Easing.ease) });
+      // setTimeout(() => setForceHideCTA(true), 250);
+    }
+
+    const scrolledVerticallyBy = e?.deltaY;
+
+    const translateX = noteRollY.value - scrolledVerticallyBy;
+    // Set the limit as the end of the song
+    const translateEndLimit = getDistFromBars(getDurationInBars(songData) + countdownBars, songData.bpm) + 20;
+    verbose && console.log('Scrolled!', scrolledVerticallyBy, translateX, noteRollY.value);
+    if (translateX > 0 && translateX < translateEndLimit) {
+      noteRollY.value = translateX;
+    }
+
+    return false;
+  };
+
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      verbose && console.log('Scrolling start', window);
+      window.addEventListener('wheel', handleScrolling);
+
+      return () => {
+        if (Platform.OS === 'web') {
+          verbose && console.log('Scrolling removed', window);
+          window.removeEventListener('wheel', handleScrolling);
+        }
+      };
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [songData]);
+
+  // ==============================
   //    CTAs
 
-  const renderWebCTAs = () => (<View className="flex absolute bottom-[200px] w-full bg-neutral-950/70 py-5">
+  const renderWebCTAs = () => (<Animated.View
+    className="flex absolute bottom-[200px] w-full bg-neutral-950/70 overflow-hidden"
+    style={{ height }}
+  >
     { (playMode === 'start') ? <>
-      <Text className="text-white text-lg text-center">Press Spacebar to start playing</Text>
-      <Text className="text-neutral-400 text-regular text-center">Press Enter if you're feeling lazy. </Text>
-    </> : <Text className="text-white text-lg text-center">Press Spacebar or Enter to restart.</Text> }
-  </View>);
+      <Text className="text-white text-lg text-center mt-5">Press Spacebar to start playing</Text>
+      <Text className="text-neutral-400 text-regular text-center mb-5">Press Enter if you're feeling lazy. </Text>
+    </> : <Text className="text-white text-lg text-center my-5">Press Spacebar or Enter to restart.</Text> }
+  </Animated.View>);
 
   const renderMobileCTAs = () => (<View className="bg-neutral-950/70 absolute top-0 left-0 w-full h-full flex-1 flex-col items-center">
     <Pressable onPress={() => ((playMode === 'start') ? startGame('playing') : restart()) }>
@@ -104,7 +188,7 @@ const PlayingUI = ({
     return (
       <View className="flex-1">
         {/* Start button, centered on the screen */}
-        { !isGamePlaying(playMode) && ((Platform.OS === 'web') ? renderCTAs() : renderMobileCTAs()) }
+        { !isGamePlaying(playMode) && !forceHideCTA && ((Platform.OS === 'web') ? renderCTAs() : renderMobileCTAs()) }
 
         {/* Piano sound */}
         <KeyboardAudio {...{ playMode, keysState, songData }} />
@@ -116,7 +200,9 @@ const PlayingUI = ({
               { translateX: (screenWidth - gameWidth) / 2 },
               { translateY: (screenHeight - gameHeight) / 2 },
             ]}>
-              <NoteRoll {...{ playMode, keysState, songData }} />
+              <NoteRoll {...{
+                playMode, keysState, songData, noteRollY,
+              }} />
               <PianoKeyboard keysState={keysState} songName={songData.name} />
             </Group>
           </Canvas>
