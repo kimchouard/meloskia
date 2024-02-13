@@ -1,12 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { Platform } from 'react-native';
-import { Gesture } from 'react-native-gesture-handler';
 import { router } from 'expo-router';
-import { accidentalNames, keyNames } from '../components/PianoKeyboard';
-import {
-  gameHeight, gameWidth, pianoKeyboardHeight, screenWidth,
-} from '../utils/utils';
+import { accidentalNames, keyNames, noteToKeyboardKey } from '../components/PianoKeyboard';
 import { PlayMode } from '../components/PlayingUI';
+import { SongData } from '@/utils/songs';
+import { countdownBars, getBarsFromTime, getTimeFromBars } from '@/utils/utils';
 
 const verbose = false;
 
@@ -16,16 +14,18 @@ type KeyboardListener = (e: KeyboardEvent) => void;
 const useKeyboard = ({
   keyboardType,
   playMode,
+  songData,
   startGame,
   restart,
 }:{
   keyboardType: 'laptop' | 'midi', // TODO: Add midi keyboard support
   playMode: PlayMode,
+  songData?: SongData,
   startGame: (startMode: 'playing' | 'playback') => void,
-  restart: () => void,
+  restart: () => void, // used for the escape key
 }) => {
   // ==============================
-  //    Keyboard State
+  //      Keyboard State
   // ==============================
 
   const initKeysState:KeysState = {
@@ -33,6 +33,58 @@ const useKeyboard = ({
     ...accidentalNames.reduce((acc, key) => (key !== '') && ({ ...acc, [key]: false }), {}),
   };
   const [keysState, setKeysState] = useState<KeysState>(initKeysState);
+
+  const keyPressedName = useRef<string>();
+
+  const releaseLastKey = () => {
+    const keyReleased = keyPressedName.current;
+    keyPressedName.current = null;
+
+    if (!keyReleased) return;
+
+    verbose && console.log('Key released:', keyReleased, keysState);
+    setKeysState((prev) => ({ ...prev, [keyReleased]: false }));
+  };
+
+  const releaseAllKeys = () => {
+    verbose && console.log('Releasing all keys');
+    setKeysState((prev) => {
+      const newKeysState = { ...prev };
+      Object.keys(newKeysState).forEach((key) => {
+        newKeysState[key] = false;
+      });
+
+      keyPressedName.current = null;
+
+      return newKeysState;
+    });
+  };
+
+  const keyPressed = (keyName: string, shoudReleasePreviousKey:boolean = false) => {
+    if (shoudReleasePreviousKey) releaseLastKey();
+
+    // If the key is the same as the last one, we skip the press
+    if (keyName === keyPressedName.current) return;
+
+    verbose && console.log('Changed key', keyName);
+    keyPressedName.current = keyName;
+    setKeysState((prev) => ({ ...prev, [keyName]: true }));
+  };
+
+  const keyRelease = (keyName: string) => {
+    verbose && console.log('Key release', keyName);
+    setKeysState((prev) => ({ ...prev, [keyName]: false }));
+    keyPressedName.current = null;
+  };
+
+  const resartAndStopPlayingNotes = () => {
+    releaseAllKeys();
+    restart();
+  };
+
+  // ==============================
+  //    Keyboard Listener
+  // ==============================
 
   const currentKeyboardListener = useRef<{ keydown: KeyboardListener, keyup: KeyboardListener }>();
 
@@ -42,17 +94,18 @@ const useKeyboard = ({
     // Spacebar pressed (onKeyUp only, to avoid multiple restarts on key hold)
     if (e.code === 'Space' && !keyDown) {
       if (playMode === 'start') startGame('playing');
-      else restart();
+      else resartAndStopPlayingNotes();
     }
 
     // Spacebar pressed (onKeyUp only, to avoid multiple restarts on key hold)
     if (e.code === 'Enter' && !keyDown) {
       if (playMode === 'start') startGame('playback');
+      else resartAndStopPlayingNotes();
     }
 
     // Restart on escape
     if (e.code === 'Escape' && !keyDown) {
-      if (playMode !== 'start') restart();
+      if (playMode !== 'start') resartAndStopPlayingNotes();
       else router.push('/');
     }
 
@@ -102,89 +155,131 @@ const useKeyboard = ({
   }, [keysState, playMode]);
 
   // ==============================
-  //      Keyboard Gesture
+  //      Auto Play
   // ==============================
 
-  const keyPressedName = useRef<string>();
+  const autoPlayFrameAnimationRequest = useRef<number>();
+  const startedPlayingAt = useRef<number>();
+  const currentPlayingNotes = useRef<number[]>([]);
 
-  const getKeyNameFromPosition = (x: number, y: number) => {
-    const keyFloatIndex = (x - (screenWidth - gameWidth) / 2) / (gameWidth / 10);
-    const keyIndex = Math.floor(keyFloatIndex);
+  const stopAutoPlayLooper = () => {
+    verbose && console.log('Stop frame animation!!');
 
-    // Detect key accidentals
-    if (y < gameHeight - pianoKeyboardHeight / 2) {
-      // If we're on a black key, which are 1/4 of the width of a white key and inbetween white key 1 and 2, 2 and 3, 4 and 5, 5 and 6, 6 and 7, 8 and 9 and 9 and 10
-      if ((keyFloatIndex > 0.73 && keyFloatIndex < 1.27) // W
-      || (keyFloatIndex > 1.73 && keyFloatIndex < 2.27) // E
-      || (keyFloatIndex > 3.73 && keyFloatIndex < 4.27) // T
-      || (keyFloatIndex > 4.73 && keyFloatIndex < 5.27) // Y
-      || (keyFloatIndex > 5.73 && keyFloatIndex < 6.27) // U
-      || (keyFloatIndex > 7.73 && keyFloatIndex < 8.27) // O
-      || (keyFloatIndex > 8.73 && keyFloatIndex < 9.27) // P
-      ) {
-        return accidentalNames[Math.round(keyFloatIndex)];
+    // Stop current animation frame
+    cancelAnimationFrame(autoPlayFrameAnimationRequest.current);
+    autoPlayFrameAnimationRequest.current = null;
+    startedPlayingAt.current = null;
+  };
+
+  // Check if there is are notes that needs to be started or stopped
+  const autoPlayLooper = () => {
+    const perfStart = performance.now();
+
+    if (!startedPlayingAt.current) startedPlayingAt.current = Date.now();
+
+    if (songData?.notes) {
+      const currentTimeInMs = Date.now() - startedPlayingAt.current;
+      const currentTimeInBars = getBarsFromTime(currentTimeInMs, songData.bpm);
+
+      // Get the notes (index) that are currently playing and needs to be stopped
+      const notesToStop = currentPlayingNotes.current.filter((noteIndex) => {
+        const note = songData.notes[noteIndex];
+        const noteStart = note.startAtBar + countdownBars;
+        const noteEnd = noteStart + note.durationInBars;
+
+        if (currentTimeInBars >= noteEnd) {
+          // Check that the note is playing
+          const noteIsPlaying = currentPlayingNotes.current.includes(songData.notes.indexOf(note));
+          // verbose && console.log(perfStart, 'STOP noteIsPlaying', noteIsPlaying);
+          return noteIsPlaying;
+        }
+
+        // If the not is not playing anymore or shouldn't be stopped yet
+        return false;
+      });
+
+      // Get the new notes that are should be playing but are not currently playing
+      const newNotesToPlay = songData.notes.filter((note) => {
+        const noteStart = note.startAtBar + countdownBars;
+        const noteEnd = noteStart + note.durationInBars;
+
+        if (currentTimeInBars >= noteStart && currentTimeInBars < noteEnd) {
+          // Check that the note is not currently playing (unless it just has been stopped)
+          const noteIsntPlaying = !currentPlayingNotes.current.includes(songData.notes.indexOf(note));
+          const noteJustStopped = notesToStop.includes(songData.notes.indexOf(note));
+          // verbose && console.log(perfStart, 'START noteIsntPlaying', noteIsntPlaying, 'noteJustStopped', noteJustStopped);
+          return noteIsntPlaying || noteJustStopped;
+        }
+
+        // If the note is not playing or currently tagged as is, we return false
+        return false;
+      });
+
+      // Stop the notes that are no longer playing
+      notesToStop.forEach((noteIndex) => {
+        const note = songData.notes[noteIndex];
+        const keyboardKey = noteToKeyboardKey[note.noteName];
+
+        console.log(perfStart, `Stopping note at index ${noteIndex}:`, note, keyboardKey);
+        keyRelease(keyboardKey);
+      });
+
+      // Start the notes that are now playing
+      newNotesToPlay.forEach((note) => {
+        const keyboardKey = noteToKeyboardKey[note.noteName];
+
+        console.log(perfStart, 'Starting note:', note, keyboardKey);
+        keyPressed(keyboardKey);
+      });
+
+      // If we need the update the currentPlayingNotes array
+      if (newNotesToPlay.length > 0 || notesToStop.length > 0) {
+        verbose && console.log(perfStart, 'Updating notes', newNotesToPlay, notesToStop);
+        // Update the currentPlayingNotes
+        currentPlayingNotes.current = [...currentPlayingNotes.current.filter((noteIndex) => !notesToStop.includes(noteIndex)), ...newNotesToPlay.map((note) => songData.notes.indexOf(note))];
       }
+    } else {
+      console.error('No songData.notes');
+      return stopAutoPlayLooper();
     }
 
-    // We're on a white key
-    return keyNames[keyIndex];
+    // Calculate the time it took to process the frame
+    const perfEnd = performance.now();
+    const perfDuration = perfEnd - perfStart;
+    verbose && console.log('Evaluated frame in (ms):', perfDuration);
+
+    // Looping on next animation frame
+    if (playMode === 'playback') {
+      autoPlayFrameAnimationRequest.current = requestAnimationFrame(autoPlayLooper);
+    }
   };
 
-  const releaseLastKey = () => {
-    const keyReleased = keyPressedName.current;
-    keyPressedName.current = null;
+  useEffect(() => {
+    if (playMode === 'playback') {
+      // Use animationFrames to detect when to play the next note
+      autoPlayFrameAnimationRequest.current = requestAnimationFrame(autoPlayLooper);
+    } else {
+      // We stop the frame calculations
+      stopAutoPlayLooper();
+    }
 
-    verbose && console.log('Key released:', keyReleased, keysState);
-    setKeysState((prev) => ({ ...prev, [keyReleased]: false }));
-  };
-
-  const keyPressed = (keyName: string) => {
-    keyPressedName.current = keyName;
-    setKeysState((prev) => ({ ...prev, [keyName]: true }));
-  };
-
-  const onPressKeyboard = Gesture.Pan().minDistance(0)
-    .onStart((e) => {
-      // If the key is pressed on the keyboard
-      if (e.y > gameHeight - pianoKeyboardHeight) {
-        verbose && console.log('Key pressed:', e);
-
-        keyPressed(getKeyNameFromPosition(e.x, e.y));
-      }
-    })
-    .onChange((e) => {
-      // If the key is pressed on the keyboard
-      if (e.y > gameHeight - pianoKeyboardHeight) {
-        const keyName = getKeyNameFromPosition(e.x, e.y);
-        // If we're on an unknown key
-        if (!keyName) return releaseLastKey();
-        // If the key is the same as the last one
-        if (keyName === keyPressedName.current) return;
-
-        verbose && console.log('Changed key', keyName, e);
-        releaseLastKey();
-        keyPressed(keyName);
-
-      // If we've left the keyboard area
-      } else {
-        releaseLastKey();
-      }
-    })
-    .onEnd(() => {
-      releaseLastKey();
-    });
+    // Stop the frame calculations on unmounting
+    return () => {
+      stopAutoPlayLooper();
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playMode]);
 
   // ==============================
   //    Export
 
   return {
-    // Playing state
-    playMode,
-    restart,
-    startGame,
     // Keyboard state
     keysState,
-    onPressKeyboard,
+    keyPressed,
+    keyRelease,
+    releaseLastKey,
+    releaseAllKeys,
   };
 };
 

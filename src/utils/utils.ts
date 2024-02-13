@@ -68,11 +68,13 @@ export const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs));
 
 export const isGamePlaying = (playMode) => playMode === 'playing' || playMode === 'playback';
 
+// Countdown bars
+export const countdownBars = 1;
+
 // Distance between quarter lines & change ratio based on BPM
 export const distanceBetweenBars = 100;
 export const baseBPM = 80;
 export const dynamicDistRatio = 0.2;
-export const countdownBars = 4;
 
 // Get the dynamic distance for 1 bar: 75% fixed and 25% dynamic based on the BPM
 // >> allows for a easier reading on fast BPM
@@ -100,6 +102,17 @@ export const getTimeFromBars = (barCount: number, BPM: number, options: { roundV
   }
 
   console.error('getTimeFromBars called with undefined or null arguments');
+};
+
+// Get the number of bars from the time (ms)
+export const getBarsFromTime = (timeInMs: number, BPM: number, options: { roundValue: true | false } = { roundValue: false }):number => {
+  if (timeInMs !== undefined && BPM !== undefined
+  && timeInMs !== null && BPM !== null) {
+    const barsFromTime = timeInMs / (60 / BPM) / 1000;
+    return (options.roundValue === true) ? Math.round(barsFromTime) : barsFromTime;
+  }
+
+  console.error('getBarsFromTime called with undefined or null arguments');
 };
 
 // ===========================
