@@ -34,29 +34,42 @@ export const whiteKeyColor = '#FEFEFE';
 
 // Create an array of pastel colors for the 10 notes
 export const keyNoteColors = [
-  '#FFB6B9',
-  '#FFC8A2',
-  '#FFEBAE',
-  '#CFFFE5',
   '#BAE7FF',
   '#B5C7FF',
   '#C6B5FF',
   '#FFB5FF',
-  '#FFB5D9',
   '#FFB5B5',
+  '#FFC8A2',
+  '#FFEBAE',
+  '#CFFFE5',
+  // Restarting, next octave!
+  '#BAE7FF',
+  '#B5C7FF',
+  '#C6B5FF',
+
+  // Extra colors
+  // '#FFB5FF',
+  // '#FFB5D9',
+  // '#FFB6B9',
 ];
 
 export const accidentalNoteColors = [
+  '#7ABDFF',
+  '#6A8AFF',
+  '#8A6AFF',
   '#FF7A7A',
   '#FFA94D',
   '#FFD747',
   '#9DFFB0',
+  // Restarting, next octave!
   '#7ABDFF',
   '#6A8AFF',
   '#8A6AFF',
-  '#FF6AFF',
-  '#FF6ACD',
-  '#FF6A6A',
+
+  // Extra colors
+  // '#FF6AFF',
+  // '#FF6ACD',
+  // '#FF6A6A',
 ];
 
 // ===========================

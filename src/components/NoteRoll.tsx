@@ -73,7 +73,7 @@ const NoteRoll = ({
         { (i < 10) && <Rect key={`bg_${i}`} x={xPos} y={yPos} width={keyWidth} height={height} color={ (keyPressed) ? keyNoteColors[i] : colors.neutral[950] } opacity={ (keyPressed) ? 0.1 : 1} /> }
 
         {/* Lines */}
-        <Rect key={`line_${i}`} x={xPos} y={yPos} width={(accidentalPressed) ? 2 : 1} height={height} color={(accidentalPressed) ? accidentalNoteColors[i] : defaultAccidentalColor} />
+        <Rect key={`line_${i}`} x={xPos} y={yPos} width={(accidentalPressed) ? 2 : 1} height={height} color={(accidentalPressed) ? accidentalNoteColors[i - 1] : defaultAccidentalColor} />
 
       </Group>;
     }) }
@@ -105,7 +105,7 @@ const NoteRoll = ({
           } else if (noteAccidentalIndex !== -1) {
             roundedRectParams.xPos = (noteAccidentalIndex - 1 / 4) * keyWidth + noteStrokeWidth / 2;
             roundedRectParams.width = gameWidth / (10 * 2) - noteStrokeWidth;
-            roundedRectParams.color = accidentalNoteColors[noteAccidentalIndex];
+            roundedRectParams.color = accidentalNoteColors[noteAccidentalIndex - 1];
           } else {
             console.error('Uknown note:', note.noteName, note);
             return <></>;

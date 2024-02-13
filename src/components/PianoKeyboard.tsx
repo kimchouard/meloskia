@@ -6,7 +6,7 @@ import colors from 'tailwindcss/colors';
 import { useDerivedValue, useSharedValue, withTiming } from 'react-native-reanimated';
 import { Easing } from 'react-native';
 import {
-  pianoKeyboardHeight, keyStrokeWidth, numberOfWhiteKeys, gameWidth, gameHeight, screenWidth, keyWidth, whiteKeyColor,
+  pianoKeyboardHeight, keyStrokeWidth, numberOfWhiteKeys, gameWidth, gameHeight, screenWidth, keyWidth, whiteKeyColor, accidentalNoteColors, bgColor, keyNoteColors,
 } from '../utils/utils';
 import { KeysState } from '../hooks/useKeyboard';
 
@@ -42,7 +42,7 @@ const PianoKeyboard = ({
   keysState: KeysState,
   songName: string,
 }) => {
-  const noteNameFontSize = 25;
+  const noteNameFontSize = 20;
   const noteNameFont = useFont('/Inter_600SemiBold.ttf', noteNameFontSize);
 
   const scrollInY = useSharedValue(pianoKeyboardHeight);
@@ -86,7 +86,9 @@ const PianoKeyboard = ({
             <LinearGradient
               start={vec(xPos, yPos)}
               end={vec(xPos, yPos + pianoKeyboardHeight)}
-              colors={[whiteKeyColor, (keyState) ? '#BDBDBD' : '#EDEDED']}
+              colors={[whiteKeyColor, (keyState) ? '#DDDDDD' : '#EDEDED']}
+              // Colorful option:
+              // colors={(keyState) ? [keyNoteColors[i], accidentalNoteColors[i]] : [whiteKeyColor, '#EDEDED']}
             />
           </RoundedRect>
 
@@ -102,8 +104,8 @@ const PianoKeyboard = ({
 
           {/* Draw the note names (white & black keys! 🎹) */}
           { (screenWidth > 600) && <Group>
-            { hasAnAccidentalBefore && <Text x={xPos - noteNameFontSize / 2.5} y={gameHeight - pianoKeyboardHeight / 2 - noteNameFontSize / 2} text={accidentalName} font={noteNameFont} color={whiteKeyColor} /> }
-            <Text x={xPos + keyWidth / 2 - noteNameFontSize / 4} y={gameHeight - noteNameFontSize / 2} text={keyName} font={noteNameFont} />
+            { hasAnAccidentalBefore && <Text x={xPos - noteNameFontSize / 2.5} y={gameHeight - pianoKeyboardHeight / 2 - noteNameFontSize * ((accidentalState) ? 8 / 10 : 1)} text={accidentalName} font={noteNameFont} color={(accidentalState) ? accidentalNoteColors[i - 1] : whiteKeyColor} /> }
+            <Text x={xPos + keyWidth / 2 - noteNameFontSize / 4} y={gameHeight - noteNameFontSize * ((keyState) ? 8 / 10 : 1)} text={keyName} font={noteNameFont} />
           </Group>}
         </Group>;
       }) }
