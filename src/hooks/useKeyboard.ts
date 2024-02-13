@@ -106,7 +106,7 @@ const useKeyboard = ({
     // Restart on escape
     if (e.code === 'Escape' && !keyDown) {
       if (playMode !== 'start') resartAndStopPlayingNotes();
-      else router.push('/');
+      else router.replace('/');
     }
 
     const letterName = e.key?.replace('Key', '').toUpperCase();
@@ -171,82 +171,87 @@ const useKeyboard = ({
     startedPlayingAt.current = null;
   };
 
-  // Check if there is are notes that needs to be started or stopped
-  const autoPlayLooper = () => {
+  const playNotesFromBars = (currentTimeInBars: number) => {
     const perfStart = performance.now();
 
-    if (!startedPlayingAt.current) startedPlayingAt.current = Date.now();
+    // Get the notes (index) that are currently playing and needs to be stopped
+    const notesToStop = currentPlayingNotes.current.filter((noteIndex) => {
+      const note = songData.notes[noteIndex];
+      const noteStart = note.startAtBar + countdownBars;
+      const noteEnd = noteStart + note.durationInBars;
+      // Check that the note is playing
+      const noteIsPlaying = currentPlayingNotes.current.includes(songData.notes.indexOf(note));
 
-    if (songData?.notes) {
-      const currentTimeInMs = Date.now() - startedPlayingAt.current;
-      const currentTimeInBars = getBarsFromTime(currentTimeInMs, songData.bpm);
-
-      // Get the notes (index) that are currently playing and needs to be stopped
-      const notesToStop = currentPlayingNotes.current.filter((noteIndex) => {
-        const note = songData.notes[noteIndex];
-        const noteStart = note.startAtBar + countdownBars;
-        const noteEnd = noteStart + note.durationInBars;
-
-        if (currentTimeInBars >= noteEnd) {
-          // Check that the note is playing
-          const noteIsPlaying = currentPlayingNotes.current.includes(songData.notes.indexOf(note));
-          // verbose && console.log(perfStart, 'STOP noteIsPlaying', noteIsPlaying);
-          return noteIsPlaying;
-        }
-
-        // If the not is not playing anymore or shouldn't be stopped yet
-        return false;
-      });
-
-      // Get the new notes that are should be playing but are not currently playing
-      const newNotesToPlay = songData.notes.filter((note) => {
-        const noteStart = note.startAtBar + countdownBars;
-        const noteEnd = noteStart + note.durationInBars;
-
-        if (currentTimeInBars >= noteStart && currentTimeInBars < noteEnd) {
-          // Check that the note is not currently playing (unless it just has been stopped)
-          const noteIsntPlaying = !currentPlayingNotes.current.includes(songData.notes.indexOf(note));
-          const noteJustStopped = notesToStop.includes(songData.notes.indexOf(note));
-          // verbose && console.log(perfStart, 'START noteIsntPlaying', noteIsntPlaying, 'noteJustStopped', noteJustStopped);
-          return noteIsntPlaying || noteJustStopped;
-        }
-
-        // If the note is not playing or currently tagged as is, we return false
-        return false;
-      });
-
-      // Stop the notes that are no longer playing
-      notesToStop.forEach((noteIndex) => {
-        const note = songData.notes[noteIndex];
-        const keyboardKey = noteToKeyboardKey[note.noteName];
-
-        console.log(perfStart, `Stopping note at index ${noteIndex}:`, note, keyboardKey);
-        keyRelease(keyboardKey);
-      });
-
-      // Start the notes that are now playing
-      newNotesToPlay.forEach((note) => {
-        const keyboardKey = noteToKeyboardKey[note.noteName];
-
-        console.log(perfStart, 'Starting note:', note, keyboardKey);
-        keyPressed(keyboardKey);
-      });
-
-      // If we need the update the currentPlayingNotes array
-      if (newNotesToPlay.length > 0 || notesToStop.length > 0) {
-        verbose && console.log(perfStart, 'Updating notes', newNotesToPlay, notesToStop);
-        // Update the currentPlayingNotes
-        currentPlayingNotes.current = [...currentPlayingNotes.current.filter((noteIndex) => !notesToStop.includes(noteIndex)), ...newNotesToPlay.map((note) => songData.notes.indexOf(note))];
+      // If we've finished the note or if the note should not play yet
+      if (currentTimeInBars >= noteEnd || currentTimeInBars < noteStart) {
+        // verbose && console.log(perfStart, 'STOP noteIsPlaying', noteIsPlaying);
+        return noteIsPlaying;
       }
-    } else {
-      console.error('No songData.notes');
-      return stopAutoPlayLooper();
+
+      // If the not is not playing anymore or shouldn't be stopped yet
+      return false;
+    });
+
+    // Get the new notes that are should be playing but are not currently playing
+    const newNotesToPlay = songData.notes.filter((note) => {
+      const noteStart = note.startAtBar + countdownBars;
+      const noteEnd = noteStart + note.durationInBars;
+
+      if (currentTimeInBars >= noteStart && currentTimeInBars < noteEnd) {
+        // Check that the note is not currently playing (unless it just has been stopped)
+        const noteIsntPlaying = !currentPlayingNotes.current.includes(songData.notes.indexOf(note));
+        const noteJustStopped = notesToStop.includes(songData.notes.indexOf(note));
+        // verbose && console.log(perfStart, 'START noteIsntPlaying', noteIsntPlaying, 'noteJustStopped', noteJustStopped);
+        return noteIsntPlaying || noteJustStopped;
+      }
+
+      // If the note is not playing or currently tagged as is, we return false
+      return false;
+    });
+
+    // Stop the notes that are no longer playing
+    notesToStop.forEach((noteIndex) => {
+      const note = songData.notes[noteIndex];
+      const keyboardKey = noteToKeyboardKey[note.noteName];
+
+      verbose && console.log(perfStart, `Stopping note at index ${noteIndex}:`, note, keyboardKey);
+      keyRelease(keyboardKey);
+    });
+
+    // Start the notes that are now playing
+    newNotesToPlay.forEach((note) => {
+      const keyboardKey = noteToKeyboardKey[note.noteName];
+
+      verbose && console.log(perfStart, 'Starting note:', note, keyboardKey);
+      keyPressed(keyboardKey);
+    });
+
+    // If we need the update the currentPlayingNotes array
+    if (newNotesToPlay.length > 0 || notesToStop.length > 0) {
+      verbose && console.log(perfStart, 'Updating notes', newNotesToPlay, notesToStop);
+      // Update the currentPlayingNotes
+      currentPlayingNotes.current = [...currentPlayingNotes.current.filter((noteIndex) => !notesToStop.includes(noteIndex)), ...newNotesToPlay.map((note) => songData.notes.indexOf(note))];
     }
 
     // Calculate the time it took to process the frame
     const perfEnd = performance.now();
     const perfDuration = perfEnd - perfStart;
     verbose && console.log('Evaluated frame in (ms):', perfDuration);
+  };
+
+  // Check if there is are notes that needs to be started or stopped
+  const autoPlayLooper = () => {
+    if (!startedPlayingAt.current) startedPlayingAt.current = Date.now();
+
+    if (songData?.notes) {
+      const currentTimeInMs = Date.now() - startedPlayingAt.current;
+      const currentTimeInBars = getBarsFromTime(currentTimeInMs, songData.bpm);
+
+      playNotesFromBars(currentTimeInBars);
+    } else {
+      console.error('No songData.notes');
+      return stopAutoPlayLooper();
+    }
 
     // Looping on next animation frame
     if (playMode === 'playback') {
@@ -280,6 +285,7 @@ const useKeyboard = ({
     keyRelease,
     releaseLastKey,
     releaseAllKeys,
+    playNotesFromBars,
   };
 };
 

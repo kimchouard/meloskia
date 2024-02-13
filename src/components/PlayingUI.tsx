@@ -11,13 +11,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
 import { GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
-  useDerivedValue, useSharedValue, withDelay, withTiming,
+  useSharedValue, withDelay, withTiming,
 } from 'react-native-reanimated';
 import PianoKeyboard from './PianoKeyboard';
 import NoteRoll from './NoteRoll';
 import {
   countdownBars,
-  gameHeight, gameWidth, getDistFromBars, getDurationInBars, getOnPressKeyboardGestureHandler, getTimeFromBars, isGamePlaying, screenHeight, screenWidth,
+  gameHeight, gameWidth, getBarsFromDist, getDistFromBars, getDurationInBars, getOnPressKeyboardGestureHandler, getTimeFromBars, isGamePlaying, screenHeight, screenWidth,
 } from '../utils/utils';
 import useKeyboard from '../hooks/useKeyboard';
 import KeyboardAudio from './KeyboardAudio';
@@ -56,27 +56,13 @@ const PlayingUI = ({
   //    Keyboard Handler
 
   const {
-    keysState, keyPressed, releaseLastKey,
+    keysState, keyPressed, releaseLastKey, playNotesFromBars,
   } = useKeyboard({
     keyboardType: 'laptop', playMode, startGame, restart, songData,
   });
 
   // ==============================
   //    Animations
-
-  // CTA Animation
-  const [forceHideCTA, setForceHideCTA] = useState(false);
-  const height = useSharedValue(0);
-  useEffect(() => {
-    height.value = 0;
-    height.value = withDelay(1000, withTiming(85, { duration: 250, easing: Easing.inOut(Easing.ease) }));
-
-    return () => {
-      height.value = 0;
-      setForceHideCTA(false);
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [songData.name]);
 
   // NoteRoll Animation
   const noteRollY = useSharedValue(0);
@@ -98,14 +84,29 @@ const PlayingUI = ({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playMode]);
 
+  // CTA Animation
+  const height = useSharedValue(0);
+  useEffect(() => {
+    if (playMode === 'start' && noteRollY.value === 0) {
+      height.value = 0;
+      height.value = withDelay(1000, withTiming((Platform.OS === 'web') ? 85 : 200, { duration: 250, easing: Easing.inOut(Easing.ease) }));
+    }
+
+    return () => {
+      height.value = 0;
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [songData.name]);
+
   // ===========================
   //        Scroll (web)
 
   const handleScrolling = (e: WheelEvent) => {
+    if (isGamePlaying(playMode)) return false;
+
     // Hide the CTA
-    if (!forceHideCTA) {
+    if (height.value !== 0) {
       height.value = withTiming(0, { duration: 250, easing: Easing.inOut(Easing.ease) });
-      // setTimeout(() => setForceHideCTA(true), 250);
     }
 
     const scrolledVerticallyBy = e?.deltaY;
@@ -114,8 +115,16 @@ const PlayingUI = ({
     // Set the limit as the end of the song
     const translateEndLimit = getDistFromBars(getDurationInBars(songData) + countdownBars, songData.bpm) + 20;
     verbose && console.log('Scrolled!', scrolledVerticallyBy, translateX, noteRollY.value);
+
+    // If we're in the boundaries
     if (translateX > 0 && translateX < translateEndLimit) {
+      // We move the scene
       noteRollY.value = translateX;
+
+      // Play the notes as we scroll
+      const currentTimeInBars = getBarsFromDist(translateX, songData.bpm);
+      verbose && console.log('Scrolling', currentTimeInBars, translateX);
+      playNotesFromBars(currentTimeInBars);
     }
 
     return false;
@@ -134,22 +143,25 @@ const PlayingUI = ({
       };
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [songData]);
+  }, [songData, playMode]);
 
   // ==============================
   //    CTAs
 
   const renderWebCTAs = () => (<Animated.View
-    className="flex absolute bottom-[200px] w-full bg-neutral-950/70 overflow-hidden"
+    className="flex absolute bottom-[200px] w-full h-0 bg-neutral-950/70 overflow-hidden"
     style={{ height }}
   >
     { (playMode === 'start') ? <>
       <Text className="text-white text-lg text-center mt-5">Press Spacebar to start playing</Text>
-      <Text className="text-neutral-400 text-regular text-center mb-5">Press Enter if you're feeling lazy. </Text>
+      <Text className="text-neutral-400 text-regular text-center mb-5">Press Enter if you're feeling lazy. Or simply Scroll away.</Text>
     </> : <Text className="text-white text-lg text-center my-5">Press Spacebar or Enter to restart.</Text> }
   </Animated.View>);
 
-  const renderMobileCTAs = () => (<View className="bg-neutral-950/70 absolute top-0 left-0 w-full h-full flex-1 flex-col items-center">
+  const renderMobileCTAs = () => (<Animated.View
+    className="absolute bottom-[200px] left-0 w-full pb-10"
+    style={{ height }}
+  >
     <Pressable onPress={() => ((playMode === 'start') ? startGame('playing') : restart()) }>
       <LinearGradient
         colors={
@@ -157,7 +169,7 @@ const PlayingUI = ({
         }
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        className="content-center items-center rounded-lg py-5 px-10"
+        className="content-center items-center rounded-lg py-5 px-10 mx-auto"
       >
         <Text className='text-white font-medium text-2xl'>{(playMode === 'start') ? 'Start Playing' : 'Restart'}</Text>
       </LinearGradient>
@@ -169,9 +181,9 @@ const PlayingUI = ({
     >
         <Text className="text-neutral-400 text-lg">Feeling lazy?</Text>
     </Pressable>}
-  </View>);
+  </Animated.View>);
 
-  const renderCTAs = () => (<View className="absolute top-0 left-0 w-full h-full flex-1 flex-col items-center">
+  const renderCTAs = () => (<>
     { (Platform.OS === 'web') ? renderWebCTAs() : renderMobileCTAs()}
 
     {/* Close icon on the top right */}
@@ -179,7 +191,7 @@ const PlayingUI = ({
       <Text className="text-neutral-400 text-lg">&lt; Back</Text>
       {/* <Text className="text-neutral-200 font-medium text-3xl">x</Text> */}
     </Link>
-  </View>);
+  </>);
 
   // ==============================
   //    Skia Canvas
@@ -188,7 +200,7 @@ const PlayingUI = ({
     return (
       <View className="flex-1">
         {/* Start button, centered on the screen */}
-        { !isGamePlaying(playMode) && !forceHideCTA && ((Platform.OS === 'web') ? renderCTAs() : renderMobileCTAs()) }
+        { !isGamePlaying(playMode) && ((Platform.OS === 'web') ? renderCTAs() : renderMobileCTAs()) }
 
         {/* Piano sound */}
         <KeyboardAudio {...{ playMode, keysState, songData }} />

@@ -96,6 +96,17 @@ export const getDistFromBars = (barCount: number, BPM: number, options: { roundV
   console.error('getDistXFromBars called with undefined or null arguments');
 };
 
+// Get the number of bars from the distance (px)
+export const getBarsFromDist = (dist: number, BPM: number, options: { roundValue: true | false } = { roundValue: false }):number => {
+  if (dist !== undefined && BPM !== undefined
+  && dist !== null && BPM !== null) {
+    const barsFromDist = dist / getDistFor1Bar(BPM);
+    return (options.roundValue === true) ? Math.round(barsFromDist) : barsFromDist;
+  }
+
+  console.error('getBarsFromDist called with undefined or null arguments');
+};
+
 // Get time (ms) from the number of bars
 export const getTimeFromBars = (barCount: number, BPM: number, options: { roundValue: true | false } = { roundValue: true }):number => {
   if (barCount !== undefined && BPM !== undefined
