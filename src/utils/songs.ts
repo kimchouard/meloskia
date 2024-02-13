@@ -1,7 +1,7 @@
 export interface SongData {
   name: string,
   bpm: number,
-  durationInBars: number,
+  durationInBars?: number,
   notes: { noteName: string, startAtBar: number, durationInBars: number }[],
 }
 
@@ -9,7 +9,7 @@ export const songs = [
   {
     name: 'All-notes Demo',
     bpm: 160,
-    durationInBars: 17,
+    // durationInBars: 17,
     notes: [
       { noteName: 'C3', startAtBar: 0, durationInBars: 1 },
       { noteName: 'D3', startAtBar: 1, durationInBars: 1 },
@@ -60,7 +60,7 @@ export const songs = [
   {
     name: 'The Final Tech Stack',
     bpm: 105,
-    durationInBars: 30,
+    // durationInBars: 30,
     notes: [
       { noteName: 'C#4', startAtBar: 0, durationInBars: 0.25 }, // 1
       { noteName: 'B3', startAtBar: 0.25, durationInBars: 0.25 }, // 1

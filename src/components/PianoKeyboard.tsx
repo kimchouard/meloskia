@@ -1,8 +1,10 @@
 import {
   Group, LinearGradient, Paint, Rect, RoundedRect, Text, useFont, vec,
 } from '@shopify/react-native-skia';
-import { memo } from 'react';
+import { memo, useEffect } from 'react';
 import colors from 'tailwindcss/colors';
+import { useDerivedValue, useSharedValue, withTiming } from 'react-native-reanimated';
+import { Easing } from 'react-native';
 import {
   pianoKeyboardHeight, keyStrokeWidth, numberOfWhiteKeys, gameWidth, gameHeight, screenWidth, keyWidth, whiteKeyColor,
 } from '../utils/utils';
@@ -35,14 +37,32 @@ export const noteToKeyboardKey = Object.fromEntries(Object.entries(keyboardKeyTo
 
 const PianoKeyboard = ({
   keysState,
+  songName,
 }:{
-  keysState: KeysState
+  keysState: KeysState,
+  songName: string,
 }) => {
   const noteNameFontSize = 25;
   const noteNameFont = useFont('Inter_600SemiBold.ttf', noteNameFontSize);
 
+  const scrollInY = useSharedValue(pianoKeyboardHeight);
+  const scrollInTransform = useDerivedValue(() => [{ translateY: scrollInY.value }]);
+
+  useEffect(() => {
+    scrollInY.value = withTiming(0, {
+      duration: 250,
+      easing: Easing.inOut(Easing.ease),
+    });
+
+    return () => {
+      scrollInY.value = pianoKeyboardHeight;
+    };
+  }, [songName]);
+
   return (
-    <Group>
+    <Group
+      transform={scrollInTransform}
+    >
       {/* BG */}
       <Rect x={-(screenWidth - gameWidth) / 2 } y={gameHeight - pianoKeyboardHeight - keyStrokeWidth / 2} width={screenWidth} height={pianoKeyboardHeight + keyStrokeWidth / 2} color={ colors.neutral[950] } />
 

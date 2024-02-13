@@ -1,16 +1,17 @@
 import React, { memo, useRef, useState } from 'react';
 import { Canvas, Group } from '@shopify/react-native-skia';
 import {
+  Platform,
   Pressable, Text, View,
 } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
-import PianoKeyboard, { accidentalNames, keyNames } from './PianoKeyboard';
+import { GestureDetector } from 'react-native-gesture-handler';
+import PianoKeyboard from './PianoKeyboard';
 import NoteRoll from './NoteRoll';
 import {
   countdownBars,
-  gameHeight, gameWidth, getTimeFromBars, isGamePlaying, pianoKeyboardHeight, screenHeight, screenWidth,
+  gameHeight, gameWidth, getDurationInBars, getOnPressKeyboardGestureHandler, getTimeFromBars, isGamePlaying, screenHeight, screenWidth,
 } from '../utils/utils';
 import useKeyboard from '../hooks/useKeyboard';
 import KeyboardAudio from './KeyboardAudio';
@@ -42,7 +43,7 @@ const PlayingUI = ({
     // TEMP: Allow the user to restart the game after the animation
     playingTimeout.current = setTimeout(() => {
       setPlayMode('restart');
-    }, getTimeFromBars((songData) && (songData.durationInBars + countdownBars), songData?.bpm));
+    }, getTimeFromBars((songData) && (getDurationInBars(songData) + countdownBars), songData?.bpm));
   };
 
   // ==============================
@@ -55,99 +56,60 @@ const PlayingUI = ({
   });
 
   // ==============================
-  //    Gesture Handler
+  //    CTAs
 
-  const getKeyNameFromPosition = (x: number, y: number) => {
-    const keyFloatIndex = (x - (screenWidth - gameWidth) / 2) / (gameWidth / 10);
-    const keyIndex = Math.floor(keyFloatIndex);
+  const renderWebCTAs = () => (<View className="flex absolute bottom-[200px] w-full bg-neutral-950/70 py-5">
+    { (playMode === 'start') ? <>
+      <Text className="text-white text-lg text-center">Press Spacebar to start playing</Text>
+      <Text className="text-neutral-400 text-regular text-center">Press Enter if you're feeling lazy. </Text>
+    </> : <Text className="text-white text-lg text-center">Press Spacebar or Enter to restart.</Text> }
+  </View>);
 
-    // Detect key accidentals
-    if (y < gameHeight - pianoKeyboardHeight / 2) {
-      // If we're on a black key, which are 1/4 of the width of a white key and inbetween white key 1 and 2, 2 and 3, 4 and 5, 5 and 6, 6 and 7, 8 and 9 and 9 and 10
-      if ((keyFloatIndex > 0.73 && keyFloatIndex < 1.27) // W
-      || (keyFloatIndex > 1.73 && keyFloatIndex < 2.27) // E
-      || (keyFloatIndex > 3.73 && keyFloatIndex < 4.27) // T
-      || (keyFloatIndex > 4.73 && keyFloatIndex < 5.27) // Y
-      || (keyFloatIndex > 5.73 && keyFloatIndex < 6.27) // U
-      || (keyFloatIndex > 7.73 && keyFloatIndex < 8.27) // O
-      || (keyFloatIndex > 8.73 && keyFloatIndex < 9.27) // P
-      ) {
-        return accidentalNames[Math.round(keyFloatIndex)];
-      }
-    }
+  const renderMobileCTAs = () => (<View className="bg-neutral-950/70 absolute top-0 left-0 w-full h-full flex-1 flex-col items-center">
+    <Pressable onPress={() => ((playMode === 'start') ? startGame('playing') : restart()) }>
+      <LinearGradient
+        colors={
+          (playMode === 'start') ? ['#6A8AFF', '#8A6AFF', '#FF6AFF'] : ['#FF6AFF', '#8A6AFF', '#6A8AFF']
+        }
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        className="content-center items-center rounded-lg py-5 px-10"
+      >
+        <Text className='text-white font-medium text-2xl'>{(playMode === 'start') ? 'Start Playing' : 'Restart'}</Text>
+      </LinearGradient>
+    </Pressable>
 
-    // We're on a white key
-    return keyNames[keyIndex];
-  };
+    { (playMode === 'start') && <Pressable
+      className="content-center items-center rounded-lg py-3"
+      onPress={() => startGame('playback')}
+    >
+        <Text className="text-neutral-400 text-lg">Feeling lazy?</Text>
+    </Pressable>}
+  </View>);
 
-  const onPressKeyboardGestureHandler = Gesture.Pan().minDistance(0)
-    .onStart((e) => {
-      // If the key is pressed on the keyboard
-      if (e.y > gameHeight - pianoKeyboardHeight) {
-        verbose && console.log('Key pressed:', e);
+  const renderCTAs = () => (<View className="absolute top-0 left-0 w-full h-full flex-1 flex-col items-center">
+    { (Platform.OS === 'web') ? renderWebCTAs() : renderMobileCTAs()}
 
-        keyPressed(getKeyNameFromPosition(e.x, e.y));
-      }
-    })
-    .onChange((e) => {
-      // If the key is pressed on the keyboard
-      if (e.y > gameHeight - pianoKeyboardHeight) {
-        const keyName = getKeyNameFromPosition(e.x, e.y);
-        // If we're on an unknown key
-        if (!keyName) return releaseLastKey();
-
-        keyPressed(keyName, true);
-
-      // If we've left the keyboard area
-      } else {
-        releaseLastKey();
-      }
-    })
-    .onEnd(() => {
-      releaseLastKey();
-    });
+    {/* Close icon on the top right */}
+    <Link href="/" className="absolute top-3 left-3 py-3 px-5">
+      <Text className="text-neutral-400 text-lg">&lt; Back</Text>
+      {/* <Text className="text-neutral-200 font-medium text-3xl">x</Text> */}
+    </Link>
+  </View>);
 
   // ==============================
-  //    Skia Canvas and Start Btn
+  //    Skia Canvas
 
   if (songData) {
-    const renderCTAs = () => (<View className="flex-1 absolute top-0 left-0 bg-neutral-950/70 w-full h-full flex-col items-center justify-center">
-      <Pressable onPress={() => ((playMode === 'start') ? startGame('playing') : restart()) }>
-        <LinearGradient
-          colors={
-            (playMode === 'start') ? ['#6A8AFF', '#8A6AFF', '#FF6AFF'] : ['#FF6AFF', '#8A6AFF', '#6A8AFF']
-          }
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          className="content-center items-center rounded-lg py-5 px-10"
-        >
-          <Text className='text-white font-medium text-2xl'>{(playMode === 'start') ? 'Start Playing' : 'Restart'}</Text>
-        </LinearGradient>
-      </Pressable>
-
-      { (playMode === 'start') && <Pressable
-        className="content-center items-center rounded-lg py-3"
-        onPress={() => startGame('playback')}
-      >
-          <Text className="text-neutral-400 text-lg">Feeling lazy?</Text>
-      </Pressable>}
-
-      {/* Close icon on the top right */}
-      <Link href="/" className="absolute top-3 left-3 py-3 px-5">
-        <Text className="text-neutral-400 text-lg">&lt; Back</Text>
-        {/* <Text className="text-neutral-200 font-medium text-3xl">x</Text> */}
-      </Link>
-    </View>);
-
     return (
       <View className="flex-1">
         {/* Start button, centered on the screen */}
-        { !isGamePlaying(playMode) && renderCTAs()}
+        { !isGamePlaying(playMode) && ((Platform.OS === 'web') ? renderCTAs() : renderMobileCTAs()) }
 
         {/* Piano sound */}
         <KeyboardAudio {...{ playMode, keysState, songData }} />
 
-        <GestureDetector gesture={onPressKeyboardGestureHandler}>
+        <GestureDetector gesture={getOnPressKeyboardGestureHandler(keyPressed, releaseLastKey)}>
           <Canvas style={{ width: screenWidth, height: screenHeight }}>
             <Group transform={[
               // Center the game
@@ -155,7 +117,7 @@ const PlayingUI = ({
               { translateY: (screenHeight - gameHeight) / 2 },
             ]}>
               <NoteRoll {...{ playMode, keysState, songData }} />
-              <PianoKeyboard keysState={keysState} autoPlay={(playMode === 'playback')} />
+              <PianoKeyboard keysState={keysState} songName={songData.name} />
             </Group>
           </Canvas>
         </GestureDetector>

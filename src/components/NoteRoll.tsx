@@ -2,12 +2,12 @@ import {
   Group, Paint, Rect, RoundedRect,
 } from '@shopify/react-native-skia';
 import {
-  Easing, useDerivedValue, useSharedValue, withTiming,
+  Easing, useDerivedValue, useSharedValue, withDelay, withTiming,
 } from 'react-native-reanimated';
 import { memo, useEffect } from 'react';
 import colors from 'tailwindcss/colors';
 import {
-  gameWidth, gameHeight, pianoKeyboardHeight, countdownBars, getDistFromBars, getTimeFromBars, keyWidth, keyNoteColors, accidentalNoteColors, isGamePlaying,
+  gameWidth, gameHeight, pianoKeyboardHeight, countdownBars, getDistFromBars, getTimeFromBars, keyWidth, keyNoteColors, accidentalNoteColors, isGamePlaying, getDurationInBars,
 } from '../utils/utils';
 import { KeysState } from '../hooks/useKeyboard';
 import { accidentalNames, keyNames, noteToKeyboardKey } from './PianoKeyboard';
@@ -30,10 +30,11 @@ const NoteRoll = ({
 
   useEffect(() => {
     if (isGamePlaying(playMode)) {
+      const songDurationWithCountdown = getDurationInBars(songData) + countdownBars;
       rollY.value = withTiming(
-        getDistFromBars(songData.durationInBars + countdownBars, songData.bpm),
+        getDistFromBars(songDurationWithCountdown, songData.bpm),
         {
-          duration: getTimeFromBars(songData.durationInBars + countdownBars, songData.bpm),
+          duration: getTimeFromBars(songDurationWithCountdown, songData.bpm),
           easing: Easing.linear,
         },
       );
@@ -44,19 +45,34 @@ const NoteRoll = ({
     }
   }, [rollY, playMode]);
 
-  return <Group transform={[
+  const perspectiveRollIn = useSharedValue(0);
+  const threeDRollTransform = useDerivedValue(() => [
     // Go to the top of the piano keys, horizontally centered
     { translateX: gameWidth / 2 },
     { translateY: gameHeight - pianoKeyboardHeight },
 
     // Apply the perspective effect
-    { perspective: 400 },
+    { perspective: perspectiveRollIn.value },
     { rotateX: Math.PI / 10 },
 
     // Go back to the top of the screen
     { translateX: -gameWidth / 2 },
     { translateY: -gameHeight + pianoKeyboardHeight },
-  ]}>
+  ]);
+
+  useEffect(() => {
+    perspectiveRollIn.value = 0;
+    perspectiveRollIn.value = withDelay(250, withTiming(400, {
+      duration: 750,
+      easing: Easing.inOut(Easing.ease),
+    }));
+
+    return () => {
+      perspectiveRollIn.value = 0;
+    };
+  }, [songData.name]);
+
+  return <Group transform={threeDRollTransform}>
     {/* Create a line at the center of each piano key black key and a colored bg if need be ! */}
     { [...Array(11)].map((_, i) => {
       const xPos = i * (keyWidth);
@@ -80,7 +96,7 @@ const NoteRoll = ({
       </Group>;
     }) }
 
-    {/* Create a rounded rect representing a note for each white key */}
+    {/* Draw the notes for each key (black & white 🎹) */}
     <Group transform={rollTransform}>
       { songData?.notes?.map((note, i) => {
         if (note.noteName) {

@@ -2,6 +2,9 @@ import { Dimensions } from 'react-native';
 
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { Gesture } from 'react-native-gesture-handler';
+import { accidentalNames, keyNames } from '@/components/PianoKeyboard';
+import { SongData } from './songs';
 
 const verbose = false;
 
@@ -69,7 +72,7 @@ export const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs));
 export const isGamePlaying = (playMode) => playMode === 'playing' || playMode === 'playback';
 
 // Countdown bars
-export const countdownBars = 1;
+export const countdownBars = 4;
 
 // Distance between quarter lines & change ratio based on BPM
 export const distanceBetweenBars = 100;
@@ -115,6 +118,15 @@ export const getBarsFromTime = (timeInMs: number, BPM: number, options: { roundV
   console.error('getBarsFromTime called with undefined or null arguments');
 };
 
+export const getDurationInBars = (songData: SongData):number => {
+  if (songData && songData.notes) {
+    const lastNote = songData.notes[songData.notes.length - 1];
+    return lastNote.startAtBar + lastNote.durationInBars;
+  }
+
+  return 0;
+};
+
 // ===========================
 //   Expo Router
 // ===========================
@@ -136,3 +148,56 @@ export const getNumberedUrlParams = (strindId: string):number => {
     }
   }
 };
+
+// ==============================
+//    Gesture Handler
+
+const getKeyNameFromPosition = (x: number, y: number) => {
+  const keyFloatIndex = (x - (screenWidth - gameWidth) / 2) / (gameWidth / 10);
+  const keyIndex = Math.floor(keyFloatIndex);
+
+  // Detect key accidentals
+  if (y < gameHeight - pianoKeyboardHeight / 2) {
+    // If we're on a black key, which are 1/4 of the width of a white key and inbetween white key 1 and 2, 2 and 3, 4 and 5, 5 and 6, 6 and 7, 8 and 9 and 9 and 10
+    if ((keyFloatIndex > 0.73 && keyFloatIndex < 1.27) // W
+      || (keyFloatIndex > 1.73 && keyFloatIndex < 2.27) // E
+      || (keyFloatIndex > 3.73 && keyFloatIndex < 4.27) // T
+      || (keyFloatIndex > 4.73 && keyFloatIndex < 5.27) // Y
+      || (keyFloatIndex > 5.73 && keyFloatIndex < 6.27) // U
+      || (keyFloatIndex > 7.73 && keyFloatIndex < 8.27) // O
+      || (keyFloatIndex > 8.73 && keyFloatIndex < 9.27) // P
+    ) {
+      return accidentalNames[Math.round(keyFloatIndex)];
+    }
+  }
+
+  // We're on a white key
+  return keyNames[keyIndex];
+};
+
+export const getOnPressKeyboardGestureHandler = (keyPressed, releaseLastKey) => keyPressed && releaseLastKey && Gesture.Pan().minDistance(0)
+  .onStart((e) => {
+    // If the key is pressed on the keyboard
+    if (e.y > gameHeight - pianoKeyboardHeight) {
+      verbose && console.log('Key pressed:', e);
+
+      keyPressed(getKeyNameFromPosition(e.x, e.y));
+    }
+  })
+  .onChange((e) => {
+    // If the key is pressed on the keyboard
+    if (e.y > gameHeight - pianoKeyboardHeight) {
+      const keyName = getKeyNameFromPosition(e.x, e.y);
+      // If we're on an unknown key
+      if (!keyName) return releaseLastKey();
+
+      keyPressed(keyName, true);
+
+      // If we've left the keyboard area
+    } else {
+      releaseLastKey();
+    }
+  })
+  .onEnd(() => {
+    releaseLastKey();
+  });
