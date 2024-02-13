@@ -43,7 +43,7 @@ const PianoKeyboard = ({
   songName: string,
 }) => {
   const noteNameFontSize = 25;
-  const noteNameFont = useFont('Inter_600SemiBold.ttf', noteNameFontSize);
+  const noteNameFont = useFont('/Inter_600SemiBold.ttf', noteNameFontSize);
 
   const scrollInY = useSharedValue(pianoKeyboardHeight);
   const scrollInTransform = useDerivedValue(() => [{ translateY: scrollInY.value }]);
@@ -103,7 +103,7 @@ const PianoKeyboard = ({
           {/* Draw the note names (white & black keys! 🎹) */}
           { (screenWidth > 600) && <Group>
             { hasAnAccidentalBefore && <Text x={xPos - noteNameFontSize / 2.5} y={gameHeight - pianoKeyboardHeight / 2 - noteNameFontSize / 2} text={accidentalName} font={noteNameFont} color={whiteKeyColor} /> }
-            { <Text x={xPos + keyWidth / 2 - noteNameFontSize / 4} y={gameHeight - noteNameFontSize / 2} text={keyName} font={noteNameFont} /> }
+            <Text x={xPos + keyWidth / 2 - noteNameFontSize / 4} y={gameHeight - noteNameFontSize / 2} text={keyName} font={noteNameFont} />
           </Group>}
         </Group>;
       }) }
