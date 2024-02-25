@@ -7,13 +7,13 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "postinstall": "yarn setup-skia-web \"public\" && node canvaskit-wasm-postinstall-fs-path.js && npx tailwindcss -i ./global.css -o ./node_modules/.cache/nativewind/global.css.web.css"
+    "postinstall": "yarn setup-skia-web && npx tailwindcss -i ./global.css -o ./node_modules/.cache/nativewind/global.css.web.css"
   },
   "dependencies": {
     "@babel/plugin-proposal-export-namespace-from": "^7.18.9",
     "@expo-google-fonts/inter": "^0.2.3",
     "@expo/metro-runtime": "^3.1.2",
-    "@shopify/react-native-skia": "^0.1.237",
+    "@shopify/react-native-skia": "^0.1.240",
     "@types/react": "~18.2.45",
     "canvaskit-js": "https://bit.ly/canvaskit-js_v210",
     "clsx": "^2.1.0",

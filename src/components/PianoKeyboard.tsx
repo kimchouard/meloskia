@@ -38,24 +38,32 @@ export const noteToKeyboardKey = Object.fromEntries(Object.entries(keyboardKeyTo
 const PianoKeyboard = ({
   keysState,
   songName,
+  disableAnimation,
+  showNoteNames,
+  hideSideBackground,
 }:{
   keysState: KeysState,
   songName: string,
+  disableAnimation?: boolean,
+  showNoteNames?: boolean,
+  hideSideBackground?: boolean,
 }) => {
   const noteNameFontSize = 20;
   const noteNameFont = useFont('/Inter_600SemiBold.ttf', noteNameFontSize);
 
-  const scrollInY = useSharedValue(pianoKeyboardHeight);
+  const scrollInY = useSharedValue((disableAnimation) ? 0 : pianoKeyboardHeight);
   const scrollInTransform = useDerivedValue(() => [{ translateY: scrollInY.value }]);
 
   useEffect(() => {
-    scrollInY.value = withTiming(0, {
-      duration: 250,
-      easing: Easing.inOut(Easing.ease),
-    });
+    if (!disableAnimation) {
+      scrollInY.value = withTiming(0, {
+        duration: 250,
+        easing: Easing.inOut(Easing.ease),
+      });
+    }
 
     return () => {
-      scrollInY.value = pianoKeyboardHeight;
+      scrollInY.value = (disableAnimation) ? 0 : pianoKeyboardHeight;
     };
   }, [songName]);
 
@@ -64,7 +72,7 @@ const PianoKeyboard = ({
       transform={scrollInTransform}
     >
       {/* BG */}
-      <Rect x={-(screenWidth - gameWidth) / 2 } y={gameHeight - pianoKeyboardHeight - keyStrokeWidth / 2} width={screenWidth} height={pianoKeyboardHeight + keyStrokeWidth / 2} color={ colors.neutral[950] } />
+      { !hideSideBackground && <Rect x={-(screenWidth - gameWidth) / 2 } y={gameHeight - pianoKeyboardHeight - keyStrokeWidth / 2} width={screenWidth} height={pianoKeyboardHeight + keyStrokeWidth / 2} color={ colors.neutral[950] } />}
 
       {/* Draw 11 White keys using a loop */}
       { keysState && [...Array(numberOfWhiteKeys)].map((_, i) => {
@@ -103,7 +111,7 @@ const PianoKeyboard = ({
           </RoundedRect> }
 
           {/* Draw the note names (white & black keys! 🎹) */}
-          { (screenWidth > 600) && <Group>
+          { showNoteNames && (screenWidth > 600) && <Group>
             { hasAnAccidentalBefore && <Text x={xPos - noteNameFontSize / 2.5} y={gameHeight - pianoKeyboardHeight / 2 - noteNameFontSize * ((accidentalState) ? 8 / 10 : 1)} text={accidentalName} font={noteNameFont} color={(accidentalState) ? accidentalNoteColors[i - 1] : whiteKeyColor} /> }
             <Text x={xPos + keyWidth / 2 - noteNameFontSize / 4} y={gameHeight - noteNameFontSize * ((keyState) ? 8 / 10 : 1)} text={keyName} font={noteNameFont} />
           </Group>}
