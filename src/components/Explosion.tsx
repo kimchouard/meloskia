@@ -56,7 +56,7 @@ const Particle = (rectOrigin: SkRect, color: string) => {
     canvas.save();
     const width = rectOrigin.width * scale.value;
     const height = rectOrigin.height * scale.value;
-    canvas.drawOval(rect(x.value, y.value, width, height), paint);
+    canvas.drawRect(rect(x.value, y.value, width, height), paint);
     canvas.restore();
   };
 
