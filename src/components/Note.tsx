@@ -114,8 +114,6 @@ export const Note: FC<Props> = ({
         isCollidedKeyboardTop={isCollidedKeyboardTop}
         rrectOrigin={rrectOrigin}
         color={keyNoteColors[keyIndex]}
-        stageWidth={stageWidth}
-        stageHeight={stageHeight}
       />
       <Ripple
         isCollidedKeyboardTop={isCollidedKeyboardTop}
