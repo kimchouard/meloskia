@@ -1,4 +1,3 @@
-// @refresh reset
 import { usePianoLayout } from "@/hooks/usePianoLayout";
 import { SongData } from "@/utils/songs";
 import { countdownBars, getDistFromBars } from "@/utils/utils";

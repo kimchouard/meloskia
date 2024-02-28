@@ -32,7 +32,6 @@ export const PianoKeyboard: FC<Props> = ({}) => {
           style={{
             width: whiteKeyWidth,
             height: "100%",
-            backgroundColor: "red",
           }}
         >
           <PianoKey
@@ -51,14 +50,15 @@ export const PianoKeyboard: FC<Props> = ({}) => {
 
   const renderBlackKeys = () => {
     return PIANO_KEYS_BLACK.map((key) => {
-      const posIndex = BLACK_KEY_POSITION_INDICES[key];
-      const left = posIndex * (whiteKeyWidth + gap) + whiteKeyWidth + gap;
       return (
         <Animated.View
           key={key}
           style={{
             position: "absolute",
-            left,
+            left:
+              BLACK_KEY_POSITION_INDICES[key] * (whiteKeyWidth + gap) +
+              whiteKeyWidth +
+              gap,
             width: blackKeyWidth,
             height: "50%",
             transform: [
