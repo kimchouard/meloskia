@@ -1,5 +1,5 @@
 import {
-  Group,  multiply4,  processTransform3d, translate,
+  Group, multiply4, processTransform3d, translate,
 } from '@shopify/react-native-skia';
 import {
   Easing, SharedValue, useDerivedValue, useSharedValue, withDelay, withTiming,
@@ -20,7 +20,7 @@ const NoteRoll = ({
   keysState,
   songData,
   noteRollY,
-}:{
+}: {
   keysState: KeysState,
   songData: SongData
   noteRollY: SharedValue<number>,
@@ -59,7 +59,7 @@ const NoteRoll = ({
 
   return <Group>
     {/* Create a line at the center of each piano key black key and a colored bg if need be ! */}
-    { keysState && [...Array(11)].map((_, i) => {
+    {keysState && [...Array(11)].map((_, i) => {
       const xPos = i * (keyWidth);
 
       const keyPressed = keysState[keyNames[i]];
@@ -73,17 +73,17 @@ const NoteRoll = ({
 
       return <Group key={`lines_${i}`}>
         {/* BG */}
-        { (i < 10) && <Plane key={`bg_${i}`} matrix={matrix} x={xPos} y={yPos} width={keyWidth} height={height} color={ (keyPressed) ? keyNoteColors[i] : colors.neutral[950] } opacity={ (keyPressed) ? 0.1 : 1} /> }
+        {(i < 10) && <Plane key={`bg_${i}`} matrix={matrix} x={xPos} y={yPos} width={keyWidth} height={height} color={(keyPressed) ? keyNoteColors[i] : colors.neutral[950]} opacity={(keyPressed) ? 0.1 : 1} />}
 
         {/* Lines */}
-        <Plane key={`line_${i}`} x={xPos} y={yPos} matrix={matrix}  width={(accidentalPressed) ? 2 : 1} height={height} color={(accidentalPressed) ? accidentalNoteColors[i - 1] : defaultAccidentalColor} />
+        <Plane key={`line_${i}`} x={xPos} y={yPos} matrix={matrix} width={(accidentalPressed) ? 2 : 1} height={height} color={(accidentalPressed) ? accidentalNoteColors[i - 1] : defaultAccidentalColor} />
 
       </Group>;
-    }) }
+    })}
 
     {/* Draw the notes for each key (black & white 🎹) */}
     <Group>
-      { songData?.notes?.map((note, i) => {
+      {songData?.notes?.map((note, i) => {
         if (note.noteName) {
           const yOfKeyboardHeight = gameHeight - pianoKeyboardHeight;
 
@@ -92,7 +92,7 @@ const NoteRoll = ({
           const noteIndex = keyNames.indexOf(keyboardKey);
           const noteAccidentalIndex = accidentalNames.indexOf(keyboardKey);
 
-          const roundedRectParams:{
+          const roundedRectParams: {
             xPos?: number,
             yPos?: number,
             width?: number,
@@ -123,7 +123,7 @@ const NoteRoll = ({
                 width={roundedRectParams.width}
                 height={getDistFromBars(note.durationInBars, songData.bpm) - noteStrokeWidth}
                 r={5}
-                color={ roundedRectParams.color }
+                color={roundedRectParams.color}
               />
               <Plane
                 matrix={translatedMatrix}
@@ -132,7 +132,7 @@ const NoteRoll = ({
                 width={roundedRectParams.width}
                 height={getDistFromBars(note.durationInBars, songData.bpm) - noteStrokeWidth}
                 r={5}
-                color={ roundedRectParams.color } style="stroke" strokeWidth={noteStrokeWidth} opacity={0.5}
+                color={roundedRectParams.color} style="stroke" strokeWidth={noteStrokeWidth} opacity={0.5}
               />
             </React.Fragment>
           );
@@ -140,7 +140,7 @@ const NoteRoll = ({
 
         // ELSE: no noteName, so it's a rest
         return <></>;
-      }) }
+      })}
     </Group>
   </Group>;
 };

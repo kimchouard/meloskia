@@ -6,7 +6,7 @@ import { App } from 'expo-router/build/qualified-entry';
 import { renderRootComponent } from 'expo-router/build/renderRootComponent';
 
 // RN Skia (WASM)
-//import { LoadSkiaWeb } from '@shopify/react-native-skia/lib/module/web';
+// import { LoadSkiaWeb } from '@shopify/react-native-skia/lib/module/web';
 
 // LoadSkiaWeb({
 //   locateFile: (file) => `/static/js/${file}`,
