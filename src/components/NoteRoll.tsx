@@ -13,6 +13,7 @@ import { KeysState } from '../hooks/useKeyboard';
 import { accidentalNames, keyNames, noteToKeyboardKey } from './PianoKeyboard';
 import { PlayMode } from './PlayingUI';
 import { SongData } from '@/utils/songs';
+import { Plane } from './Plane';
 
 const noteStrokeWidth = 8;
 
@@ -54,7 +55,7 @@ const NoteRoll = ({
     };
   }, [songData.name]);
 
-  return <Group transform={threeDRollTransform}>
+  return <Group>
     {/* Create a line at the center of each piano key black key and a colored bg if need be ! */}
     { keysState && [...Array(11)].map((_, i) => {
       const xPos = i * (keyWidth);
@@ -70,10 +71,10 @@ const NoteRoll = ({
 
       return <Group key={`lines_${i}`}>
         {/* BG */}
-        { (i < 10) && <Rect key={`bg_${i}`} x={xPos} y={yPos} width={keyWidth} height={height} color={ (keyPressed) ? keyNoteColors[i] : colors.neutral[950] } opacity={ (keyPressed) ? 0.1 : 1} /> }
+        { (i < 10) && <Plane key={`bg_${i}`} transform={threeDRollTransform} x={xPos} y={yPos} width={keyWidth} height={height} color={ (keyPressed) ? keyNoteColors[i] : colors.neutral[950] } opacity={ (keyPressed) ? 0.1 : 1} /> }
 
         {/* Lines */}
-        <Rect key={`line_${i}`} x={xPos} y={yPos} width={(accidentalPressed) ? 2 : 1} height={height} color={(accidentalPressed) ? accidentalNoteColors[i - 1] : defaultAccidentalColor} />
+        <Plane key={`line_${i}`} x={xPos} y={yPos} transform={threeDRollTransform}  width={(accidentalPressed) ? 2 : 1} height={height} color={(accidentalPressed) ? accidentalNoteColors[i - 1] : defaultAccidentalColor} />
 
       </Group>;
     }) }
