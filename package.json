@@ -15,7 +15,7 @@
     "@expo/metro-runtime": "^3.1.2",
     "@shopify/react-native-skia": "^0.1.240",
     "@types/react": "~18.2.45",
-    "canvaskit-js": "https://bit.ly/canvaskit-js_v210",
+    "canvaskit-js": "2.1.4",
     "clsx": "^2.1.0",
     "expo": "~50.0.4",
     "expo-constants": "~15.4.5",

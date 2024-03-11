@@ -2262,10 +2262,10 @@
     component-type "^1.2.1"
     join-component "^1.1.0"
 
-"@shopify/react-native-skia@^0.1.237":
-  version "0.1.240"
-  resolved "https://registry.yarnpkg.com/@shopify/react-native-skia/-/react-native-skia-0.1.240.tgz#4bd88defc277175eadb52465f070e2df67909483"
-  integrity sha512-KcmmGiC4eHaVR1Erx5LCR6OUflLW9YN7fEuf3FOt0j7hvMbX3QZDXfqRP0D17jjh4W+BO26+YM4vxm6V7+htkQ==
+"@shopify/react-native-skia@^0.1.240":
+  version "0.1.241"
+  resolved "https://registry.yarnpkg.com/@shopify/react-native-skia/-/react-native-skia-0.1.241.tgz#592471a565f3a7792e03a453eaf922518dd994e5"
+  integrity sha512-jQFJHiNUVONTGPPnL7LIJc3kg6x4PBPh3m7NAJuTxuhB8VOSVlQR3UWd4tDHHJgj7otG3S2dbHD7+bftxM5cFA==
   dependencies:
     canvaskit-wasm "0.39.1"
     react-reconciler "0.27.0"
@@ -2968,9 +2968,10 @@ caniuse-lite@^1.0.30001580:
   resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001581.tgz#0dfd4db9e94edbdca67d57348ebc070dece279f4"
   integrity sha512-whlTkwhqV2tUmP3oYhtNfaWGYHDdS3JYFQBKXxcUR9qqPWsRhFHhoISO2Xnl/g0xyKzht9mI1LZpiNWfMzHixQ==
 
-"canvaskit-js@https://bit.ly/canvaskit-js_v210":
-  version "2.1.0"
-  resolved "https://bit.ly/canvaskit-js_v210#fbc8b5eba27e69ec725fefc8ac88cab289d3c469"
+canvaskit-js@2.1.4:
+  version "2.1.4"
+  resolved "https://registry.yarnpkg.com/canvaskit-js/-/canvaskit-js-2.1.4.tgz#ad515cb2d59b47f4c69c306b6612271625ee0672"
+  integrity sha512-FbeP+mrm5flCQToQckgT2ZJkw5CEieiyHnZ9TRPcXR16nmcH1bYk7mK+LysIcKgONwIY0jsgnoxYxRYIE6N2Wg==
 
 canvaskit-wasm@0.39.1:
   version "0.39.1"
