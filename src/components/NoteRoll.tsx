@@ -1,10 +1,10 @@
 import {
-  Group, Paint, Rect, RoundedRect,
+  Group, Paint, Rect, RoundedRect, processTransform3d,
 } from '@shopify/react-native-skia';
 import {
   Easing, SharedValue, useDerivedValue, useSharedValue, withDelay, withTiming,
 } from 'react-native-reanimated';
-import { memo, useEffect } from 'react';
+import React, { memo, useEffect } from 'react';
 import colors from 'tailwindcss/colors';
 import {
   gameWidth, gameHeight, pianoKeyboardHeight, countdownBars, getDistFromBars, getTimeFromBars, keyWidth, keyNoteColors, accidentalNoteColors, isGamePlaying, getDurationInBars,
@@ -29,19 +29,20 @@ const NoteRoll = ({
   const noteRollTransform = useDerivedValue(() => [{ translateY: noteRollY?.value }]);
 
   const perspectiveRollIn = useSharedValue(0);
-  const threeDRollTransform = useDerivedValue(() => [
-    // Go to the top of the piano keys, horizontally centered
-    { translateX: gameWidth / 2 },
-    { translateY: gameHeight - pianoKeyboardHeight },
+  const matrix = useDerivedValue(() => {
+    return processTransform3d([
+      { translateX: gameWidth / 2 },
+      { translateY: gameHeight - pianoKeyboardHeight },
 
-    // Apply the perspective effect
-    { perspective: perspectiveRollIn.value },
-    { rotateX: Math.PI / 10 },
+      // Apply the perspective effect
+      { perspective: perspectiveRollIn.value },
+      { rotateX: Math.PI / 10 },
 
-    // Go back to the top of the screen
-    { translateX: -gameWidth / 2 },
-    { translateY: -gameHeight + pianoKeyboardHeight },
-  ]);
+      // Go back to the top of the screen
+      { translateX: -gameWidth / 2 },
+      { translateY: -gameHeight + pianoKeyboardHeight },
+    ]);
+  });
 
   useEffect(() => {
     perspectiveRollIn.value = 0;
@@ -71,10 +72,10 @@ const NoteRoll = ({
 
       return <Group key={`lines_${i}`}>
         {/* BG */}
-        { (i < 10) && <Plane key={`bg_${i}`} transform={threeDRollTransform} x={xPos} y={yPos} width={keyWidth} height={height} color={ (keyPressed) ? keyNoteColors[i] : colors.neutral[950] } opacity={ (keyPressed) ? 0.1 : 1} /> }
+        { (i < 10) && <Plane key={`bg_${i}`} matrix={matrix} x={xPos} y={yPos} width={keyWidth} height={height} color={ (keyPressed) ? keyNoteColors[i] : colors.neutral[950] } opacity={ (keyPressed) ? 0.1 : 1} /> }
 
         {/* Lines */}
-        <Plane key={`line_${i}`} x={xPos} y={yPos} transform={threeDRollTransform}  width={(accidentalPressed) ? 2 : 1} height={height} color={(accidentalPressed) ? accidentalNoteColors[i - 1] : defaultAccidentalColor} />
+        <Plane key={`line_${i}`} x={xPos} y={yPos} matrix={matrix}  width={(accidentalPressed) ? 2 : 1} height={height} color={(accidentalPressed) ? accidentalNoteColors[i - 1] : defaultAccidentalColor} />
 
       </Group>;
     }) }
@@ -112,17 +113,26 @@ const NoteRoll = ({
             return <></>;
           }
 
-          return <RoundedRect
-            key={`note_${i}`}
+          return <React.Fragment             key={`note_${i}`}
+          ><Plane
+          matrix={matrix}
             x={roundedRectParams.xPos}
             y={roundedRectParams.yPos}
             width={roundedRectParams.width}
             height={getDistFromBars(note.durationInBars, songData.bpm) - noteStrokeWidth}
             r={5}
-          >
-            <Paint color={ roundedRectParams.color } style="stroke" strokeWidth={noteStrokeWidth} opacity={0.5} />
-            <Paint color={ roundedRectParams.color } />
-          </RoundedRect>;
+            color={ roundedRectParams.color }
+          />
+          <Plane
+          matrix={matrix}
+            x={roundedRectParams.xPos}
+            y={roundedRectParams.yPos}
+            width={roundedRectParams.width}
+            height={getDistFromBars(note.durationInBars, songData.bpm) - noteStrokeWidth}
+            r={5}
+            color={ roundedRectParams.color } style="stroke" strokeWidth={noteStrokeWidth} opacity={0.5}
+          />
+          </React.Fragment>;
         }
 
         // ELSE: no noteName, so it's a rest
