@@ -1,5 +1,5 @@
 import {
-  Group, Paint, Rect, RoundedRect, processTransform3d,
+  Group,  multiply4,  processTransform3d, translate,
 } from '@shopify/react-native-skia';
 import {
   Easing, SharedValue, useDerivedValue, useSharedValue, withDelay, withTiming,
@@ -11,7 +11,6 @@ import {
 } from '../utils/utils';
 import { KeysState } from '../hooks/useKeyboard';
 import { accidentalNames, keyNames, noteToKeyboardKey } from './PianoKeyboard';
-import { PlayMode } from './PlayingUI';
 import { SongData } from '@/utils/songs';
 import { Plane } from './Plane';
 
@@ -26,7 +25,6 @@ const NoteRoll = ({
   songData: SongData
   noteRollY: SharedValue<number>,
 }) => {
-  const noteRollTransform = useDerivedValue(() => [{ translateY: noteRollY?.value }]);
 
   const perspectiveRollIn = useSharedValue(0);
   const matrix = useDerivedValue(() => {
@@ -42,6 +40,9 @@ const NoteRoll = ({
       { translateX: -gameWidth / 2 },
       { translateY: -gameHeight + pianoKeyboardHeight },
     ]);
+  });
+  const translatedMatrix = useDerivedValue(() => {
+    return multiply4(matrix.value, translate(0, noteRollY.value));
   });
 
   useEffect(() => {
@@ -81,7 +82,7 @@ const NoteRoll = ({
     }) }
 
     {/* Draw the notes for each key (black & white 🎹) */}
-    <Group transform={noteRollTransform}>
+    <Group>
       { songData?.notes?.map((note, i) => {
         if (note.noteName) {
           const yOfKeyboardHeight = gameHeight - pianoKeyboardHeight;
@@ -113,26 +114,28 @@ const NoteRoll = ({
             return <></>;
           }
 
-          return <React.Fragment             key={`note_${i}`}
-          ><Plane
-          matrix={matrix}
-            x={roundedRectParams.xPos}
-            y={roundedRectParams.yPos}
-            width={roundedRectParams.width}
-            height={getDistFromBars(note.durationInBars, songData.bpm) - noteStrokeWidth}
-            r={5}
-            color={ roundedRectParams.color }
-          />
-          <Plane
-          matrix={matrix}
-            x={roundedRectParams.xPos}
-            y={roundedRectParams.yPos}
-            width={roundedRectParams.width}
-            height={getDistFromBars(note.durationInBars, songData.bpm) - noteStrokeWidth}
-            r={5}
-            color={ roundedRectParams.color } style="stroke" strokeWidth={noteStrokeWidth} opacity={0.5}
-          />
-          </React.Fragment>;
+          return (
+            <React.Fragment key={`note_${i}`}>
+              <Plane
+                matrix={translatedMatrix}
+                x={roundedRectParams.xPos}
+                y={roundedRectParams.yPos}
+                width={roundedRectParams.width}
+                height={getDistFromBars(note.durationInBars, songData.bpm) - noteStrokeWidth}
+                r={5}
+                color={ roundedRectParams.color }
+              />
+              <Plane
+                matrix={translatedMatrix}
+                x={roundedRectParams.xPos}
+                y={roundedRectParams.yPos}
+                width={roundedRectParams.width}
+                height={getDistFromBars(note.durationInBars, songData.bpm) - noteStrokeWidth}
+                r={5}
+                color={ roundedRectParams.color } style="stroke" strokeWidth={noteStrokeWidth} opacity={0.5}
+              />
+            </React.Fragment>
+          );
         }
 
         // ELSE: no noteName, so it's a rest
