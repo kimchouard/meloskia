@@ -212,9 +212,9 @@ const PlayingUI = ({
               { translateX: (screenWidth - gameWidth) / 2 },
               { translateY: (screenHeight - gameHeight) / 2 },
             ]}>
-              <NoteRoll {...{
+              {/* <NoteRoll {...{
                 playMode, keysState, songData, noteRollY,
-              }} />
+              }} /> */}
               <PianoKeyboard keysState={keysState} songName={songData.name} />
             </Group>
           </Canvas>

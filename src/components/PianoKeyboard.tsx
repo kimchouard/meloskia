@@ -64,7 +64,7 @@ const PianoKeyboard = ({
       transform={scrollInTransform}
     >
       {/* BG */}
-      <Rect x={-(screenWidth - gameWidth) / 2 } y={gameHeight - pianoKeyboardHeight - keyStrokeWidth / 2} width={screenWidth} height={pianoKeyboardHeight + keyStrokeWidth / 2} color={ colors.neutral[950] } />
+      <Rect x={-(screenWidth - gameWidth) / 2 } y={gameHeight - pianoKeyboardHeight - keyStrokeWidth / 2} width={screenWidth} height={pianoKeyboardHeight + keyStrokeWidth / 2} color={ "yellow" } />
 
       {/* Draw 11 White keys using a loop */}
       { keysState && [...Array(numberOfWhiteKeys)].map((_, i) => {
@@ -81,26 +81,26 @@ const PianoKeyboard = ({
 
         return <Group key={`pianokey_${i}`}>
           {/* White Key */}
-          <RoundedRect x={xPos} y={yPos} width={keyWidth} height={pianoKeyboardHeight} r={5}>
-            <Paint color={ colors.neutral[950] } style="stroke" strokeWidth={keyStrokeWidth} />
-            <LinearGradient
+          <Rect x={xPos} y={yPos} width={keyWidth} height={pianoKeyboardHeight} r={5} color="red">
+            {/* <Paint color={ colors.neutral[950] } style="stroke" strokeWidth={keyStrokeWidth} /> */}
+            {/* <LinearGradient
               start={vec(xPos, yPos)}
               end={vec(xPos, yPos + pianoKeyboardHeight)}
               colors={[whiteKeyColor, (keyState) ? '#DDDDDD' : '#EDEDED']}
               // Colorful option:
               // colors={(keyState) ? [keyNoteColors[i], accidentalNoteColors[i]] : [whiteKeyColor, '#EDEDED']}
-            />
-          </RoundedRect>
+            /> */}
+          </Rect>
 
           {/* Accidental (if there's one) */}
-          { hasAnAccidentalBefore && <RoundedRect x={xPos - keyWidth / 4} y={yPos} width={keyWidth / 2} height={pianoKeyboardHeight / 2} r={5}>
-            <Paint color={ colors.neutral[950] } style="stroke" strokeWidth={keyStrokeWidth} />
-            <LinearGradient
+          { hasAnAccidentalBefore && <Rect x={xPos - keyWidth / 4} y={yPos} width={keyWidth / 2} height={pianoKeyboardHeight / 2} r={5} color="cyan">
+            {/* <Paint color={ colors.neutral[950] } style="stroke" strokeWidth={keyStrokeWidth} /> */}
+            {/* <LinearGradient
               start={vec(xPos, yPos)}
               end={vec(xPos, yPos + pianoKeyboardHeight)}
               colors={[colors.neutral[950], (accidentalState) ? '#222' : '#444']}
-            />
-          </RoundedRect> }
+            /> */}
+          </Rect> }
 
           {/* Draw the note names (white & black keys! 🎹) */}
           { (screenWidth > 600) && <Group>
