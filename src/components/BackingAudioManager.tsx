@@ -133,13 +133,21 @@ const BackingAudioManager = ({
     return playerNode;
   };
 
-  const updateGainNodeVolume = useCallback((gainNode: GainNode, volume: number, soundName?: SoundName) => {
+  const updateGainNodeVolume = (gainNode: GainNode, baseVolume: number, soundName?: SoundName) => {
+    if (!gainNode) return;
+
     // Update the gain node volume, taking into account the track volume state
     const trackVolume = soundName ? trackVolumes[soundName] : 1;
-    gainNode.gain.value = volume * trackVolume;
+    const finalVolume = baseVolume * trackVolume;
+    gainNode.gain.value = finalVolume;
 
-    verbose && console.log(`[BackingAudioManager/updateGainNodeVolume] Updated sound ${soundName} gain node volume to ${volume} (gainNode.gain.value: ${gainNode.gain.value}, trackVolume: ${trackVolume})`);
-  }, [trackVolumes]);
+    verbose && console.log(`[BackingAudioManager/updateGainNodeVolume] Updated sound ${soundName} gain node volume:`, {
+      baseVolume,
+      trackVolume,
+      finalVolume,
+      gainNodeValue: gainNode.gain.value,
+    });
+  };
 
   // ===========================
   //      LOAD sounds
@@ -153,6 +161,13 @@ const BackingAudioManager = ({
     }
 
     if (soundObj.status === 'loaded' || soundObj.status === 'disabled') {
+      // Even if already loaded, we should update the volume in case trackVolumes changed
+      if (soundObj.status === 'loaded' && soundObj.gainNode) {
+        const soundData = songData.backingTracks?.find((track) => track.type === soundName);
+        if (soundData) {
+          updateGainNodeVolume(soundObj.gainNode, soundData.volume, soundName);
+        }
+      }
       verbose && console.log(`[BackingAudioManager/loadSound] Sound "${soundName}" is already loaded or disabled.`, { soundObj });
       return; // Sound is already loaded
     }
