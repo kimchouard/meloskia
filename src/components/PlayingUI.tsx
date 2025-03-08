@@ -206,7 +206,7 @@ const PlayingUI = ({
         <KeyboardAudio {...{ playMode, keysState, songData }} />
 
         <GestureDetector gesture={getOnPressKeyboardGestureHandler(keyPressed, releaseLastKey)}>
-          <Canvas style={{ width: screenWidth, height: screenHeight }}>
+          <Canvas style={{ width: screenWidth, height: screenHeight, flex: 1, overflow: 'hidden' }}>
             <Group transform={[
               // Center the game
               { translateX: (screenWidth - gameWidth) / 2 },
