@@ -8,10 +8,16 @@ import { renderRootComponent } from 'expo-router/build/renderRootComponent';
 // RN Skia (WASM)
 import { LoadSkiaWeb } from '@shopify/react-native-skia/lib/module/web';
 
-LoadSkiaWeb({
-  locateFile: (file) => `/${file}`,
-}).then(async () => {
-  renderRootComponent(App);
+// RN Audio API (WASM for Stretcher Node => respecting pitch when changing BPM / playing rate ;)
+import { LoadCustomWasm } from 'react-native-audio-api';
+
+
+// Load the WASM file for react-native-skia
+LoadSkiaWeb({ locateFile: (file) => `/${file}` }).then(() => {
+  // Load the custom WASM file for react-native-audio-api
+  LoadCustomWasm().then(() => {
+    renderRootComponent(App);
+  });
 });
 
 // RN Skia (CanvasKitJS)

@@ -93,19 +93,19 @@ const useKeyboard = ({
 
     // Spacebar pressed (onKeyUp only, to avoid multiple restarts on key hold)
     if (e.code === 'Space' && !keyDown) {
-      if (playMode === 'start') startGame('playing');
+      if (playMode === 'stopped') startGame('playing');
       else resartAndStopPlayingNotes();
     }
 
     // Spacebar pressed (onKeyUp only, to avoid multiple restarts on key hold)
     if (e.code === 'Enter' && !keyDown) {
-      if (playMode === 'start') startGame('playback');
+      if (playMode === 'stopped') startGame('playback');
       else resartAndStopPlayingNotes();
     }
 
     // Restart on escape
     if (e.code === 'Escape' && !keyDown) {
-      if (playMode !== 'start') resartAndStopPlayingNotes();
+      if (playMode !== 'stopped') resartAndStopPlayingNotes();
       else router.replace('/');
     }
 

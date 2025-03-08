@@ -151,6 +151,9 @@ export const getDurationInBars = (songData: SongData):number => {
   return 0;
 };
 
+export const getSongBarCountWithCountdownPlusClosing = (songData: SongData):number => (getDurationInBars(songData) + countdownBars * 3); // * 3 to have a bit of space at the end of the song (1 countdown bar + 2 closing countdown space)
+
+
 // ===========================
 //   Expo Router
 // ===========================

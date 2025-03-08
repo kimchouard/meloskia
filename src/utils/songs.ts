@@ -1,12 +1,21 @@
+export interface BackingTrack {
+  type: 'instrumental' | 'clicks',
+  volume: number,
+  url: string,
+}
+
 export interface SongData {
+  id: number,
   name: string,
   bpm: number,
   durationInBars?: number,
+  backingTracks: BackingTrack[],
   notes: { noteName: string, startAtBar: number, durationInBars: number }[],
 }
 
 export const songs = [
   {
+    id: 0,
     name: 'All-notes Demo',
     bpm: 160,
     // durationInBars: 17,
@@ -31,6 +40,7 @@ export const songs = [
     ],
   },
   {
+    id: 1,
     name: 'All-notes Demo (reversed)',
     bpm: 160,
     // durationInBars: 17,
@@ -55,6 +65,7 @@ export const songs = [
     ],
   },
   {
+    id: 2,
     name: 'E-Z Song',
     bpm: 60,
     durationInBars: 34,
@@ -82,9 +93,14 @@ export const songs = [
     ],
   },
   {
+    id: 3,
     name: 'The Final Tech Stack',
     bpm: 120,
     // durationInBars: 30,
+    backingTracks: [
+      { type: 'instrumental', url: '/final-tech-stack/the-final-tech-stack_instrumental.mp3', volume: 1 },
+      { type: 'clicks', url: '/final-tech-stack/the-final-tech-stack_clicks.mp3', volume: 1 },
+    ],
     notes: [
       { noteName: 'C#4', startAtBar: 0, durationInBars: 0.25 }, // 1
       { noteName: 'B3', startAtBar: 0.25, durationInBars: 0.25 }, // 1
@@ -143,7 +159,6 @@ export const songs = [
       { noteName: 'C#4', startAtBar: 25.75, durationInBars: 0.5 }, // 1
       { noteName: 'B3', startAtBar: 26.25, durationInBars: 0.5 }, // 1
       { noteName: 'C#4', startAtBar: 26.75, durationInBars: 3 }, // 4
-
-    ],
+    ].map((note) => ({ ...note, startAtBar: note.startAtBar + 1.5 })),
   },
 ];

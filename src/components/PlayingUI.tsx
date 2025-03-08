@@ -17,15 +17,16 @@ import PianoKeyboard from './PianoKeyboard';
 import NoteRoll from './NoteRoll';
 import {
   countdownBars,
-  gameHeight, gameWidth, getBarsFromDist, getDistFromBars, getDurationInBars, getOnPressKeyboardGestureHandler, getTimeFromBars, isGamePlaying, screenHeight, screenWidth,
+  gameHeight, gameWidth, getBarsFromDist, getDistFromBars, getDurationInBars, getOnPressKeyboardGestureHandler, getSongBarCountWithCountdownPlusClosing, getTimeFromBars, isGamePlaying, screenHeight, screenWidth,
 } from '../utils/utils';
 import useKeyboard from '../hooks/useKeyboard';
 import KeyboardAudio from './KeyboardAudio';
 import { SongData } from '../utils/songs';
+import BackingAudioManager from '@/components/BackingAudioManager';
 
 const verbose = false;
 
-export type PlayMode = 'start' | 'playing' | 'playback' | 'restart';
+export type PlayMode = 'stopped' | 'playing' | 'playback' | 'restart';
 
 const PlayingUI = ({
   songData,
@@ -37,9 +38,11 @@ const PlayingUI = ({
 
   const playingTimeout = useRef<NodeJS.Timeout>();
 
-  const [playMode, setPlayMode] = useState<PlayMode>('start');
+  const [playMode, setPlayMode] = useState<PlayMode>('stopped');
+  const [userBpm, setUserBpm] = useState<number>(songData.bpm);
+
   const restart = () => {
-    setPlayMode('start');
+    setPlayMode('stopped');
     clearTimeout(playingTimeout.current);
   };
 
@@ -49,7 +52,7 @@ const PlayingUI = ({
     // TEMP: Allow the user to restart the game after the animation
     playingTimeout.current = setTimeout(() => {
       setPlayMode('restart');
-    }, getTimeFromBars((songData) && (getDurationInBars(songData) + countdownBars), songData?.bpm));
+    }, getTimeFromBars((songData) && getSongBarCountWithCountdownPlusClosing(songData), songData?.bpm));
   };
 
   // ==============================
@@ -68,15 +71,15 @@ const PlayingUI = ({
   const noteRollY = useSharedValue(0);
   useEffect(() => {
     if (isGamePlaying(playMode)) {
-      const songDurationWithCountdown = getDurationInBars(songData) + countdownBars;
+      const songBarCountWithCountdownPlusClosing = getSongBarCountWithCountdownPlusClosing(songData);
       noteRollY.value = withTiming(
-        getDistFromBars(songDurationWithCountdown, songData.bpm),
+        getDistFromBars(songBarCountWithCountdownPlusClosing, songData.bpm),
         {
-          duration: getTimeFromBars(songDurationWithCountdown, songData.bpm),
+          duration: getTimeFromBars(songBarCountWithCountdownPlusClosing, songData.bpm),
           easing: Easing.linear,
         },
       );
-    } else if (playMode === 'start') {
+    } else if (playMode === 'stopped') {
       noteRollY.value = withTiming(0, {
         duration: 500,
       });
@@ -87,7 +90,7 @@ const PlayingUI = ({
   // CTA Animation
   const height = useSharedValue(0);
   useEffect(() => {
-    if (playMode === 'start' && noteRollY.value === 0) {
+    if (playMode === 'stopped' && noteRollY.value === 0) {
       height.value = 0;
       height.value = withDelay(1000, withTiming((Platform.OS === 'web') ? 85 : 200, { duration: 250, easing: Easing.inOut(Easing.ease) }));
     }
@@ -152,7 +155,7 @@ const PlayingUI = ({
     className="flex absolute bottom-[200px] w-full h-0 bg-neutral-950/70 overflow-hidden"
     style={{ height }}
   >
-    { (playMode === 'start') ? <>
+    { (playMode === 'stopped') ? <>
       <Text className="text-white text-lg text-center mt-5">Press Spacebar to start playing</Text>
       <Text className="text-neutral-400 text-regular text-center mb-5">Press Enter if you're feeling lazy. Or simply Scroll away.</Text>
     </> : <Text className="text-white text-lg text-center my-5">Press Spacebar or Enter to restart.</Text> }
@@ -162,20 +165,20 @@ const PlayingUI = ({
     className="absolute bottom-[200px] left-0 w-full pb-10"
     style={{ height }}
   >
-    <Pressable onPress={() => ((playMode === 'start') ? startGame('playing') : restart()) }>
+    <Pressable onPress={() => ((playMode === 'stopped') ? startGame('playing') : restart()) }>
       <LinearGradient
         colors={
-          (playMode === 'start') ? ['#6A8AFF', '#8A6AFF', '#FF6AFF'] : ['#FF6AFF', '#8A6AFF', '#6A8AFF']
+          (playMode === 'stopped') ? ['#6A8AFF', '#8A6AFF', '#FF6AFF'] : ['#FF6AFF', '#8A6AFF', '#6A8AFF']
         }
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         className="content-center items-center rounded-lg py-5 px-10 mx-auto"
       >
-        <Text className='text-white font-medium text-2xl'>{(playMode === 'start') ? 'Start Playing' : 'Restart'}</Text>
+        <Text className='text-white font-medium text-2xl'>{(playMode === 'stopped') ? 'Start Playing' : 'Restart'}</Text>
       </LinearGradient>
     </Pressable>
 
-    { (playMode === 'start') && <Pressable
+    { (playMode === 'stopped') && <Pressable
       className="content-center items-center rounded-lg py-3"
       onPress={() => startGame('playback')}
     >
@@ -205,6 +208,9 @@ const PlayingUI = ({
         {/* Piano sound */}
         <KeyboardAudio {...{ playMode, keysState, songData }} />
 
+        {/* Backing tracks */}
+        <BackingAudioManager {...{ playMode, userBpm, songData }} />
+
         <GestureDetector gesture={getOnPressKeyboardGestureHandler(keyPressed, releaseLastKey)}>
           <Canvas style={{ width: screenWidth, height: screenHeight, flex: 1, overflow: 'hidden' }}>
             <Group transform={[
@@ -213,7 +219,7 @@ const PlayingUI = ({
               { translateY: (screenHeight - gameHeight) / 2 },
             ]}>
               <NoteRoll {...{
-                playMode, keysState, songData, noteRollY,
+                keysState, songData, noteRollY,
               }} />
               <PianoKeyboard keysState={keysState} songName={songData.name} />
             </Group>

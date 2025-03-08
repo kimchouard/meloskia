@@ -5335,6 +5335,11 @@ react-is@^18.0.0, react-is@^18.2.0:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-18.3.1.tgz#e83557dc12eae63a99e003a46388b1dcbb44db7e"
   integrity sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==
 
+react-native-audio-api@^0.4.13:
+  version "0.4.13"
+  resolved "https://registry.yarnpkg.com/react-native-audio-api/-/react-native-audio-api-0.4.13.tgz#d437c4ba39b46ed8dc172c95d46a96ce9127273c"
+  integrity sha512-ub1IjgSdPvB5Rc+/NCbp1oxW1+rS9XpGtKfui652UoTGp0H67gt/LXWRh+OqGYlJ8cLds6IhfOqO9LF1fgwG9g==
+
 react-native-css-interop@0.1.22:
   version "0.1.22"
   resolved "https://registry.yarnpkg.com/react-native-css-interop/-/react-native-css-interop-0.1.22.tgz#70cc6ca7a8f14126e123e44a19ceed74dd2a167a"

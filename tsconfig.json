@@ -1,11 +1,14 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
+    "moduleSuffixes": [".ios", ".android", ".native", ".web", ""],
     "paths": {
       "@/*": [
         "./src/*"
       ]
-    }
+    },
+    "jsx": "react-jsx",
+    "jsxImportSource": "react"
   },
   "extends": "expo/tsconfig.base",
   "include": [
