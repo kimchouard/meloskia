@@ -33,10 +33,15 @@ const BackingAudioManager = ({
   playMode,
   userBpm,
   songData,
+  trackVolumes,
 }: {
   playMode: PlayMode,
   userBpm: number,
   songData: SongData,
+  trackVolumes: {
+    instrumental: number,
+    clicks: number,
+  }
 }) => {
   // Local State
   const [isLoadingSounds, setIsLoadingSounds] = useState(false);
@@ -129,11 +134,12 @@ const BackingAudioManager = ({
   };
 
   const updateGainNodeVolume = useCallback((gainNode: GainNode, volume: number, soundName?: SoundName) => {
-    // Update the gain node volume
-    gainNode.gain.value = volume;
+    // Update the gain node volume, taking into account the track volume state
+    const trackVolume = soundName ? trackVolumes[soundName] : 1;
+    gainNode.gain.value = volume * trackVolume;
 
-    verbose && console.log(`[BackingAudioManager/updateGainNodeVolume] Updated sound ${soundName} gain node volume to ${volume} (gainNode.gain.value: ${gainNode.gain.value})`);
-  }, []);
+    verbose && console.log(`[BackingAudioManager/updateGainNodeVolume] Updated sound ${soundName} gain node volume to ${volume} (gainNode.gain.value: ${gainNode.gain.value}, trackVolume: ${trackVolume})`);
+  }, [trackVolumes]);
 
   // ===========================
   //      LOAD sounds
@@ -155,11 +161,15 @@ const BackingAudioManager = ({
     soundObjs.current[soundName].status = 'loading';
 
     // Get the sound data
-    const soundData = songData.backingTracks.find((track) => track.type === soundName);
+    const soundData = songData.backingTracks?.find((track) => track.type === soundName);
 
     if (!soundData || !soundData.url) {
       console.error(`[BackingAudioManager] Can't load sound "${soundName}": data or url not defined. Disabling it.`, { soundData });
       soundObjs.current[soundName].status = 'disabled';
+      soundObjs.current[soundName].playerNode = null;
+      soundObjs.current[soundName].gainNode = null;
+      soundObjs.current[soundName].audioBuffer = null;
+      
       return;
     }
 
@@ -223,7 +233,7 @@ const BackingAudioManager = ({
     verbose && console.log('[BackingAudioManager] Checking sound loading sound statuses:', soundObjs.current);
     
     for (const soundName of Object.keys(soundObjs.current) as SoundName[]) {
-      // const soundData = songData.backingTracks.find((track) => track.type === soundName);
+      // const soundData = songData.backingTracks?.find((track) => track.type === soundName);
       // if (soundData && soundData.url) {
         verbose && console.log(`[BackingAudioManager] Loading sound: ${soundName}`);
         await loadSound(soundName, false);
@@ -249,7 +259,9 @@ const BackingAudioManager = ({
 
     // Reset the backing tracks in case some of them are already playing
     for (const soundName of backingTrackNames) {
-      await stopSound(soundName);
+      if (isSoundPlaying(soundName)) {
+        await stopSound(soundName);
+      }
     }
     
     for (const soundName of backingTrackNames) {
@@ -383,25 +395,42 @@ const BackingAudioManager = ({
     verbose && console.log('[BackingAudioManager/useEffect>volumes] Updating sounds volumes:', { soundObjs: soundObjs.current });
     for (const soundName of Object.keys(soundObjs.current) as SoundName[]) {
       const soundObj = soundObjs.current[soundName as SoundName];
-      const soundData = songData.backingTracks.find((track) => track.type === soundName);
+      const soundData = songData.backingTracks?.find((track) => track.type === soundName);
       if (soundData && soundObj && soundObj.status === 'loaded') {
         updateGainNodeVolume(soundObj.gainNode, soundData.volume, soundName as SoundName);
       }
     }
-  }, [songData.backingTracks]);
+  }, [songData.backingTracks, trackVolumes]);
 
   // ===========================
   //   useEffect (BPM / Rate)
   // ===========================
 
-  // useEffect(() => {
-  //   if (userBpm) {
-  //     verbose && console.log('[BackingAudioManager/useEffect>userBpm] Updating sounds rate based on BPM:', { userBpm });
+  const updatePlayerNodeRate = async (audioContext: AudioContext, soundName: SoundName) => {
+    const soundObj = soundObjs.current[soundName];
+    if (soundObj && soundObj.status === 'loaded') {
+      const newPlayerNode = await getPlayerNode(audioContext, soundObj);
+      
+      soundObjs.current[soundName].playerNode = newPlayerNode;
+      
+      verbose && console.log('[BackingAudioManager/updatePlayerNodeRate] Updating player node rate for', { soundObj, newPlayerNode });
+    }
+  };
 
-  //     // Stop all the backing sounds will recreate all the player nodes with the new rate 😏
-  //     stopBackingSounds();
-  //   }
-  // }, [userBpm]);
+  const updateAllPlayerNodeRates = async () => {
+    const audioContext = getOrInitializeAudioContext();
+    for (const soundName of Object.keys(soundObjs.current) as SoundName[]) {
+      await updatePlayerNodeRate(audioContext, soundName);
+    }
+  };
+
+  useEffect(() => {
+    if (userBpm) {
+      verbose && console.log('[BackingAudioManager/useEffect>userBpm] Updating sounds rate based on BPM:', { userBpm });
+
+      updateAllPlayerNodeRates();
+    }
+  }, [userBpm]);
 
 
 

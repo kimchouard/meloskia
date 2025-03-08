@@ -5,7 +5,7 @@ import { Canvas, Group } from '@shopify/react-native-skia';
 import {
   Easing,
   Platform,
-  Pressable, Text, View,
+  Pressable, Text, TextInput, View,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
@@ -13,9 +13,11 @@ import { GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue, withDelay, withTiming,
 } from 'react-native-reanimated';
+import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import PianoKeyboard from './PianoKeyboard';
 import NoteRoll from './NoteRoll';
 import {
+  cn,
   countdownBars,
   gameHeight, gameWidth, getBarsFromDist, getDistFromBars, getDurationInBars, getOnPressKeyboardGestureHandler, getSongBarCountWithCountdownPlusClosing, getTimeFromBars, isGamePlaying, screenHeight, screenWidth,
 } from '../utils/utils';
@@ -40,6 +42,39 @@ const PlayingUI = ({
 
   const [playMode, setPlayMode] = useState<PlayMode>('stopped');
   const [userBpm, setUserBpm] = useState<number>(songData.bpm);
+  const [showBpmInput, setShowBpmInput] = useState(false);
+  const [bpmInputValue, setBpmInputValue] = useState(songData.bpm.toString());
+  const [trackVolumes, setTrackVolumes] = useState({
+    instrumental: 1,
+    clicks: 1,
+  });
+
+  // Function to handle BPM changes
+  const handleBpmChange = (newBpm: number) => {
+    // Ensure BPM is within bounds
+    const boundedBpm = Math.max(40, Math.min(180, newBpm));
+    setUserBpm(boundedBpm);
+    setBpmInputValue(boundedBpm.toString());
+  };
+
+  // Function to handle BPM input submission
+  const handleBpmInputSubmit = () => {
+    const newBpm = parseInt(bpmInputValue, 10);
+    if (!isNaN(newBpm)) {
+      handleBpmChange(newBpm);
+    } else {
+      setBpmInputValue(userBpm.toString());
+    }
+    setShowBpmInput(false);
+  };
+
+  // Function to handle track volume toggle
+  const toggleTrackVolume = (track: 'instrumental' | 'clicks') => {
+    setTrackVolumes(prev => ({
+      ...prev,
+      [track]: prev[track] === 0 ? 1 : 0,
+    }));
+  };
 
   const restart = () => {
     setPlayMode('stopped');
@@ -188,13 +223,111 @@ const PlayingUI = ({
 
   const renderCTAs = () => (<>
     { (Platform.OS === 'web') ? renderWebCTAs() : renderMobileCTAs()}
-
-    {/* Close icon on the top right */}
-    <Link href="/" className="absolute top-3 left-3 py-3 px-5">
-      <Text className="text-neutral-400 text-lg">&lt; Back</Text>
-      {/* <Text className="text-neutral-200 font-medium text-3xl">x</Text> */}
-    </Link>
   </>);
+
+  // ==============================
+  //    Header Component
+
+  const renderHeader = () => (
+    <View className="absolute top-0 left-0 right-0 min-h-16 backdrop-blur-sm bg-black/30 border-b border-neutral-800 flex-col sm:flex-row items-center px-4 py-2 sm:py-0 z-10">
+      {/* Top line: Back + Title */}
+      <View className="w-full sm:w-auto flex-row items-center">
+        {/* Back Button */}
+        <Link href="/" className="py-2 px-3 rounded-lg hover:bg-neutral-800/50 flex flex-row items-center">
+          <MaterialIcons name="arrow-back" size={24} color="#9ca3af" />
+          <Text className="text-neutral-400 text-lg ml-2 leading-6 hidden sm:block">Back</Text>
+        </Link>
+
+        {/* Song Title */}
+        <Text className="text-white text-xl font-medium flex-1 text-center sm:hidden">{songData.name}</Text>
+      </View>
+
+      {/* Song Title (desktop) */}
+      <Text className="text-white text-xl font-medium hidden sm:block absolute left-1/2 -translate-x-1/2">{songData.name}</Text>
+
+      {/* Controls */}
+      <View className="w-full sm:w-auto flex-row items-center justify-between sm:justify-start space-x-4 mt-2 sm:mt-0 sm:ml-auto">
+        {/* BPM Controls */}
+        <View className="flex-row items-center space-x-2">
+          <View className="flex-row items-center bg-neutral-900/50 backdrop-blur-sm rounded-lg overflow-hidden">
+
+            {/* Reset BPM Button */}
+            {(
+              <Pressable
+                onPress={() => handleBpmChange(songData.bpm)}
+                // Disabled look if the BPM is the default
+                className={cn(
+                  'p-2 rounded-lg backdrop-blur-sm bg-neutral-900/50',
+                  userBpm === songData.bpm ? 'opacity-50' : 'hover:bg-neutral-800/50',
+                )}
+                disabled={userBpm === songData.bpm}
+              >
+                <MaterialIcons name="refresh" size={20} color="#9ca3af" />
+              </Pressable>
+            )}
+
+            <Pressable
+              onPress={() => handleBpmChange(Math.floor((userBpm - 5) / 5) * 5)}
+              className="p-2 hover:bg-neutral-800/50"
+            >
+              <MaterialIcons name="remove" size={20} color="#9ca3af" />
+            </Pressable>
+            
+            {showBpmInput ? (
+              <TextInput
+                value={bpmInputValue}
+                onChangeText={setBpmInputValue}
+                onBlur={handleBpmInputSubmit}
+                onSubmitEditing={handleBpmInputSubmit}
+                keyboardType="number-pad"
+                className="w-16 text-center text-white bg-neutral-800/50 py-1"
+                autoFocus
+              />
+            ) : (
+              <Pressable
+                onPress={() => setShowBpmInput(true)}
+                className="px-3 py-1"
+              >
+                <Text className="text-white">{userBpm} BPM</Text>
+              </Pressable>
+            )}
+
+            <Pressable
+              onPress={() => handleBpmChange(Math.ceil((userBpm + 5) / 5) * 5)}
+              className="p-2 hover:bg-neutral-800/50"
+            >
+              <MaterialIcons name="add" size={20} color="#9ca3af" />
+            </Pressable>
+          </View>
+        </View>
+
+        {/* Track Volume Controls */}
+        <View className="flex-row space-x-2">
+          <Pressable
+            onPress={() => toggleTrackVolume('instrumental')}
+            className={`p-2 rounded-full backdrop-blur-sm ${trackVolumes.instrumental === 0 ? 'bg-neutral-800/50' : 'bg-neutral-700/50 hover:bg-neutral-600/50'}`}
+          >
+            <MaterialIcons
+              name={trackVolumes.instrumental === 0 ? "volume-off" : "volume-up"}
+              size={20}
+              color={trackVolumes.instrumental === 0 ? "#9ca3af" : "#ffffff"}
+            />
+          </Pressable>
+
+          <Pressable
+            onPress={() => toggleTrackVolume('clicks')}
+            className={`p-2 rounded-full backdrop-blur-sm ${trackVolumes.clicks === 0 ? 'bg-neutral-800/50' : 'bg-neutral-700/50 hover:bg-neutral-600/50'}`}
+          >
+            <MaterialIcons
+              name={trackVolumes.clicks === 0 ? "timer-off" : "timer"}
+              size={20}
+              color={trackVolumes.clicks === 0 ? "#9ca3af" : "#ffffff"}
+            />
+          </Pressable>
+        </View>
+      </View>
+    </View>
+  );
 
   // ==============================
   //    Skia Canvas
@@ -202,6 +335,9 @@ const PlayingUI = ({
   if (songData) {
     return (
       <View className="flex-1">
+        {/* Header */}
+        {renderHeader()}
+
         {/* Start button, centered on the screen */}
         { !isGamePlaying(playMode) && ((Platform.OS === 'web') ? renderCTAs() : renderMobileCTAs()) }
 
@@ -209,7 +345,7 @@ const PlayingUI = ({
         <KeyboardAudio {...{ playMode, keysState, songData }} />
 
         {/* Backing tracks */}
-        <BackingAudioManager {...{ playMode, userBpm, songData }} />
+        <BackingAudioManager {...{ playMode, userBpm, songData, trackVolumes }} />
 
         <GestureDetector gesture={getOnPressKeyboardGestureHandler(keyPressed, releaseLastKey)}>
           <Canvas style={{ width: screenWidth, height: screenHeight, flex: 1, overflow: 'hidden' }}>
