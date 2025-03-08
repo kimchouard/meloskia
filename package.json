@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "main": "src/index",
   "scripts": {
-    "start": "expo start",
-    "android": "expo run:android",
-    "ios": "expo run:ios",
-    "web": "expo start --web",
+    "start": "npx expo start -c",
+    "android": "npx expo run:android",
+    "ios": "npx expo run:ios",
+    "web": "npx expo start --web",
     "postinstall": "yarn setup-skia-web && npx tailwindcss -i ./global.css -o ./node_modules/.cache/nativewind/global.css.web.css"
   },
   "dependencies": {
