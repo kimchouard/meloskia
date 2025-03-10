@@ -98,8 +98,8 @@ export const songs = [
     bpm: 120,
     // durationInBars: 30,
     backingTracks: [
-      { type: 'instrumental', url: '/final-tech-stack/the-final-tech-stack_instrumental.mp3', volume: 1 },
-      { type: 'clicks', url: '/final-tech-stack/the-final-tech-stack_clicks.mp3', volume: 1 },
+      { type: 'instrumental', url: '/audio/final-tech-stack/the-final-tech-stack_instrumental.mp3', volume: 1 },
+      { type: 'clicks', url: '/audio/final-tech-stack/the-final-tech-stack_clicks.mp3', volume: 1 },
     ],
     notes: [
       { noteName: 'C#4', startAtBar: 0, durationInBars: 0.25 }, // 1
