@@ -4,6 +4,8 @@ import theFinalTechStack from './theFinalTechStack';
 import allNotesDemoReversed from './allNotesDemoReversed';
 import type { Song } from './types';
 
+export { default as commonAssets } from './commonAssets';
+
 export * from './types';
 
 const songs: Song[] = [

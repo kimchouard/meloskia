@@ -11,24 +11,29 @@ import {
   pianoKeyboardHeight,
   accidentalNoteColors,
 } from '@/utils/utils';
-import { SongData, SongNote } from '@/utils/songs';
 import {
   keyNames,
   accidentalNames,
   noteToKeyboardKey,
 } from '@/components/PianoKeyboard';
+import { InstrumentNote, Song } from '@/songs';
 
 interface NoteRollNotesProps {
-  songData: SongData;
+  song: Song;
 }
 
 const NoteRollNotes: React.FC<NoteRollNotesProps> = (props) => {
-  const { songData } = props;
+  const { song } = props;
+  const pianoVoice = song.voices.find((voice) => voice.id === 'piano');
 
   return (
     <>
-      {songData.notes.map((note, i) => (
-        <Note key={`${i}-${note.noteName}`} note={note} bpm={songData.bpm} />
+      {pianoVoice?.notes.map((note, i) => (
+        <Note
+          key={`note-${i}`}
+          bpm={song.baseBpm}
+          note={note as InstrumentNote}
+        />
       ))}
     </>
   );
@@ -37,7 +42,7 @@ const NoteRollNotes: React.FC<NoteRollNotesProps> = (props) => {
 export default memo(NoteRollNotes);
 
 interface NoteProps {
-  note: SongNote;
+  note: InstrumentNote;
   bpm: number;
 }
 
@@ -61,10 +66,7 @@ const Note: React.FC<NoteProps> = (props) => {
 
     const y =
       yOfKeyboardHeight -
-      getDistFromBars(
-        countdownBars + note.startAtBar + note.durationInBars,
-        bpm
-      ) +
+      getDistFromBars(countdownBars + note.startAt + note.duration, bpm) +
       noteStrokeWidth / 2;
 
     if (noteIndex !== -1) {
@@ -80,14 +82,14 @@ const Note: React.FC<NoteProps> = (props) => {
     color = accidentalNoteColors[noteAccidentalIndex - 1];
 
     return { x, y, width, color };
-  }, [bpm]);
+  }, [bpm, note]);
 
   return (
     <RoundedRect
       x={roundedRectParams.x}
       y={roundedRectParams.y}
       width={roundedRectParams.width}
-      height={getDistFromBars(note.durationInBars, bpm) - noteStrokeWidth}
+      height={getDistFromBars(note.duration, bpm) - noteStrokeWidth}
       r={5}>
       <Paint
         color={roundedRectParams.color}

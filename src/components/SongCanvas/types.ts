@@ -6,11 +6,18 @@ export type PlayerState = 'stopped' | 'playing' | 'playback' | 'restart';
 
 export interface SongCanvasContextType {
   song: Song;
+
   bpm: number;
+  metronome: 0 | 1 | 2 | 4;
+
   state: PlayerState;
+  isLoading: boolean;
+
   noteRollY: SharedValue<number>;
 
-  setBpm: Dispatch<SetStateAction<number>>;
-  startGame: (startMode: 'playing' | 'playback') => void;
   restartGame: () => void;
+  startGame: (startMode: 'playing' | 'playback') => void;
+
+  setBpm: Dispatch<SetStateAction<number>>;
+  setMetronome: Dispatch<SetStateAction<0 | 1 | 2 | 4>>;
 }

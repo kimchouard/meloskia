@@ -16,7 +16,7 @@ import {
 } from 'react-native-reanimated';
 import { useEffect, useRef, useState } from 'react';
 import NoteRoll from './NoteRoll';
-import { songs } from '@/utils/songs';
+import songs from '@/songs';
 
 const SideRoll = ({
   startAnimation,

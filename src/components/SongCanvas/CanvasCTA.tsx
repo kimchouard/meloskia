@@ -11,8 +11,7 @@ import Animated, {
 import { useSongCanvasContext } from './SongCanvasContext';
 
 const CanvasCTA: React.FC = () => {
-  const { song, state, noteRollY, startGame, restartGame } =
-    useSongCanvasContext();
+  const { state, startGame, restartGame } = useSongCanvasContext();
   const height = useSharedValue(0);
 
   const onToggleStart = () => {
@@ -28,7 +27,7 @@ const CanvasCTA: React.FC = () => {
   };
 
   useEffect(() => {
-    if (state === 'stopped' && noteRollY.value === 0) {
+    if (state === 'stopped') {
       height.value = 0;
       height.value = withDelay(
         1000,
@@ -43,7 +42,7 @@ const CanvasCTA: React.FC = () => {
       height.value = 0;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [song.name]);
+  }, [state]);
 
   if (Platform.OS === 'web') {
     return (
@@ -52,17 +51,21 @@ const CanvasCTA: React.FC = () => {
         style={{ height }}>
         {state === 'stopped' ? (
           <>
-            <Text className="text-white text-lg text-center mt-5">
-              Press Space bar to start playing
-            </Text>
+            <Pressable onPress={onStartPlayback}>
+              <Text className="text-white text-lg text-center my-5">
+                Press Space bar or Enter to restart.
+              </Text>
+            </Pressable>
             <Text className="text-neutral-400 text-regular text-center mb-5">
               Press Enter if you're feeling lazy. Or simply Scroll away.
             </Text>
           </>
         ) : (
-          <Text className="text-white text-lg text-center my-5">
-            Press Space bar or Enter to restart.
-          </Text>
+          <Pressable onPress={onStartPlayback}>
+            <Text className="text-white text-lg text-center my-5">
+              Press Space bar or Enter to restart.
+            </Text>
+          </Pressable>
         )}
       </Animated.View>
     );

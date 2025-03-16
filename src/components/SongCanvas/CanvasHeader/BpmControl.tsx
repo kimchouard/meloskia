@@ -46,20 +46,18 @@ const BpmControl: React.FC = () => {
 
   return (
     <View className="flex-row items-center space-x-2">
-      <View className="flex-row items-center bg-neutral-900/50 backdrop-blur-sm rounded-lg overflow-hidden">
+      <View className="flex-row items-center bg-neutral-800/50 backdrop-blur-sm rounded-lg overflow-hidden">
         {/* Reset BPM Button */}
-        {
-          <Pressable
-            onPress={() => handleBpmChange(song.baseBpm)}
-            // Disabled look if the BPM is the default
-            className={cn(
-              'p-2 rounded-lg backdrop-blur-sm bg-neutral-900/50',
-              isBaseBpm ? 'opacity-50' : 'hover:bg-neutral-800/50'
-            )}
-            disabled={isBaseBpm}>
-            <MaterialIcons name="refresh" size={20} color="#9ca3af" />
-          </Pressable>
-        }
+        <Pressable
+          onPress={() => handleBpmChange(song.baseBpm)}
+          // Disabled look if the BPM is the default
+          className={cn(
+            'p-2 rounded-lg backdrop-blur-sm bg-neutral-800/50',
+            isBaseBpm ? 'opacity-50' : 'hover:bg-neutral-700/50'
+          )}
+          disabled={isBaseBpm}>
+          <MaterialIcons name="refresh" size={20} color="#9ca3af" />
+        </Pressable>
 
         <Pressable onPress={onBpmDown} className="p-2 hover:bg-neutral-800/50">
           <MaterialIcons name="remove" size={20} color="#9ca3af" />
@@ -72,7 +70,7 @@ const BpmControl: React.FC = () => {
             onBlur={handleBpmInputSubmit}
             onSubmitEditing={handleBpmInputSubmit}
             keyboardType="number-pad"
-            className="w-16 text-center text-white bg-neutral-800/50 py-1"
+            className="w-16 text-center text-white bg-neutral-700/50 py-1"
             autoFocus
           />
         ) : (
@@ -83,7 +81,7 @@ const BpmControl: React.FC = () => {
           </Pressable>
         )}
 
-        <Pressable onPress={onBpmUp} className="p-2 hover:bg-neutral-800/50">
+        <Pressable onPress={onBpmUp} className="p-2 hover:bg-neutral-700/50">
           <MaterialIcons name="add" size={20} color="#9ca3af" />
         </Pressable>
       </View>

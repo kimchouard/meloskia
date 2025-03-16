@@ -4,7 +4,7 @@ import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { Gesture } from 'react-native-gesture-handler';
 import { accidentalNames, keyNames } from '@/components/PianoKeyboard';
-import { SongData } from './songs';
+import { InstrumentNote, Song } from '../songs';
 
 const verbose = false;
 
@@ -185,18 +185,22 @@ export const getBarsFromTime = (
   console.error('getBarsFromTime called with undefined or null arguments');
 };
 
-export const getDurationInBars = (songData: SongData): number => {
-  if (songData && songData.notes) {
-    const lastNote = songData.notes[songData.notes.length - 1];
-    return lastNote.startAtBar + lastNote.durationInBars;
+export const getDurationInBars = (songData: Song): number => {
+  const pianoVoice = songData?.voices?.find((voice) => voice.id === 'piano');
+
+  if (!pianoVoice) {
+    return 0;
   }
 
-  return 0;
+  const lastNote = pianoVoice.notes[
+    pianoVoice.notes.length - 1
+  ] as InstrumentNote;
+
+  return lastNote.startAt + lastNote.duration;
 };
 
-export const getSongBarCountWithCountdownPlusClosing = (
-  songData: SongData
-): number => getDurationInBars(songData) + countdownBars * 3; // * 3 to have a bit of space at the end of the song (1 countdown bar + 2 closing countdown space)
+export const getSongBarCountWithCountdownPlusClosing = (song: Song): number =>
+  getDurationInBars(song) + countdownBars * 3; // * 3 to have a bit of space at the end of the song (1 countdown bar + 2 closing countdown space)
 
 // ==============================
 //    Gesture Handler

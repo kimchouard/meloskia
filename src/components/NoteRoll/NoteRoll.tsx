@@ -9,7 +9,7 @@ import {
   useDerivedValue,
 } from 'react-native-reanimated';
 
-import { SongData } from '@/utils/songs';
+import { Song } from '@/songs';
 import { KeysState } from '@/hooks/useKeyboard';
 import { gameWidth, gameHeight, pianoKeyboardHeight } from '@/utils/utils';
 
@@ -18,18 +18,14 @@ import NoteRollNotes from './NoteRollNotes';
 import NoteRollLines from './NoteRollLines';
 
 interface NoteRollProps {
-  songData: SongData;
+  song: Song;
   keysState: KeysState;
   noteRollY: SharedValue<number>;
 }
 
 const T3TransformEnabled = true;
 
-const NoteRoll: React.FC<NoteRollProps> = ({
-  songData,
-  keysState,
-  noteRollY,
-}) => {
+const NoteRoll: React.FC<NoteRollProps> = ({ song, keysState, noteRollY }) => {
   const perspectiveRollIn = useSharedValue(0);
 
   const noteRollTransform = useDerivedValue(() => [
@@ -66,14 +62,15 @@ const NoteRoll: React.FC<NoteRollProps> = ({
     return () => {
       perspectiveRollIn.value = 0;
     };
-  }, [songData.name]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [song.name]);
 
   return (
     <Group transform={threeDRollTransform}>
       <NoteRollBackground keysState={keysState} />
       <NoteRollLines keysState={keysState} />
       <Group transform={noteRollTransform}>
-        <NoteRollNotes songData={songData} />
+        <NoteRollNotes song={song} />
       </Group>
     </Group>
   );

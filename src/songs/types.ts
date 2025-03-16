@@ -117,17 +117,26 @@ interface NoteSongAsset extends SongAssetBase {
   noteName: NoteName;
 }
 
+export type NoteType = 'a' | 'i';
+
 export type SongAsset = BackingTrackSongAsset | NoteSongAsset;
 
-export interface SongNote {
+export type AssetNote = {
+  type: 'a';
+  assetId: string;
+  startAt: number;
+};
+
+export type InstrumentNote = {
+  type: 'i';
   noteName: NoteName;
   assetId?: string;
 
-  // Start of the note in relation to current measure, in measures (0-1)
   startAt: number;
-  // in measures (0-1)
   duration: number;
-}
+};
+
+export type SongNote = AssetNote | InstrumentNote;
 
 export interface Voice {
   id: string;
