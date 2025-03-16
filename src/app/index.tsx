@@ -1,9 +1,10 @@
 import { Link } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
 import { Text, View } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { songs } from '@/utils/songs';
+
 import { cn } from '@/utils/utils';
+import songs from '@/songs';
 
 export default function App() {
   return (
@@ -55,15 +56,13 @@ export default function App() {
 
             return (
               <Link
-                key={`song_${i}`}
-                href={`/play/${i}`}
+                key={`song-${song.id}`}
+                href={`/play/${song.id}`}
                 className={cn(
                   'py-5 border-b border-neutral-900 text-center w-full hover:bg-neutral-900',
                   textColor
                 )}>
-                <Text key={`song_${i}`} className="text-lg">
-                  {song.name}
-                </Text>
+                <Text className="text-lg">{song.name}</Text>
               </Link>
             );
           })}

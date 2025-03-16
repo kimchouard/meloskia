@@ -1,20 +1,20 @@
+import { useMemo } from 'react';
 import { Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Link, useLocalSearchParams } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import PlayingUI from '@/components/PlayingUI';
+import SongCanvas from '@/components/SongCanvas';
 
-import { getNumberedUrlParams } from '@/utils/utils';
-import { songs } from '@/utils/songs';
+import songs from '@/songs';
 
 export default function App() {
   // Get context on the current URL params
   const { songId } = useLocalSearchParams<{ songId: string }>();
 
-  const songIdNumber = getNumberedUrlParams(songId);
+  const song = useMemo(() => songs.find((s) => s.id === songId), [songId]);
 
-  if (songIdNumber === null || songIdNumber === undefined) {
+  if (!song) {
     return (
       <View className="flex-1 bg-neutral-950 items-center justify-center">
         <Text className="text-lg font-bold text-white">
@@ -34,7 +34,7 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View className="flex-1 bg-neutral-950 items-center justify-center">
         <StatusBar style="auto" />
-        <PlayingUI songData={songs[songIdNumber]} />
+        <SongCanvas song={song} />
       </View>
     </GestureHandlerRootView>
   );

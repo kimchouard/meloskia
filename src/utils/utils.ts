@@ -198,34 +198,6 @@ export const getSongBarCountWithCountdownPlusClosing = (
   songData: SongData
 ): number => getDurationInBars(songData) + countdownBars * 3; // * 3 to have a bit of space at the end of the song (1 countdown bar + 2 closing countdown space)
 
-// ===========================
-//   Expo Router
-// ===========================
-
-export const getNumberedUrlParams = (stringId: string): number => {
-  // If the is is new, then we return a 'null' id
-  if (stringId === 'new') return null;
-
-  // If there is a songId
-  if (
-    stringId !== null &&
-    stringId !== undefined &&
-    typeof stringId === 'string'
-  ) {
-    // We try to convert it to a number
-    const stringIdNumbered = parseInt(stringId, 10);
-    verbose && console.log('Converting id: ', stringId, stringIdNumbered);
-
-    // And we return it if it's a number
-    if (
-      typeof stringIdNumbered === 'number' &&
-      !Number.isNaN(stringIdNumbered)
-    ) {
-      return stringIdNumbered;
-    }
-  }
-};
-
 // ==============================
 //    Gesture Handler
 
