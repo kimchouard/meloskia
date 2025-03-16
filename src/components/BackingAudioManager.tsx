@@ -27,7 +27,7 @@ interface SoundObj {
     | "playing"
     | "paused"
     | "stopped";
-  playerNode: StretcherNode | AudioBufferSourceNode;
+  playerNode: AudioBufferSourceNode;
   gainNode: GainNode;
   audioBuffer: AudioBuffer;
   url?: string; // to detect if a new sound needs to be loaded
