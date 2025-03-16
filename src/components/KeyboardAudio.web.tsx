@@ -1,10 +1,10 @@
-import { Song, Track, Instrument } from "reactronica";
-import { useEffect, useState } from "react";
-import { KeysState } from "../hooks/useKeyboard";
-import { keyboardKeyToNote } from "./PianoKeyboard";
-import { PlayMode } from "./PlayingUI";
+import { Song, Track, Instrument } from 'reactronica';
+import { useEffect, useState } from 'react';
+import { KeysState } from '../hooks/useKeyboard';
+import { keyboardKeyToNote } from './PianoKeyboard';
+import { PlayMode } from './PlayingUI';
 // import { countdownBars, isGamePlaying } from '../utils/utils';
-import { SongData } from "@/utils/songs";
+import { SongData } from '@/utils/songs';
 
 // const verbose = false;
 

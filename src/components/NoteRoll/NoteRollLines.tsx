@@ -1,10 +1,10 @@
-import React, { memo } from "react";
-import { Group, Rect } from "@shopify/react-native-skia";
+import React, { memo } from 'react';
+import { Group, Rect } from '@shopify/react-native-skia';
 
-import { KeysState } from "@/hooks/useKeyboard";
-import { keyWidth, gameHeight, accidentalNoteColors } from "@/utils/utils";
+import { KeysState } from '@/hooks/useKeyboard';
+import { keyWidth, gameHeight, accidentalNoteColors } from '@/utils/utils';
 
-import { accidentalNames } from "../PianoKeyboard";
+import { accidentalNames } from '../PianoKeyboard';
 
 interface NoteRollLinesProps {
   keysState: KeysState;
@@ -23,7 +23,7 @@ const NoteRollLines: React.FC<NoteRollLinesProps> = (props) => {
     const accidentalPressed = keysState[accidentalNames[i]];
 
     const defaultAccidentalColor =
-      i === 10 || accidentalNames[i] === "" ? "#333" : "#666";
+      i === 10 || accidentalNames[i] === '' ? '#333' : '#666';
 
     return (
       <Rect

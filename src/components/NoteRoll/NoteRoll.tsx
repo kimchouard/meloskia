@@ -1,5 +1,5 @@
-import React, { memo, useEffect } from "react";
-import { Group } from "@shopify/react-native-skia";
+import React, { memo, useEffect } from 'react';
+import { Group } from '@shopify/react-native-skia';
 import {
   Easing,
   withDelay,
@@ -7,15 +7,15 @@ import {
   SharedValue,
   useSharedValue,
   useDerivedValue,
-} from "react-native-reanimated";
+} from 'react-native-reanimated';
 
-import { SongData } from "@/utils/songs";
-import { KeysState } from "@/hooks/useKeyboard";
-import { gameWidth, gameHeight, pianoKeyboardHeight } from "@/utils/utils";
+import { SongData } from '@/utils/songs';
+import { KeysState } from '@/hooks/useKeyboard';
+import { gameWidth, gameHeight, pianoKeyboardHeight } from '@/utils/utils';
 
-import NoteRollBackground from "./NoteRollBackground";
-import NoteRollNotes from "./NoteRollNotes";
-import NoteRollLines from "./NoteRollLines";
+import NoteRollBackground from './NoteRollBackground';
+import NoteRollNotes from './NoteRollNotes';
+import NoteRollLines from './NoteRollLines';
 
 interface NoteRollProps {
   songData: SongData;

@@ -1,14 +1,14 @@
-import { useEffect, useRef, useState } from "react";
-import { Platform } from "react-native";
-import { router } from "expo-router";
+import { useEffect, useRef, useState } from 'react';
+import { Platform } from 'react-native';
+import { router } from 'expo-router';
 import {
   accidentalNames,
   keyNames,
   noteToKeyboardKey,
-} from "../components/PianoKeyboard";
-import { PlayMode } from "../components/PlayingUI";
-import { SongData } from "@/utils/songs";
-import { countdownBars, getBarsFromTime, getTimeFromBars } from "@/utils/utils";
+} from '../components/PianoKeyboard';
+import { PlayMode } from '../components/PlayingUI';
+import { SongData } from '@/utils/songs';
+import { countdownBars, getBarsFromTime } from '@/utils/utils';
 
 const verbose = false;
 
@@ -23,11 +23,11 @@ const useKeyboard = ({
   startGame,
   restart,
 }: {
-  keyboardType: "laptop" | "midi"; // TODO: Add midi keyboard support
+  keyboardType: 'laptop' | 'midi'; // TODO: Add midi keyboard support
   playMode: PlayMode;
   songData?: SongData;
   userBpm?: number;
-  startGame: (startMode: "playing" | "playback") => void;
+  startGame: (startMode: 'playing' | 'playback') => void;
   restart: () => void; // used for the escape key
 }) => {
   // ==============================
@@ -37,7 +37,7 @@ const useKeyboard = ({
   const initKeysState: KeysState = {
     ...keyNames.reduce((acc, key) => ({ ...acc, [key]: false }), {}),
     ...accidentalNames.reduce(
-      (acc, key) => key !== "" && { ...acc, [key]: false },
+      (acc, key) => key !== '' && { ...acc, [key]: false },
       {}
     ),
   };
@@ -51,12 +51,12 @@ const useKeyboard = ({
 
     if (!keyReleased) return;
 
-    verbose && console.log("Key released:", keyReleased, keysState);
+    verbose && console.log('Key released:', keyReleased, keysState);
     setKeysState((prev) => ({ ...prev, [keyReleased]: false }));
   };
 
   const releaseAllKeys = () => {
-    verbose && console.log("Releasing all keys");
+    verbose && console.log('Releasing all keys');
     setKeysState((prev) => {
       const newKeysState = { ...prev };
       Object.keys(newKeysState).forEach((key) => {
@@ -78,13 +78,13 @@ const useKeyboard = ({
     // If the key is the same as the last one, we skip the press
     if (keyName === keyPressedName.current) return;
 
-    verbose && console.log("Changed key", keyName);
+    verbose && console.log('Changed key', keyName);
     keyPressedName.current = keyName;
     setKeysState((prev) => ({ ...prev, [keyName]: true }));
   };
 
   const keyRelease = (keyName: string) => {
-    verbose && console.log("Key release", keyName);
+    verbose && console.log('Key release', keyName);
     setKeysState((prev) => ({ ...prev, [keyName]: false }));
     keyPressedName.current = null;
   };
@@ -104,27 +104,27 @@ const useKeyboard = ({
   }>();
 
   const onKey = (e: KeyboardEvent, keyDown: boolean) => {
-    verbose && console.log("onKey", e, keyDown);
+    verbose && console.log('onKey', e, keyDown);
 
     // Spacebar pressed (onKeyUp only, to avoid multiple restarts on key hold)
-    if (e.code === "Space" && !keyDown) {
-      if (playMode === "stopped") startGame("playing");
+    if (e.code === 'Space' && !keyDown) {
+      if (playMode === 'stopped') startGame('playing');
       else resartAndStopPlayingNotes();
     }
 
     // Spacebar pressed (onKeyUp only, to avoid multiple restarts on key hold)
-    if (e.code === "Enter" && !keyDown) {
-      if (playMode === "stopped") startGame("playback");
+    if (e.code === 'Enter' && !keyDown) {
+      if (playMode === 'stopped') startGame('playback');
       else resartAndStopPlayingNotes();
     }
 
     // Restart on escape
-    if (e.code === "Escape" && !keyDown) {
-      if (playMode !== "stopped") resartAndStopPlayingNotes();
-      else router.replace("/");
+    if (e.code === 'Escape' && !keyDown) {
+      if (playMode !== 'stopped') resartAndStopPlayingNotes();
+      else router.replace('/');
     }
 
-    const letterName = e.key?.replace("Key", "").toUpperCase();
+    const letterName = e.key?.replace('Key', '').toUpperCase();
     // If the key is included in the keyNames array, then we can use it
     if (keyNames.includes(letterName) || accidentalNames.includes(letterName)) {
       // e.preventDefault();
@@ -145,16 +145,16 @@ const useKeyboard = ({
 
   const cleanListeners = () => {
     window.removeEventListener(
-      "keydown",
+      'keydown',
       currentKeyboardListener.current?.keydown
     );
-    window.removeEventListener("keyup", currentKeyboardListener.current?.keyup);
+    window.removeEventListener('keyup', currentKeyboardListener.current?.keyup);
   };
 
   // Listeners need to be updated on each state change
   useEffect(() => {
-    if (Platform.OS === "web" && keyboardType === "laptop") {
-      verbose && console.log("(re)Setting keyboard listeners");
+    if (Platform.OS === 'web' && keyboardType === 'laptop') {
+      verbose && console.log('(re)Setting keyboard listeners');
       // Remove prior listeners
       cleanListeners();
 
@@ -166,10 +166,10 @@ const useKeyboard = ({
 
       // Add new listener
       window.addEventListener(
-        "keydown",
+        'keydown',
         currentKeyboardListener.current.keydown
       );
-      window.addEventListener("keyup", currentKeyboardListener.current.keyup);
+      window.addEventListener('keyup', currentKeyboardListener.current.keyup);
 
       return () => {
         cleanListeners();
@@ -188,7 +188,7 @@ const useKeyboard = ({
   const currentPlayingNotes = useRef<number[]>([]);
 
   const stopAutoPlayLooper = () => {
-    verbose && console.log("Stop frame animation!!");
+    verbose && console.log('Stop frame animation!!');
 
     // Stop current animation frame
     cancelAnimationFrame(autoPlayFrameAnimationRequest.current);
@@ -259,14 +259,14 @@ const useKeyboard = ({
     newNotesToPlay.forEach((note) => {
       const keyboardKey = noteToKeyboardKey[note.noteName];
 
-      verbose && console.log(perfStart, "Starting note:", note, keyboardKey);
+      verbose && console.log(perfStart, 'Starting note:', note, keyboardKey);
       keyPressed(keyboardKey);
     });
 
     // If we need the update the currentPlayingNotes array
     if (newNotesToPlay.length > 0 || notesToStop.length > 0) {
       verbose &&
-        console.log(perfStart, "Updating notes", newNotesToPlay, notesToStop);
+        console.log(perfStart, 'Updating notes', newNotesToPlay, notesToStop);
       // Update the currentPlayingNotes
       currentPlayingNotes.current = [
         ...currentPlayingNotes.current.filter(
@@ -279,7 +279,7 @@ const useKeyboard = ({
     // Calculate the time it took to process the frame
     const perfEnd = performance.now();
     const perfDuration = perfEnd - perfStart;
-    verbose && console.log("Evaluated frame in (ms):", perfDuration);
+    verbose && console.log('Evaluated frame in (ms):', perfDuration);
   };
 
   // Check if there is are notes that needs to be started or stopped
@@ -292,19 +292,19 @@ const useKeyboard = ({
 
       playNotesFromBars(currentTimeInBars);
     } else {
-      console.error("No songData.notes");
+      console.error('No songData.notes');
       return stopAutoPlayLooper();
     }
 
     // Looping on next animation frame
-    if (playMode === "playback") {
+    if (playMode === 'playback') {
       autoPlayFrameAnimationRequest.current =
         requestAnimationFrame(autoPlayLooper);
     }
   };
 
   useEffect(() => {
-    if (playMode === "playback") {
+    if (playMode === 'playback') {
       // Use animationFrames to detect when to play the next note
       autoPlayFrameAnimationRequest.current =
         requestAnimationFrame(autoPlayLooper);

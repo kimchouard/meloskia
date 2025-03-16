@@ -1,11 +1,11 @@
-import React, { memo, useCallback } from "react";
-import { Group, Rect } from "@shopify/react-native-skia";
+import React, { memo, useCallback } from 'react';
+import { Group, Rect } from '@shopify/react-native-skia';
 
-import { KeysState } from "@/hooks/useKeyboard";
-import { gameHeight, keyNoteColors, keyWidth } from "@/utils/utils";
+import { KeysState } from '@/hooks/useKeyboard';
+import { gameHeight, keyNoteColors, keyWidth } from '@/utils/utils';
 
-import { keyNames } from "../PianoKeyboard";
-import colors from "tailwindcss/colors";
+import { keyNames } from '../PianoKeyboard';
+import colors from 'tailwindcss/colors';
 
 interface NoteRollBackgroundProps {
   keysState: KeysState;

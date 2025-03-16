@@ -1,5 +1,5 @@
-import React, { memo, useMemo } from "react";
-import { RoundedRect, Paint } from "@shopify/react-native-skia";
+import React, { memo, useMemo } from 'react';
+import { RoundedRect, Paint } from '@shopify/react-native-skia';
 
 import {
   keyWidth,
@@ -10,13 +10,13 @@ import {
   getDistFromBars,
   pianoKeyboardHeight,
   accidentalNoteColors,
-} from "@/utils/utils";
-import { SongData, SongNote } from "@/utils/songs";
+} from '@/utils/utils';
+import { SongData, SongNote } from '@/utils/songs';
 import {
   keyNames,
   accidentalNames,
   noteToKeyboardKey,
-} from "@/components/PianoKeyboard";
+} from '@/components/PianoKeyboard';
 
 interface NoteRollNotesProps {
   songData: SongData;
@@ -57,7 +57,7 @@ const Note: React.FC<NoteProps> = (props) => {
 
     let x = 0;
     let width = 0;
-    let color = "";
+    let color = '';
 
     const y =
       yOfKeyboardHeight -
@@ -88,8 +88,7 @@ const Note: React.FC<NoteProps> = (props) => {
       y={roundedRectParams.y}
       width={roundedRectParams.width}
       height={getDistFromBars(note.durationInBars, bpm) - noteStrokeWidth}
-      r={5}
-    >
+      r={5}>
       <Paint
         color={roundedRectParams.color}
         style="stroke"
