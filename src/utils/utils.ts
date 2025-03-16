@@ -1,10 +1,10 @@
-import { Dimensions } from "react-native";
+import { Dimensions } from 'react-native';
 
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
-import { Gesture } from "react-native-gesture-handler";
-import { accidentalNames, keyNames } from "@/components/PianoKeyboard";
-import { SongData } from "./songs";
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+import { Gesture } from 'react-native-gesture-handler';
+import { accidentalNames, keyNames } from '@/components/PianoKeyboard';
+import { SongData } from './songs';
 
 const verbose = false;
 
@@ -12,12 +12,12 @@ const verbose = false;
 //   Dimensions & Placing
 // ===========================
 
-export const screenWidth = Dimensions.get("window").width;
-export const screenHeight = Dimensions.get("window").height;
+export const screenWidth = Dimensions.get('window').width;
+export const screenHeight = Dimensions.get('window').height;
 
 export const gameWidth =
-  Dimensions.get("window").width * (screenWidth > 1000 ? 0.5 : 0.9);
-export const gameHeight = Dimensions.get("window").height;
+  Dimensions.get('window').width * (screenWidth > 1000 ? 0.5 : 0.9);
+export const gameHeight = Dimensions.get('window').height;
 
 export const pianoKeyboardHeight = 200;
 export const keyStrokeWidth = 4;
@@ -29,24 +29,24 @@ export const keyWidth = gameWidth / numberOfWhiteKeys;
 //   Colors
 // ===========================
 
-export const bgColor = "#101010";
-export const blackKeyColor = "#202020";
-export const whiteKeyColor = "#FEFEFE";
+export const bgColor = '#101010';
+export const blackKeyColor = '#202020';
+export const whiteKeyColor = '#FEFEFE';
 
 // Create an array of pastel colors for the 10 notes
 export const keyNoteColors = [
-  "#BAE7FF",
-  "#B5C7FF",
-  "#C6B5FF",
-  "#FFB5FF",
-  "#FFB5B5",
-  "#FFC8A2",
-  "#FFEBAE",
-  "#CFFFE5",
+  '#BAE7FF',
+  '#B5C7FF',
+  '#C6B5FF',
+  '#FFB5FF',
+  '#FFB5B5',
+  '#FFC8A2',
+  '#FFEBAE',
+  '#CFFFE5',
   // Restarting, next octave!
-  "#BAE7FF",
-  "#B5C7FF",
-  "#C6B5FF",
+  '#BAE7FF',
+  '#B5C7FF',
+  '#C6B5FF',
 
   // Extra colors
   // '#FFB5FF',
@@ -55,17 +55,17 @@ export const keyNoteColors = [
 ];
 
 export const accidentalNoteColors = [
-  "#7ABDFF",
-  "#6A8AFF",
-  "#8A6AFF",
-  "#FF7A7A",
-  "#FFA94D",
-  "#FFD747",
-  "#9DFFB0",
+  '#7ABDFF',
+  '#6A8AFF',
+  '#8A6AFF',
+  '#FF7A7A',
+  '#FFA94D',
+  '#FFD747',
+  '#9DFFB0',
   // Restarting, next octave!
-  "#7ABDFF",
-  "#6A8AFF",
-  "#8A6AFF",
+  '#7ABDFF',
+  '#6A8AFF',
+  '#8A6AFF',
 
   // Extra colors
   // '#FF6AFF',
@@ -84,7 +84,7 @@ export const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs));
 // ===========================
 
 export const isGamePlaying = (playMode) =>
-  playMode === "playing" || playMode === "playback";
+  playMode === 'playing' || playMode === 'playback';
 
 // Countdown bars
 export const countdownBars = 4;
@@ -119,7 +119,7 @@ export const getDistFromBars = (
       : distXFromBars;
   }
 
-  console.error("getDistFromBars called with undefined or null arguments");
+  console.error('getDistFromBars called with undefined or null arguments');
 };
 
 // Get the number of bars from the distance (px)
@@ -140,7 +140,7 @@ export const getBarsFromDist = (
       : barsFromDist;
   }
 
-  console.error("getBarsFromDist called with undefined or null arguments");
+  console.error('getBarsFromDist called with undefined or null arguments');
 };
 
 // Get time (ms) from the number of bars
@@ -161,7 +161,7 @@ export const getTimeFromBars = (
       : timeFromBars;
   }
 
-  console.error("getTimeFromBars called with undefined or null arguments");
+  console.error('getTimeFromBars called with undefined or null arguments');
 };
 
 // Get the number of bars from the time (ms)
@@ -182,7 +182,7 @@ export const getBarsFromTime = (
       : barsFromTime;
   }
 
-  console.error("getBarsFromTime called with undefined or null arguments");
+  console.error('getBarsFromTime called with undefined or null arguments');
 };
 
 export const getDurationInBars = (songData: SongData): number => {
@@ -202,26 +202,26 @@ export const getSongBarCountWithCountdownPlusClosing = (
 //   Expo Router
 // ===========================
 
-export const getNumberedUrlParams = (strindId: string): number => {
+export const getNumberedUrlParams = (stringId: string): number => {
   // If the is is new, then we return a 'null' id
-  if (strindId === "new") return null;
+  if (stringId === 'new') return null;
 
   // If there is a songId
   if (
-    strindId !== null &&
-    strindId !== undefined &&
-    typeof strindId === "string"
+    stringId !== null &&
+    stringId !== undefined &&
+    typeof stringId === 'string'
   ) {
     // We try to convert it to a number
-    const strindIdNumbered = parseInt(strindId, 10);
-    verbose && console.log("Converting id: ", strindId, strindIdNumbered);
+    const stringIdNumbered = parseInt(stringId, 10);
+    verbose && console.log('Converting id: ', stringId, stringIdNumbered);
 
     // And we return it if it's a number
     if (
-      typeof strindIdNumbered === "number" &&
-      !Number.isNaN(strindIdNumbered)
+      typeof stringIdNumbered === 'number' &&
+      !Number.isNaN(stringIdNumbered)
     ) {
-      return strindIdNumbered;
+      return stringIdNumbered;
     }
   }
 };
@@ -235,7 +235,7 @@ const getKeyNameFromPosition = (x: number, y: number) => {
 
   // Detect key accidentals
   if (y < gameHeight - pianoKeyboardHeight / 2) {
-    // If we're on a black key, which are 1/4 of the width of a white key and inbetween white key 1 and 2, 2 and 3, 4 and 5, 5 and 6, 6 and 7, 8 and 9 and 9 and 10
+    // If we're on a black key, which are 1/4 of the width of a white key and in between white key 1 and 2, 2 and 3, 4 and 5, 5 and 6, 6 and 7, 8 and 9 and 9 and 10
     if (
       (keyFloatIndex > 0.73 && keyFloatIndex < 1.27) || // W
       (keyFloatIndex > 1.73 && keyFloatIndex < 2.27) || // E
@@ -261,7 +261,7 @@ export const getOnPressKeyboardGestureHandler = (keyPressed, releaseLastKey) =>
     .onStart((e) => {
       // If the key is pressed on the keyboard
       if (e.y > gameHeight - pianoKeyboardHeight) {
-        verbose && console.log("Key pressed:", e);
+        verbose && console.log('Key pressed:', e);
 
         keyPressed(getKeyNameFromPosition(e.x, e.y));
       }

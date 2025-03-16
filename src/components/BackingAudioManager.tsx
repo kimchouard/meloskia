@@ -1,15 +1,15 @@
-import type { PlayMode } from "@/components/PlayingUI";
-import type { SongData } from "@/utils/songs";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Platform } from "react-native";
-import * as FileSystem from "expo-file-system";
+import type { PlayMode } from '@/components/PlayingUI';
+import type { SongData } from '@/utils/songs';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Platform } from 'react-native';
+import * as FileSystem from 'expo-file-system';
 import {
   AudioContext,
   type AudioBuffer,
   type GainNode,
   type AudioBufferSourceNode,
-} from "react-native-audio-api";
-import { isGamePlaying } from "@/utils/utils";
+} from 'react-native-audio-api';
+import { isGamePlaying } from '@/utils/utils';
 
 const verbose = false;
 
@@ -19,14 +19,14 @@ const verbose = false;
 
 interface SoundObj {
   status:
-    | "disabled"
-    | "idle"
-    | "loaded"
-    | "failed"
-    | "loading"
-    | "playing"
-    | "paused"
-    | "stopped";
+    | 'disabled'
+    | 'idle'
+    | 'loaded'
+    | 'failed'
+    | 'loading'
+    | 'playing'
+    | 'paused'
+    | 'stopped';
   playerNode: AudioBufferSourceNode;
   gainNode: GainNode;
   audioBuffer: AudioBuffer;
@@ -62,13 +62,13 @@ const BackingAudioManager = ({
   // REFS
   const soundObjs = useRef<Partial<SoundObjs>>({
     instrumental: {
-      status: "idle",
+      status: 'idle',
       playerNode: null,
       gainNode: null,
       audioBuffer: null,
     },
     clicks: {
-      status: "idle",
+      status: 'idle',
       playerNode: null,
       gainNode: null,
       audioBuffer: null,
@@ -85,15 +85,15 @@ const BackingAudioManager = ({
   const isSoundDisabled = (soundName: SoundName): boolean =>
     soundName &&
     (!soundObjs.current[soundName] ||
-      soundObjs.current[soundName].status === "disabled");
+      soundObjs.current[soundName].status === 'disabled');
   const isSoundLoaded = (soundName: SoundName): boolean =>
     soundName &&
     soundObjs.current[soundName] &&
-    soundObjs.current[soundName].status === "loaded";
+    soundObjs.current[soundName].status === 'loaded';
   const isSoundPlaying = (soundName: SoundName): boolean =>
     soundName &&
     soundObjs.current[soundName] &&
-    soundObjs.current[soundName].status === "playing";
+    soundObjs.current[soundName].status === 'playing';
 
   // ===========================
   //    Init RN-Audio Context
@@ -103,19 +103,19 @@ const BackingAudioManager = ({
 
   const getOrInitializeAudioContext = useCallback(() => {
     if (!audioContext.current) {
-      console.log("new AudioContext()");
+      console.log('new AudioContext()');
       audioContext.current = new AudioContext();
 
-      const button = document.createElement("button");
+      const button = document.createElement('button');
       button.onclick = () => {
         audioContext.current?.resume();
       };
-      button.innerText = "Resume Audio Context";
-      button.style.position = "fixed";
-      button.style.top = "140px";
-      button.style.right = "0";
-      button.style.zIndex = "9999";
-      button.style.backgroundColor = "#abcdef";
+      button.innerText = 'Resume Audio Context';
+      button.style.position = 'fixed';
+      button.style.top = '140px';
+      button.style.right = '0';
+      button.style.zIndex = '9999';
+      button.style.backgroundColor = '#abcdef';
 
       document.body.appendChild(button);
 
@@ -140,7 +140,7 @@ const BackingAudioManager = ({
   ) => {
     if (!audioContext || !soundObj) {
       console.error(
-        "[BackingAudioManager/getPlayerNode] No audio context or sound object passed",
+        '[BackingAudioManager/getPlayerNode] No audio context or sound object passed',
         { audioContext, soundObj }
       );
       return null;
@@ -151,7 +151,7 @@ const BackingAudioManager = ({
 
     verbose &&
       console.log(
-        "[BackingAudioManager/getPlayerNode] Creating player node, with rate:",
+        '[BackingAudioManager/getPlayerNode] Creating player node, with rate:',
         {
           audioContext,
           soundObj,
@@ -167,7 +167,7 @@ const BackingAudioManager = ({
 
     if (!playerNode) {
       console.error(
-        "[BackingAudioManager/getPlayerNode] Error while creating player node for sound",
+        '[BackingAudioManager/getPlayerNode] Error while creating player node for sound',
         { audioContext, soundObj, playerNode }
       );
       return null;
@@ -182,7 +182,7 @@ const BackingAudioManager = ({
     if (globalRate !== 1) {
       verbose &&
         console.log(
-          "[BackingAudioManager/getPlayerNode] Setting the proper rate for the sound:",
+          '[BackingAudioManager/getPlayerNode] Setting the proper rate for the sound:',
           { playerNode, globalRate }
         );
       playerNode.playbackRate.value = globalRate;
@@ -190,7 +190,7 @@ const BackingAudioManager = ({
 
     verbose &&
       console.log(
-        "[BackingAudioManager] Player node created, sound loaded in the BackingAudioManager engine:",
+        '[BackingAudioManager] Player node created, sound loaded in the BackingAudioManager engine:',
         {
           playerNode,
           audioContext_currentTime: audioContext.currentTime,
@@ -239,9 +239,9 @@ const BackingAudioManager = ({
       return;
     }
 
-    if (soundObj.status === "loaded" || soundObj.status === "disabled") {
+    if (soundObj.status === 'loaded' || soundObj.status === 'disabled') {
       // Even if already loaded, we should update the volume in case trackVolumes changed
-      if (soundObj.status === "loaded" && soundObj.gainNode) {
+      if (soundObj.status === 'loaded' && soundObj.gainNode) {
         const soundData = songData.backingTracks?.find(
           (track) => track.type === soundName
         );
@@ -258,7 +258,7 @@ const BackingAudioManager = ({
     }
 
     // Update the status to loading
-    soundObjs.current[soundName].status = "loading";
+    soundObjs.current[soundName].status = 'loading';
 
     // Get the sound data
     const soundData = songData.backingTracks?.find(
@@ -270,7 +270,7 @@ const BackingAudioManager = ({
         `[BackingAudioManager] Can't load sound "${soundName}": data or url not defined. Disabling it.`,
         { soundData }
       );
-      soundObjs.current[soundName].status = "disabled";
+      soundObjs.current[soundName].status = 'disabled';
       soundObjs.current[soundName].playerNode = null;
       soundObjs.current[soundName].gainNode = null;
       soundObjs.current[soundName].audioBuffer = null;
@@ -280,15 +280,15 @@ const BackingAudioManager = ({
 
     const audioContext = getOrInitializeAudioContext();
     if (!audioContext) {
-      throw new Error("Error while initializing the Audio context");
+      throw new Error('Error while initializing the Audio context');
     }
     verbose &&
-      console.log("[BackingAudioManager/loadSound] Audio context pulled:", {
+      console.log('[BackingAudioManager/loadSound] Audio context pulled:', {
         audioContext,
       });
 
     const audioBuffer =
-      Platform.OS === "web"
+      Platform.OS === 'web'
         ? await audioContext.decodeAudioDataSource(soundData.url)
         : await FileSystem.downloadAsync(
             soundData.url,
@@ -305,7 +305,7 @@ const BackingAudioManager = ({
 
     verbose &&
       console.log(
-        "[BackingAudioManager/loadSound] URL loaded into an audio buffer:",
+        '[BackingAudioManager/loadSound] URL loaded into an audio buffer:',
         { sourceUrl: soundData.url, audioBuffer }
       );
 
@@ -323,7 +323,7 @@ const BackingAudioManager = ({
 
     verbose &&
       console.log(
-        "[BackingAudioManager/loadSound] Gain node created and connected to audio context destination:",
+        '[BackingAudioManager/loadSound] Gain node created and connected to audio context destination:',
         { gainNode, audioContext_destination: audioContext.destination }
       );
 
@@ -342,12 +342,12 @@ const BackingAudioManager = ({
 
     verbose &&
       console.log(
-        "[BackingAudioManager/loadSound] Player node created and connected to gain node:",
+        '[BackingAudioManager/loadSound] Player node created and connected to gain node:',
         { playerNode, gainNode }
       );
 
     soundObjs.current[soundName] = {
-      status: "loaded",
+      status: 'loaded',
       duration: audioBuffer.duration,
       url: soundData.url,
       playerNode,
@@ -364,7 +364,7 @@ const BackingAudioManager = ({
     setIsLoadingSounds(true);
     verbose &&
       console.log(
-        "[BackingAudioManager] Checking sound loading sound statuses:",
+        '[BackingAudioManager] Checking sound loading sound statuses:',
         soundObjs.current
       );
 
@@ -390,15 +390,15 @@ const BackingAudioManager = ({
     startAtTime?: number;
   }) => {
     const backingTrackNames: SoundName[] = options?.trackList ?? [
-      "instrumental",
-      "clicks",
+      'instrumental',
+      'clicks',
     ];
 
     const audioContext = getOrInitializeAudioContext();
 
-    console.log("[fsfs] ac.status", audioContext.state);
+    console.log('[fsfs] ac.status', audioContext.state);
 
-    if (audioContext.state === "suspended") {
+    if (audioContext.state === 'suspended') {
       await audioContext.resume();
     }
 
@@ -413,11 +413,11 @@ const BackingAudioManager = ({
     }
 
     for (const soundName of backingTrackNames) {
-      if (soundObjs.current[soundName]?.status === "loaded") {
+      if (soundObjs.current[soundName]?.status === 'loaded') {
         const soundObj = soundObjs.current[soundName];
         if (!soundObj) {
           console.error(
-            "[AudioManager/playSounds] No sound object found for",
+            '[AudioManager/playSounds] No sound object found for',
             soundName
           );
           return;
@@ -429,7 +429,7 @@ const BackingAudioManager = ({
           try {
             if (!audioContext) {
               throw new Error(
-                "Error while initializing the Audio context while starting the sounds"
+                'Error while initializing the Audio context while starting the sounds'
               );
             }
 
@@ -437,7 +437,7 @@ const BackingAudioManager = ({
             playerNode.start(); // (startTime) ? startTime : 0);
 
             // Update the status to playing
-            soundObjs.current[soundName].status = "playing";
+            soundObjs.current[soundName].status = 'playing';
 
             verbose &&
               console.log(
@@ -456,7 +456,7 @@ const BackingAudioManager = ({
     }
 
     verbose &&
-      console.log("[BackingAudioManager/playSounds] Started all sounds", {
+      console.log('[BackingAudioManager/playSounds] Started all sounds', {
         backingTrackNames,
       });
   };
@@ -467,7 +467,7 @@ const BackingAudioManager = ({
 
   const stopSound = async (soundName: SoundName) => {
     verbose &&
-      console.log("[BackingAudioManager/stopSound] Stopping sound", {
+      console.log('[BackingAudioManager/stopSound] Stopping sound', {
         soundName,
       });
 
@@ -475,7 +475,7 @@ const BackingAudioManager = ({
     const soundObj = soundObjs.current[soundName];
     if (!audioContext || !soundObj) {
       console.error(
-        "[AudioManager/stopSound] Error while initializing the Audio context while stopping the sound",
+        '[AudioManager/stopSound] Error while initializing the Audio context while stopping the sound',
         { audioContext, soundObj, soundName }
       );
       return;
@@ -495,7 +495,7 @@ const BackingAudioManager = ({
       playerNode.stop(0);
 
       // Update the status to stopped
-      soundObjs.current[soundName].status = "stopped";
+      soundObjs.current[soundName].status = 'stopped';
 
       verbose &&
         console.log(
@@ -523,12 +523,12 @@ const BackingAudioManager = ({
 
     verbose &&
       console.log(
-        "[BackingAudioManager] New player node (re)created for sound",
+        '[BackingAudioManager] New player node (re)created for sound',
         { newPlayerNode, soundObj }
       );
 
     soundObjs.current[soundName] = {
-      status: "loaded",
+      status: 'loaded',
       url: soundObj.url,
       duration: soundObj.duration,
       playerNode: newPlayerNode,
@@ -540,7 +540,7 @@ const BackingAudioManager = ({
   const stopBackingSounds = async () => {
     verbose &&
       console.log(
-        "[BackingAudioManager/stopBackingSounds] Stopping playing backing sounds"
+        '[BackingAudioManager/stopBackingSounds] Stopping playing backing sounds'
       );
 
     for (const soundName of Object.keys(soundObjs.current) as SoundName[]) {
@@ -559,14 +559,14 @@ const BackingAudioManager = ({
     if (isGamePlaying(playMode)) {
       verbose &&
         console.log(
-          "[BackingAudioManager/useEffect>playMode] Game is playing, starting the sounds",
+          '[BackingAudioManager/useEffect>playMode] Game is playing, starting the sounds',
           { playMode }
         );
       playSounds();
     } else {
       verbose &&
         console.log(
-          "[BackingAudioManager/useEffect>playMode] Game is not playing, stopping the sounds",
+          '[BackingAudioManager/useEffect>playMode] Game is not playing, stopping the sounds',
           { playMode }
         );
       stopBackingSounds();
@@ -588,7 +588,7 @@ const BackingAudioManager = ({
   useEffect(() => {
     verbose &&
       console.log(
-        "[BackingAudioManager/useEffect>volumes] Updating sounds volumes:",
+        '[BackingAudioManager/useEffect>volumes] Updating sounds volumes:',
         { soundObjs: soundObjs.current }
       );
     for (const soundName of Object.keys(soundObjs.current) as SoundName[]) {
@@ -596,7 +596,7 @@ const BackingAudioManager = ({
       const soundData = songData.backingTracks?.find(
         (track) => track.type === soundName
       );
-      if (soundData && soundObj && soundObj.status === "loaded") {
+      if (soundData && soundObj && soundObj.status === 'loaded') {
         updateGainNodeVolume(
           soundObj.gainNode,
           soundData.volume,
@@ -615,14 +615,14 @@ const BackingAudioManager = ({
     soundName: SoundName
   ) => {
     const soundObj = soundObjs.current[soundName];
-    if (soundObj && soundObj.status === "loaded") {
+    if (soundObj && soundObj.status === 'loaded') {
       const newPlayerNode = await getPlayerNode(audioContext, soundObj);
 
       soundObjs.current[soundName].playerNode = newPlayerNode;
 
       verbose &&
         console.log(
-          "[BackingAudioManager/updatePlayerNodeRate] Updating player node rate for",
+          '[BackingAudioManager/updatePlayerNodeRate] Updating player node rate for',
           { soundObj, newPlayerNode }
         );
     }
@@ -639,7 +639,7 @@ const BackingAudioManager = ({
     if (userBpm) {
       verbose &&
         console.log(
-          "[BackingAudioManager/useEffect>userBpm] Updating sounds rate based on BPM:",
+          '[BackingAudioManager/useEffect>userBpm] Updating sounds rate based on BPM:',
           { userBpm }
         );
 
