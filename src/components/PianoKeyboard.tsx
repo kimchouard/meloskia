@@ -90,6 +90,7 @@ const PianoKeyboard = ({
     return () => {
       scrollInY.value = disableAnimation ? 0 : pianoKeyboardHeight;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [songName]);
 
   return (
@@ -125,7 +126,7 @@ const PianoKeyboard = ({
           const accidentalState = keysState[accidentalName];
 
           return (
-            <Group key={`pianokey_${i}`}>
+            <Group key={`pianoKey-${i}`}>
               {/* White Key */}
               <RoundedRect
                 x={xPos}

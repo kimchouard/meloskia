@@ -3,7 +3,7 @@ import { AudioContext, AudioBuffer } from 'react-native-audio-api';
 
 import { commonAssets, SongAsset } from '@/songs';
 
-interface AudioAsset {
+export interface AudioAsset {
   songAsset: SongAsset;
   audioBuffer: AudioBuffer;
 }

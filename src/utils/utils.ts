@@ -90,14 +90,12 @@ export const isGamePlaying = (playMode) =>
 export const countdownBars = 4;
 
 // Distance between quarter lines & change ratio based on BPM
-export const distanceBetweenBars = 260;
+export const distanceBetweenBars = 280;
 export const baseBPM = 80;
 export const dynamicDistRatio = 0.2;
 
-// Get the dynamic distance for 1 bar: 75% fixed and 25% dynamic based on the BPM
-// >> allows for a easier reading on fast BPM
 export const getDistFor1Bar = (BPM: number): number =>
-  distanceBetweenBars * (1 - dynamicDistRatio * (baseBPM / BPM));
+  distanceBetweenBars * (baseBPM / BPM);
 
 // Returns the X position (px) based on the number of bars
 export const getDistFromBars = (

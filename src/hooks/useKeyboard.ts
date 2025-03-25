@@ -89,7 +89,7 @@ const useKeyboard = ({
     keyPressedName.current = null;
   };
 
-  const resartAndStopPlayingNotes = () => {
+  const restartAndStopPlayingNotes = () => {
     releaseAllKeys();
     restart();
   };
@@ -109,18 +109,18 @@ const useKeyboard = ({
     // Spacebar pressed (onKeyUp only, to avoid multiple restarts on key hold)
     if (e.code === 'Space' && !keyDown) {
       if (playMode === 'stopped') startGame('playing');
-      else resartAndStopPlayingNotes();
+      else restartAndStopPlayingNotes();
     }
 
     // Spacebar pressed (onKeyUp only, to avoid multiple restarts on key hold)
     if (e.code === 'Enter' && !keyDown) {
       if (playMode === 'stopped') startGame('playback');
-      else resartAndStopPlayingNotes();
+      else restartAndStopPlayingNotes();
     }
 
     // Restart on escape
     if (e.code === 'Escape' && !keyDown) {
-      if (playMode !== 'stopped') resartAndStopPlayingNotes();
+      if (playMode !== 'stopped') restartAndStopPlayingNotes();
       else router.replace('/');
     }
 
@@ -284,7 +284,9 @@ const useKeyboard = ({
 
   // Check if there is are notes that needs to be started or stopped
   const autoPlayLooper = () => {
-    if (!startedPlayingAt.current) startedPlayingAt.current = Date.now();
+    if (!startedPlayingAt.current) {
+      startedPlayingAt.current = Date.now();
+    }
 
     if (songData?.notes) {
       const currentTimeInMs = Date.now() - startedPlayingAt.current;

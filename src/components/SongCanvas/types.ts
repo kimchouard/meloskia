@@ -1,6 +1,7 @@
-import { Song } from '@/songs';
 import { Dispatch, SetStateAction } from 'react';
 import { SharedValue } from 'react-native-reanimated';
+
+import { Song } from '@/songs';
 
 export type PlayerState = 'stopped' | 'playing' | 'playback' | 'restart';
 
@@ -8,7 +9,10 @@ export interface SongCanvasContextType {
   song: Song;
 
   bpm: number;
+  setBpm: Dispatch<SetStateAction<number>>;
+
   metronome: 0 | 1 | 2 | 4;
+  setMetronome: Dispatch<SetStateAction<0 | 1 | 2 | 4>>;
 
   state: PlayerState;
   isLoading: boolean;
@@ -17,7 +21,4 @@ export interface SongCanvasContextType {
 
   restartGame: () => void;
   startGame: (startMode: 'playing' | 'playback') => void;
-
-  setBpm: Dispatch<SetStateAction<number>>;
-  setMetronome: Dispatch<SetStateAction<0 | 1 | 2 | 4>>;
 }

@@ -47,7 +47,7 @@ const CanvasCTA: React.FC = () => {
   if (Platform.OS === 'web') {
     return (
       <Animated.View
-        className="flex absolute bottom-[200px] w-full h-0 bg-neutral-950/70 overflow-hidden"
+        className="flex absolute bottom-[300px] w-full h-0 bg-neutral-950/70 overflow-hidden"
         style={{ height }}>
         {state === 'stopped' ? (
           <>
@@ -73,7 +73,7 @@ const CanvasCTA: React.FC = () => {
 
   return (
     <Animated.View
-      className="absolute bottom-[200px] left-0 w-full pb-10"
+      className="absolute bottom-[300px] left-0 w-full pb-10"
       style={{ height }}>
       <Pressable onPress={onToggleStart}>
         <LinearGradient

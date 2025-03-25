@@ -1,5 +1,5 @@
 // import { Song, Track, Instrument } from 'reactronica';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { KeysState } from '../hooks/useKeyboard';
 import { keyboardKeyToNote } from './PianoKeyboard';
 import { PlayMode } from './PlayingUI';
@@ -33,7 +33,7 @@ const KeyboardAudio = ({
 
   // useEffect(() => {
   //   if (playMode === 'playback') {
-  //   // Create a null step for each coundown bar
+  //   // Create a null step for each countdown bar
   //   // Convert the songData to an array of steps
   //     const newSteps = [...[...Array(countdownBars)].map(() => null), ...songData.notes.map((note) => [{ name: note.noteName, duration: note.durationInBars }])];
   //     verbose && console.log('newSteps', newSteps, isGamePlaying(playMode));

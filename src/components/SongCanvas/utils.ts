@@ -6,20 +6,10 @@ export function isPlaying(state: PlayerState) {
 }
 
 const noteToFrequencyMap: Record<NoteName, number> = {
-  C0: 16.35,
-  'C#0': 17.32,
-  D0: 18.35,
-  'D#0': 19.45,
-  E0: 20.6,
-  F0: 21.83,
-  'F#0': 23.12,
-  G0: 24.5,
-  'G#0': 25.96,
   A0: 27.5,
   'A#0': 29.14,
   B0: 30.87,
   C1: 32.7,
-  'C#1': 34.65,
   D1: 36.71,
   'D#1': 38.89,
   E1: 41.2,
@@ -118,4 +108,18 @@ const noteToFrequencyMap: Record<NoteName, number> = {
 
 export function noteToFrequency(note: NoteName) {
   return noteToFrequencyMap[note];
+}
+
+export function getInitialKeyStates(): Record<NoteName, boolean> {
+  return Object.keys(noteToFrequencyMap).reduce(
+    (acc, note) => {
+      acc[note as NoteName] = false;
+      return acc;
+    },
+    {} as Record<NoteName, boolean>
+  );
+}
+
+export function clicksForBeat(beat: number, metronome: 1 | 2 | 4) {
+  return (beat % 4) % (4 / metronome) === 0;
 }
