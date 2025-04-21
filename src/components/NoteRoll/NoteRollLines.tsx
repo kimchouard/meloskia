@@ -2,7 +2,7 @@ import React, { memo } from 'react';
 import { Group, Rect } from '@shopify/react-native-skia';
 
 import { KeysState } from '@/types';
-import { accidentalNames } from '@/constants';
+import { accidentalNames, keyboardKeyToNote } from '@/constants';
 import { keyWidth, gameHeight, accidentalNoteColors } from '@/utils/utils';
 
 interface NoteRollLinesProps {
@@ -19,7 +19,7 @@ const NoteRollLines: React.FC<NoteRollLinesProps> = (props) => {
     const yPos = -2 * gameHeight;
     const height = 4 * gameHeight;
 
-    const accidentalPressed = keysState[accidentalNames[i]];
+    const accidentalPressed = keysState[keyboardKeyToNote[accidentalNames[i]]];
 
     const defaultAccidentalColor =
       i === 10 || accidentalNames[i] === '' ? '#333' : '#666';

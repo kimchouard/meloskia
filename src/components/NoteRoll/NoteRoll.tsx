@@ -9,8 +9,7 @@ import {
   useDerivedValue,
 } from 'react-native-reanimated';
 
-import { Song } from '@/songs';
-import { KeysState } from '@/hooks/useKeyboard';
+import { NoteName, Song } from '@/songs';
 import { gameWidth, gameHeight, pianoKeyboardHeight } from '@/utils/utils';
 
 import NoteRollBackground from './NoteRollBackground';
@@ -19,7 +18,7 @@ import NoteRollLines from './NoteRollLines';
 
 interface NoteRollProps {
   song: Song;
-  keysState: KeysState;
+  keysState: Record<NoteName, boolean>;
   noteRollY: SharedValue<number>;
 }
 

@@ -2,7 +2,7 @@ import React, { memo } from 'react';
 import { Group, Rect } from '@shopify/react-native-skia';
 
 import { KeysState } from '@/types';
-import { keyNames } from '@/constants';
+import { keyNames, keyboardKeyToNote } from '@/constants';
 import { gameHeight, keyNoteColors, keyWidth } from '@/utils/utils';
 
 import colors from 'tailwindcss/colors';
@@ -17,7 +17,8 @@ const NoteRollBackground: React.FC<NoteRollBackgroundProps> = (props) => {
   const { keysState } = props;
 
   const renderBackground = (_v: number, i: number) => {
-    const keyPressed = keysState[keyNames[i]];
+    const keyPressed = keysState[keyboardKeyToNote[keyNames[i]]];
+
     const xPos = i * keyWidth;
     const yPos = -2 * gameHeight;
     const height = 4 * gameHeight;

@@ -154,7 +154,6 @@ const SongCanvas: React.FC<SongCanvasProps> = ({ song }) => {
     bpm,
     song,
     state,
-    keysState,
     metronome,
     songDuration,
     setKeysState,

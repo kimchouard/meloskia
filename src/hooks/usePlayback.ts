@@ -1,26 +1,17 @@
-import { useEffect, useMemo } from 'react';
-import {
-  GainNode,
-  AudioContext,
-  AudioScheduledSourceNode,
-} from 'react-native-audio-api';
+import { SetStateAction, useEffect, useMemo } from 'react';
+import { GainNode, AudioContext } from 'react-native-audio-api';
 
+import { Piano } from '@/sounds';
 import { PlayerState } from '@/types';
 import { NoteName, Song, SongNote } from '@/songs';
 import { getBarsFromTime, getTimeFromBars, countdownBars } from '@/utils/utils';
-import {
-  isPlaying,
-  clicksForBeat,
-  noteToFrequency,
-  getInitialKeyStates,
-} from '@/components/SongCanvas/utils';
+import { isPlaying, clicksForBeat } from '@/components/SongCanvas/utils';
 import useLoadAssets, { AudioAsset } from './useLoadAssets';
 
 interface PlaybackOptions {
   bpm: number;
 
-  keysState: Record<NoteName, boolean>;
-  setKeysState: (keysState: Record<NoteName, boolean>) => void;
+  setKeysState: (keysState: SetStateAction<Record<NoteName, boolean>>) => void;
 
   songDuration: number;
   state: PlayerState;
@@ -31,7 +22,7 @@ interface PlaybackOptions {
 const scheduleAheadTime = 0.15;
 
 export default function usePlayback(options: PlaybackOptions) {
-  const { bpm, keysState, setKeysState, state, song, metronome } = options;
+  const { bpm, setKeysState, state, song, metronome } = options;
 
   const audioContext = useMemo(() => new AudioContext(), []);
   const assets = useLoadAssets(audioContext, song.assets);
@@ -50,10 +41,6 @@ export default function usePlayback(options: PlaybackOptions) {
   useEffect(() => {
     player.setBpm(bpm);
   }, [player, bpm]);
-
-  useEffect(() => {
-    player.setKeysState(keysState);
-  }, [player, keysState]);
 
   useEffect(() => {
     player.setMetronomeOption(metronome);
@@ -76,7 +63,13 @@ interface PlayerInitOptions {
   song: Song;
   audioContext: AudioContext;
   getAsset: (assetId: string) => AudioAsset;
-  updateRemoteKeysState: (keysState: Record<NoteName, boolean>) => void;
+  updateRemoteKeysState: (
+    keysState: SetStateAction<Record<NoteName, boolean>>
+  ) => void;
+}
+
+interface SimplifiedSource {
+  stop: () => void;
 }
 
 class Player {
@@ -86,7 +79,9 @@ class Player {
   private audioContext: AudioContext;
 
   private getAsset: (assetId: string) => AudioAsset;
-  private updateRemoteKeysState: (keysState: Record<NoteName, boolean>) => void;
+  private updateRemoteKeysState: (
+    keysState: SetStateAction<Record<NoteName, boolean>>
+  ) => void;
 
   private startTime = 0;
   private scheduledTime = 0;
@@ -94,15 +89,13 @@ class Player {
   private bpm = 120;
   private metronomeOption: 0 | 1 | 2 | 4 = 0;
   private playType: 'idle' | 'playback' | 'playing' = 'idle';
-  private keysState: Record<NoteName, boolean>;
 
-  private activeSources: AudioScheduledSourceNode[] = [];
+  private activeSources: SimplifiedSource[] = [];
 
   constructor(options: PlayerInitOptions) {
     this.song = options.song;
     this.audioContext = options.audioContext;
     this.getAsset = options.getAsset;
-    this.keysState = getInitialKeyStates();
     this.updateRemoteKeysState = options.updateRemoteKeysState;
     this.mainGain = this.audioContext.createGain();
     this.mainGain.connect(this.audioContext.destination);
@@ -152,73 +145,15 @@ class Player {
     startAtBeat: number,
     stopAtBeat: number
   ) => {
-    const frequency = noteToFrequency(noteName);
-    const oscillator1 = this.audioContext.createOscillator();
-    // const oscillator2 = this.audioContext.createOscillator();
-    // const oscillator3 = this.audioContext.createOscillator();
-    // const oscillator4 = this.audioContext.createOscillator();
+    const pianoSynth = new Piano(this.audioContext, noteName, this.synthGain);
+    this.activeSources.push(pianoSynth);
 
-    const envelope = this.audioContext.createGain();
-    // const lowPass = this.audioContext.createBiquadFilter();
-
-    oscillator1.frequency.value = frequency;
-    oscillator1.type = 'sine';
-
-    // oscillator2.frequency.value = frequency;
-    // oscillator2.type = 'sine';
-
-    // oscillator3.frequency.value = frequency;
-    // oscillator3.type = 'sine';
-
-    // oscillator4.frequency.value = frequency;
-    // oscillator4.type = 'sine';
-
-    // lowPass.type = 'lowpass';
-    // lowPass.frequency.value = 1700;
-    // lowPass.Q.value = 1;
-
-    // oscillator1.connect(lowPass);
-    oscillator1.connect(envelope);
-    // oscillator2.connect(lowPass);
-    // oscillator3.connect(lowPass);
-    // oscillator4.connect(lowPass);
-    // lowPass.connect(envelope);
-    envelope.connect(this.synthGain);
-
-    const startTime =
-      getTimeFromBars(startAtBeat, this.bpm) / 1000 + this.startTime;
-    const stopTime =
-      getTimeFromBars(stopAtBeat, this.bpm) / 1000 + this.startTime;
-
-    const attackTime = 0.01 * (stopTime - startTime);
-    const decayTime = 0.08 * (stopTime - startTime);
-    const releaseTime = 0.05 * (stopTime - startTime);
-
-    // envelope.gain.setValueAtTime(1, startTime);
-    // envelope.gain.exponentialRampToValueAtTime(0.01, stopTime);
-
-    envelope.gain.setValueAtTime(0, startTime);
-    envelope.gain.linearRampToValueAtTime(1, startTime + attackTime);
-    envelope.gain.linearRampToValueAtTime(1, startTime + decayTime);
-    envelope.gain.setValueAtTime(0.5, stopTime - releaseTime);
-    envelope.gain.linearRampToValueAtTime(0, stopTime);
-
-    this.activeSources.push(oscillator1);
-    // this.activeSources.push(oscillator2);
-    // this.activeSources.push(oscillator3);
-    // this.activeSources.push(oscillator4);
-
-    oscillator1.start(startTime);
-    oscillator1.stop(stopTime);
-
-    // oscillator2.start(startTime);
-    // oscillator2.stop(stopTime);
-
-    // oscillator3.start(startTime);
-    // oscillator3.stop(stopTime);
-
-    // oscillator4.start(startTime);
-    // oscillator4.stop(stopTime);
+    pianoSynth.start(
+      getTimeFromBars(startAtBeat - 0.5, this.bpm) / 1000 + this.startTime
+    );
+    pianoSynth.stop(
+      getTimeFromBars(stopAtBeat - 0.5, this.bpm) / 1000 + this.startTime
+    );
   };
 
   getMetronomeBeats = (beatStart: number, beatEnd: number) => {
@@ -272,6 +207,13 @@ class Player {
       return;
     }
 
+    if (this.playType === 'playback' && note.type === 'i' && note.noteName) {
+      this.updateRemoteKeysState((keysState) => ({
+        ...keysState,
+        [note.noteName]: true,
+      }));
+    }
+
     if (note.type === 'a') {
       this.scheduleSourceNode(note.assetId, noteStartBeat, undefined, true);
       return;
@@ -291,10 +233,39 @@ class Player {
     this.scheduleSynth(note.noteName, noteStartBeat, noteEndBeat);
   };
 
+  scheduleSongNoteOff = (
+    note: SongNote,
+    lastBeat: number,
+    aheadBeat: number
+  ) => {
+    if (note.type !== 'i' || !note.noteName) {
+      return;
+    }
+    const noteStartBeat = note.startAt + countdownBars;
+    const noteEndBeat = noteStartBeat + note.duration;
+
+    if (noteEndBeat < lastBeat || noteEndBeat > aheadBeat) {
+      return;
+    }
+
+    this.updateRemoteKeysState((keysState) => ({
+      ...keysState,
+      [note.noteName]: false,
+    }));
+  };
+
   scheduleSongNotes = (lastBeat: number, aheadBeat: number) => {
     this.song.voices.forEach((voice) => {
       voice.notes.forEach((note) =>
         this.scheduleSongNote(note, lastBeat, aheadBeat)
+      );
+    });
+  };
+
+  scheduleSongNotesOff = (lastBeat: number, aheadBeat: number) => {
+    this.song.voices.forEach((voice) => {
+      voice.notes.forEach((note) =>
+        this.scheduleSongNoteOff(note, lastBeat, aheadBeat)
       );
     });
   };
@@ -320,6 +291,7 @@ class Player {
 
     this.scheduleMetronome(lastBeat, currentBeat, aheadBeat);
     this.scheduleSongNotes(lastBeat, aheadBeat);
+    this.scheduleSongNotesOff(lastBeat, aheadBeat);
 
     this.scheduledTime = tNow + scheduleAheadTime;
     this.requestNextLoop();
@@ -353,9 +325,5 @@ class Player {
 
   setMetronomeOption = (metronomeOption: 0 | 1 | 2 | 4) => {
     this.metronomeOption = metronomeOption;
-  };
-
-  setKeysState = (keysState: Record<NoteName, boolean>) => {
-    this.keysState = keysState;
   };
 }

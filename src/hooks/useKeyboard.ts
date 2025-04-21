@@ -1,10 +1,11 @@
 import { router } from 'expo-router';
 import { Platform } from 'react-native';
-import { useCallback, useEffect } from 'react';
+import { SetStateAction, useCallback, useEffect } from 'react';
 
-// import { accidentalNames, keyNames, noteToKeyboardKey } from '@/constants';
 import { getInitialKeyStates } from '@/components/SongCanvas/utils';
+import { accidentalNames, keyboardKeyToNote, keyNames } from '@/constants';
 import { KeysState, PlayerState } from '@/types';
+import Logger from '@/utils/Logger';
 
 interface UseKeyboardOptions {
   keyboardType: 'laptop' | 'midi'; // TODO: Add midi keyboard support
@@ -12,8 +13,10 @@ interface UseKeyboardOptions {
   restartGame: () => void;
   keysState: KeysState;
   state: PlayerState;
-  setKeysState: (keysState: KeysState) => void;
+  setKeysState: (setState: SetStateAction<KeysState>) => void;
 }
+
+const Log = Logger.spawn('UseKeyboard', true);
 
 export default function useKeyboard(options: UseKeyboardOptions) {
   const {
@@ -62,9 +65,30 @@ export default function useKeyboard(options: UseKeyboardOptions) {
         } else {
           router.replace('/');
         }
+
+        return;
       }
+
+      const letterName = event.key?.replace('Key', '').toUpperCase();
+
+      if (
+        !keyNames.includes(letterName) &&
+        !accidentalNames.includes(letterName)
+      ) {
+        return;
+      }
+
+      if (keysState[letterName] === isDown) {
+        return;
+      }
+
+      Log.info(`Key ${event.code} (${letterName}) changed to ${isDown}`);
+      setKeysState((prevState) => ({
+        ...prevState,
+        [keyboardKeyToNote[letterName]]: isDown,
+      }));
     },
-    [toggleStartGame, restartAndReleaseKeys, state]
+    [toggleStartGame, restartAndReleaseKeys, setKeysState, keysState, state]
   );
 
   const onKeyDown = useCallback(
