@@ -1,10 +1,9 @@
 import React, { memo } from 'react';
 import { Group, Rect } from '@shopify/react-native-skia';
 
-import { KeysState } from '@/hooks/useKeyboard';
+import { KeysState } from '@/types';
+import { accidentalNames } from '@/constants';
 import { keyWidth, gameHeight, accidentalNoteColors } from '@/utils/utils';
-
-import { accidentalNames } from '../PianoKeyboard';
 
 interface NoteRollLinesProps {
   keysState: KeysState;

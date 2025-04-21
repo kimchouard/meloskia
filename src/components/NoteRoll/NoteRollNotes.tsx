@@ -11,12 +11,8 @@ import {
   pianoKeyboardHeight,
   accidentalNoteColors,
 } from '@/utils/utils';
-import {
-  keyNames,
-  accidentalNames,
-  noteToKeyboardKey,
-} from '@/components/PianoKeyboard';
 import { InstrumentNote, Song } from '@/songs';
+import { keyNames, accidentalNames, noteToKeyboardKey } from '@/constants';
 
 interface NoteRollNotesProps {
   song: Song;

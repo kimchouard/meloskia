@@ -1,5 +1,5 @@
 import { NoteName } from '@/songs';
-import { PlayerState } from './types';
+import { PlayerState } from '@/types';
 
 export function isPlaying(state: PlayerState) {
   return state === 'playing' || state === 'playback';

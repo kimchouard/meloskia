@@ -1,17 +1,20 @@
 import { useEffect, useMemo } from 'react';
-import { AudioContext, GainNode } from 'react-native-audio-api';
+import {
+  GainNode,
+  AudioContext,
+  AudioScheduledSourceNode,
+} from 'react-native-audio-api';
 
+import { PlayerState } from '@/types';
 import { NoteName, Song, SongNote } from '@/songs';
-
-import useLoadAssets, { AudioAsset } from './useLoadAssets';
-import { PlayerState } from './types';
+import { getBarsFromTime, getTimeFromBars, countdownBars } from '@/utils/utils';
 import {
   isPlaying,
   clicksForBeat,
   noteToFrequency,
   getInitialKeyStates,
-} from './utils';
-import { getBarsFromTime, getTimeFromBars, countdownBars } from '@/utils/utils';
+} from '@/components/SongCanvas/utils';
+import useLoadAssets, { AudioAsset } from './useLoadAssets';
 
 interface PlaybackOptions {
   bpm: number;
@@ -93,6 +96,8 @@ class Player {
   private playType: 'idle' | 'playback' | 'playing' = 'idle';
   private keysState: Record<NoteName, boolean>;
 
+  private activeSources: AudioScheduledSourceNode[] = [];
+
   constructor(options: PlayerInitOptions) {
     this.song = options.song;
     this.audioContext = options.audioContext;
@@ -106,7 +111,7 @@ class Player {
     this.synthGain.connect(this.mainGain);
 
     this.mainGain.gain.value = 1;
-    this.synthGain.gain.value = 0.8;
+    this.synthGain.gain.value = 1;
   }
 
   scheduleSourceNode = async (
@@ -135,6 +140,8 @@ class Player {
     sourceNode.connect(this.mainGain);
     sourceNode.start(startTime);
 
+    this.activeSources.push(sourceNode);
+
     if (stopTime) {
       sourceNode.stop(stopTime);
     }
@@ -146,19 +153,36 @@ class Player {
     stopAtBeat: number
   ) => {
     const frequency = noteToFrequency(noteName);
-    const oscillator = this.audioContext.createOscillator();
+    const oscillator1 = this.audioContext.createOscillator();
+    // const oscillator2 = this.audioContext.createOscillator();
+    // const oscillator3 = this.audioContext.createOscillator();
+    // const oscillator4 = this.audioContext.createOscillator();
+
     const envelope = this.audioContext.createGain();
-    const lowPass = this.audioContext.createBiquadFilter();
+    // const lowPass = this.audioContext.createBiquadFilter();
 
-    oscillator.frequency.value = frequency;
-    oscillator.type = 'triangle';
+    oscillator1.frequency.value = frequency;
+    oscillator1.type = 'sine';
 
-    lowPass.type = 'lowpass';
-    lowPass.frequency.value = 800;
-    lowPass.Q.value = 15;
+    // oscillator2.frequency.value = frequency;
+    // oscillator2.type = 'sine';
 
-    oscillator.connect(lowPass);
-    lowPass.connect(envelope);
+    // oscillator3.frequency.value = frequency;
+    // oscillator3.type = 'sine';
+
+    // oscillator4.frequency.value = frequency;
+    // oscillator4.type = 'sine';
+
+    // lowPass.type = 'lowpass';
+    // lowPass.frequency.value = 1700;
+    // lowPass.Q.value = 1;
+
+    // oscillator1.connect(lowPass);
+    oscillator1.connect(envelope);
+    // oscillator2.connect(lowPass);
+    // oscillator3.connect(lowPass);
+    // oscillator4.connect(lowPass);
+    // lowPass.connect(envelope);
     envelope.connect(this.synthGain);
 
     const startTime =
@@ -166,14 +190,35 @@ class Player {
     const stopTime =
       getTimeFromBars(stopAtBeat, this.bpm) / 1000 + this.startTime;
 
+    const attackTime = 0.01 * (stopTime - startTime);
+    const decayTime = 0.08 * (stopTime - startTime);
+    const releaseTime = 0.05 * (stopTime - startTime);
+
+    // envelope.gain.setValueAtTime(1, startTime);
+    // envelope.gain.exponentialRampToValueAtTime(0.01, stopTime);
+
     envelope.gain.setValueAtTime(0, startTime);
-    envelope.gain.linearRampToValueAtTime(1, startTime + 0.03);
-    envelope.gain.linearRampToValueAtTime(0.5, startTime + 0.2);
-    envelope.gain.setValueAtTime(0.5, stopTime - 0.2);
+    envelope.gain.linearRampToValueAtTime(1, startTime + attackTime);
+    envelope.gain.linearRampToValueAtTime(1, startTime + decayTime);
+    envelope.gain.setValueAtTime(0.5, stopTime - releaseTime);
     envelope.gain.linearRampToValueAtTime(0, stopTime);
 
-    oscillator.start(startTime);
-    oscillator.stop(stopTime);
+    this.activeSources.push(oscillator1);
+    // this.activeSources.push(oscillator2);
+    // this.activeSources.push(oscillator3);
+    // this.activeSources.push(oscillator4);
+
+    oscillator1.start(startTime);
+    oscillator1.stop(stopTime);
+
+    // oscillator2.start(startTime);
+    // oscillator2.stop(stopTime);
+
+    // oscillator3.start(startTime);
+    // oscillator3.stop(stopTime);
+
+    // oscillator4.start(startTime);
+    // oscillator4.stop(stopTime);
   };
 
   getMetronomeBeats = (beatStart: number, beatEnd: number) => {
@@ -294,6 +339,12 @@ class Player {
 
   stop = () => {
     this.playType = 'idle';
+
+    this.activeSources.forEach((source) => {
+      source.stop();
+    });
+
+    this.activeSources = [];
   };
 
   setBpm = (bpm: number) => {

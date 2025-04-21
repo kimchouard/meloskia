@@ -8,6 +8,7 @@ import {
   useSharedValue,
 } from 'react-native-reanimated';
 
+import { PlayerState } from '@/types';
 import { NoteName, Song } from '@/songs';
 import {
   gameWidth,
@@ -18,17 +19,18 @@ import {
   getTimeFromBars,
   getSongBarCountWithCountdownPlusClosing,
 } from '@/utils/utils';
+import useKeyboard from '@/hooks/useKeyboard';
+import usePlayback from '@/hooks/usePlayback';
 
 import NoteRoll from '../NoteRoll';
 import PianoKeyboard from '../PianoKeyboard';
 
-import { PlayerState, SongCanvasContextType } from './types';
+import { SongCanvasContextType } from './types';
 import { isPlaying, getInitialKeyStates } from './utils';
 import { SongCanvasContext } from './SongCanvasContext';
 import SongNotFound from './SongNotFound';
 import CanvasHeader from './CanvasHeader';
 import CanvasCTA from './CanvasCTA';
-import usePlayback from './usePlayback';
 
 interface SongCanvasProps {
   song?: Song;
@@ -44,9 +46,6 @@ const SongCanvas: React.FC<SongCanvasProps> = ({ song }) => {
 
   const noteRollY = useSharedValue(0);
   const resetTimeoutRef = useRef<NodeJS.Timeout>();
-  // const audioBackend = useMemo(() => createAudioBackend(), []);
-
-  // const assets = useLoadAssets(audioBackend.audioContext, song?.assets ?? []);
 
   const songBeatCount = useMemo(
     () => getSongBarCountWithCountdownPlusClosing(song),
@@ -86,12 +85,13 @@ const SongCanvas: React.FC<SongCanvasProps> = ({ song }) => {
 
   const restartGame = useCallback(() => {
     setState('stopped');
+    noteRollY.value = withTiming(0, { duration: 500 });
 
     if (resetTimeoutRef.current) {
       clearTimeout(resetTimeoutRef.current);
       resetTimeoutRef.current = undefined;
     }
-  }, []);
+  }, [noteRollY]);
 
   const handleScrolling = useCallback(
     (e: WheelEvent) => {
@@ -157,6 +157,16 @@ const SongCanvas: React.FC<SongCanvasProps> = ({ song }) => {
     keysState,
     metronome,
     songDuration,
+    setKeysState,
+  });
+
+  useKeyboard({
+    state,
+    keysState,
+    keyboardType: 'laptop',
+
+    startGame,
+    restartGame,
     setKeysState,
   });
 

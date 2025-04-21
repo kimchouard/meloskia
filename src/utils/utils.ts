@@ -94,8 +94,7 @@ export const distanceBetweenBars = 280;
 export const baseBPM = 80;
 export const dynamicDistRatio = 0.2;
 
-export const getDistFor1Bar = (BPM: number): number =>
-  distanceBetweenBars * (baseBPM / BPM);
+export const getDistFor1Bar = (): number => distanceBetweenBars;
 
 // Returns the X position (px) based on the number of bars
 export const getDistFromBars = (
@@ -111,7 +110,8 @@ export const getDistFromBars = (
     barCount !== null &&
     BPM !== null
   ) {
-    const distXFromBars = barCount * getDistFor1Bar(BPM);
+    const distXFromBars = barCount * getDistFor1Bar();
+
     return options.roundValue === true
       ? Math.round(distXFromBars)
       : distXFromBars;
@@ -132,7 +132,7 @@ export const getBarsFromDist = (
     dist !== null &&
     BPM !== null
   ) {
-    const barsFromDist = dist / getDistFor1Bar(BPM);
+    const barsFromDist = dist / getDistFor1Bar();
     return options.roundValue === true
       ? Math.round(barsFromDist)
       : barsFromDist;

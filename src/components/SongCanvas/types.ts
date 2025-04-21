@@ -2,8 +2,7 @@ import { Dispatch, SetStateAction } from 'react';
 import { SharedValue } from 'react-native-reanimated';
 
 import { Song } from '@/songs';
-
-export type PlayerState = 'stopped' | 'playing' | 'playback' | 'restart';
+import { PlayerState } from '@/types';
 
 export interface SongCanvasContextType {
   song: Song;
