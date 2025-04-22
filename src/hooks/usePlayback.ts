@@ -10,6 +10,7 @@ import useLoadAssets, { AudioAsset } from './useLoadAssets';
 
 interface PlaybackOptions {
   bpm: number;
+  audioContext: AudioContext;
 
   setKeysState: (keysState: SetStateAction<Record<NoteName, boolean>>) => void;
 
@@ -22,9 +23,8 @@ interface PlaybackOptions {
 const scheduleAheadTime = 0.15;
 
 export default function usePlayback(options: PlaybackOptions) {
-  const { bpm, setKeysState, state, song, metronome } = options;
+  const { bpm, setKeysState, state, song, metronome, audioContext } = options;
 
-  const audioContext = useMemo(() => new AudioContext(), []);
   const assets = useLoadAssets(audioContext, song.assets);
 
   const player = useMemo(

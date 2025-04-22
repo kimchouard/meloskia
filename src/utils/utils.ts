@@ -3,7 +3,7 @@ import { Dimensions } from 'react-native';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { Gesture } from 'react-native-gesture-handler';
-import { accidentalNames, keyNames } from '@/components/PianoKeyboard';
+import { accidentalNames, keyNames } from '@/constants';
 import { InstrumentNote, Song } from '../songs';
 
 const verbose = false;

@@ -1,68 +1,63 @@
-// import { Song, Track, Instrument } from 'reactronica';
-import { useEffect } from 'react';
-import { KeysState } from '../hooks/useKeyboard';
-import { keyboardKeyToNote } from './PianoKeyboard';
-import { PlayMode } from './PlayingUI';
-// import { countdownBars, isGamePlaying } from '../utils/utils';
-import { SongData } from '@/utils/songs';
+import React, { useEffect, useRef } from 'react';
 
-// const verbose = false;
+import { NoteName } from '@/songs';
+import { PlayerState } from '@/types';
+import { useSongCanvasContext } from './SongCanvas/SongCanvasContext';
+import { Piano } from '@/sounds';
+import Logger from '@/utils/Logger';
 
-const KeyboardAudio = ({
-  // playMode,
-  keysState,
-}: // songData,
-{
-  playMode: PlayMode;
-  keysState: KeysState;
-  songData: SongData;
-}) => {
-  // const [notes, setNotes] = useState([]);
-  // const [steps, setSteps] = useState([]);
+// import { keyboardKeyToNote } from './PianoKeyboard';
+
+const Log = Logger.spawn('KeyboardAudio', false);
+
+interface KeyboardAudioProps {
+  playMode: PlayerState;
+  keysState: Record<NoteName, boolean>;
+}
+
+type ActiveNotes = Partial<Record<NoteName, Piano>>;
+
+const KeyboardAudio: React.FC<KeyboardAudioProps> = (props) => {
+  const { playMode, keysState } = props;
+
+  const { audioContext } = useSongCanvasContext();
+  const activeNotes = useRef<ActiveNotes>({});
 
   useEffect(() => {
-    // // Convert the keysState to an array of notes
-    // const newNotes = Object.keys(keysState)
-    //   .filter((key) => keysState[key])
-    //   // Convert the key name to a note
-    //   .map((key) => ({
-    //     name: keyboardKeyToNote[key],
-    //   }));
-    // setNotes(newNotes);
-  }, [keysState]);
+    if (playMode === 'playback') {
+      // If the playMode is playback, we don't need to do anything
+      return;
+    }
 
-  // useEffect(() => {
-  //   if (playMode === 'playback') {
-  //   // Create a null step for each countdown bar
-  //   // Convert the songData to an array of steps
-  //     const newSteps = [...[...Array(countdownBars)].map(() => null), ...songData.notes.map((note) => [{ name: note.noteName, duration: note.durationInBars }])];
-  //     verbose && console.log('newSteps', newSteps, isGamePlaying(playMode));
-  //     setSteps(newSteps);
-  //   } else {
-  //     setSteps([]);
-  //   }
-  // }, [songData.notes, playMode]);
+    Object.entries(keysState).forEach(([key, isActive]) => {
+      // if the key is active, trigger its sound if necessary
+      if (isActive) {
+        // key is already playing, nothing to do
+        if (activeNotes.current[key]) {
+          Log.info('Key is already playing, nothing to do');
+          return;
+        }
 
-  // return (
-  //   <>
-  //     <Song
-  //       // isPlaying={isGamePlaying(playMode) && steps.length !== 0}
-  //       // bpm={songData.bpm}
-  //     >
-  //       <Track
-  //         // steps={steps}
-  //         // onStepPlay={(stepNotes, index) => {
-  //         //   verbose && console.log('onStepPlay', stepNotes, index);
-  //         // }}
-  //       >
-  //         <Instrument
-  //           type="synth"
-  //           notes={notes}
-  //         />
-  //       </Track>
-  //     </Song>
-  //   </>
-  // );
+        Log.info('Key is not playing, creating new note');
+        activeNotes.current[key] = new Piano(
+          audioContext,
+          key as NoteName,
+          audioContext.destination
+        );
+
+        activeNotes.current[key].start();
+        return;
+      }
+
+      // if the key is not active, stop its sound if necessary
+      if (activeNotes.current[key]) {
+        Log.info('Key is active, stopping note');
+        activeNotes.current[key].stop();
+        delete activeNotes.current[key];
+      }
+    });
+  }, [keysState, playMode, audioContext]);
+
   return null;
 };
 

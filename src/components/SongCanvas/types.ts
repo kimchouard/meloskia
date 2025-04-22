@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction } from 'react';
 import { SharedValue } from 'react-native-reanimated';
+import { AudioContext } from 'react-native-audio-api';
 
 import { Song } from '@/songs';
 import { PlayerState } from '@/types';
@@ -20,4 +21,6 @@ export interface SongCanvasContextType {
 
   restartGame: () => void;
   startGame: (startMode: 'playing' | 'playback') => void;
+
+  audioContext: AudioContext;
 }

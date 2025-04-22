@@ -7,6 +7,7 @@ import {
   withTiming,
   useSharedValue,
 } from 'react-native-reanimated';
+import { AudioContext } from 'react-native-audio-api';
 
 import { PlayerState } from '@/types';
 import { NoteName, Song } from '@/songs';
@@ -18,6 +19,8 @@ import {
   getDistFromBars,
   getTimeFromBars,
   getSongBarCountWithCountdownPlusClosing,
+  getBarsFromDist,
+  countdownBars,
 } from '@/utils/utils';
 import useKeyboard from '@/hooks/useKeyboard';
 import usePlayback from '@/hooks/usePlayback';
@@ -31,6 +34,7 @@ import { SongCanvasContext } from './SongCanvasContext';
 import SongNotFound from './SongNotFound';
 import CanvasHeader from './CanvasHeader';
 import CanvasCTA from './CanvasCTA';
+import KeyboardAudio from '../KeyboardAudio';
 
 interface SongCanvasProps {
   song?: Song;
@@ -43,6 +47,8 @@ const SongCanvas: React.FC<SongCanvasProps> = ({ song }) => {
   const [keysState, setKeysState] = useState<Record<NoteName, boolean>>(
     getInitialKeyStates()
   );
+
+  const audioContext = useMemo(() => new AudioContext(), []);
 
   const noteRollY = useSharedValue(0);
   const resetTimeoutRef = useRef<NodeJS.Timeout>();
@@ -98,13 +104,47 @@ const SongCanvas: React.FC<SongCanvasProps> = ({ song }) => {
       if (isPlaying(state)) {
         return false;
       }
+
       const scrolledVerticallyBy = e?.deltaY;
       const translateX = noteRollY.value - scrolledVerticallyBy;
 
       noteRollY.value = clamp(translateX, 0, songDistance);
+
+      const progressInBars = getBarsFromDist(noteRollY.value, bpm);
+
+      const notesPressed: NoteName[] = [];
+
+      song.voices.forEach((voice) => {
+        voice.notes.forEach((note) => {
+          if (note.type !== 'i' || !note.noteName) {
+            return;
+          }
+
+          const noteStartBeat = note.startAt + countdownBars;
+          const noteEndBeat = noteStartBeat + note.duration;
+
+          if (noteStartBeat <= progressInBars) {
+            if (noteEndBeat >= progressInBars) {
+              notesPressed.push(note.noteName);
+            }
+          }
+        });
+      });
+
+      setKeysState({
+        ...getInitialKeyStates(),
+        ...notesPressed.reduce(
+          (acc, noteName) => {
+            acc[noteName] = true;
+            return acc;
+          },
+          {} as Record<NoteName, boolean>
+        ),
+      });
+
       return false;
     },
-    [noteRollY, songDistance, state]
+    [noteRollY, songDistance, state, bpm, song]
   );
 
   useEffect(() => {
@@ -122,6 +162,7 @@ const SongCanvas: React.FC<SongCanvasProps> = ({ song }) => {
 
   const stableContext = useMemo<SongCanvasContextType>(
     () => ({
+      audioContext,
       song,
 
       bpm,
@@ -144,6 +185,8 @@ const SongCanvas: React.FC<SongCanvasProps> = ({ song }) => {
       state,
       noteRollY,
       metronome,
+      audioContext,
+
       startGame,
       restartGame,
       setMetronome,
@@ -155,6 +198,7 @@ const SongCanvas: React.FC<SongCanvasProps> = ({ song }) => {
     song,
     state,
     metronome,
+    audioContext,
     songDuration,
     setKeysState,
   });
@@ -200,6 +244,7 @@ const SongCanvas: React.FC<SongCanvasProps> = ({ song }) => {
           />
         </Group>
       </Canvas>
+      <KeyboardAudio keysState={keysState} playMode={state} />
       {!isPlaying(state) && <CanvasCTA />}
     </SongCanvasContext.Provider>
   );

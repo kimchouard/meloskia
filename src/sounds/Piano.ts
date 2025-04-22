@@ -92,8 +92,8 @@ class Piano {
     this.attackDecaySustain(when);
   };
 
-  stop = (when: number = 0) => {
-    this.releaseStop(when);
+  stop = (when?: number) => {
+    this.releaseStop(when ?? this.audioContext.currentTime);
   };
 }
 
