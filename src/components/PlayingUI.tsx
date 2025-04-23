@@ -39,7 +39,7 @@ const PlayingUI = ({
   // ==============================
   //    Playing State
 
-  const playingTimeout = useRef<NodeJS.Timeout>();
+  const playingTimeout = useRef<ReturnType<typeof setTimeout>>();
 
   const [playMode, setPlayMode] = useState<PlayMode>('stopped');
   const [userBpm, setUserBpm] = useState<number>(songData.bpm);
@@ -362,7 +362,7 @@ const PlayingUI = ({
                 <PianoKeyboard keysState={keysState} songName={songData.name} />
               </Group>
             </Canvas>
-            <SparklesOverlay width={screenWidth} height={screenHeight} />
+            <SparklesOverlay screenWidth={screenWidth} width={gameWidth} height={screenHeight} />
           </>
         </GestureDetector>
       </View>
