@@ -23,6 +23,7 @@ import {
 } from '../utils/utils';
 import useKeyboard from '../hooks/useKeyboard';
 import KeyboardAudio from './KeyboardAudio';
+import SparklesOverlay from './SparklesOverlay/SparklesOverlay';
 import { SongData } from '../utils/songs';
 import BackingAudioManager from '@/components/BackingAudioManager';
 
@@ -334,7 +335,7 @@ const PlayingUI = ({
 
   if (songData) {
     return (
-      <View className="flex-1">
+      <View className="relative flex-1">
         {/* Header */}
         {renderHeader()}
 
@@ -348,18 +349,21 @@ const PlayingUI = ({
         <BackingAudioManager {...{ playMode, userBpm, songData, trackVolumes }} />
 
         <GestureDetector gesture={getOnPressKeyboardGestureHandler(keyPressed, releaseLastKey)}>
-          <Canvas style={{ width: screenWidth, height: screenHeight, flex: 1, overflow: 'hidden' }}>
-            <Group transform={[
-              // Center the game
-              { translateX: (screenWidth - gameWidth) / 2 },
-              { translateY: (screenHeight - gameHeight) / 2 },
-            ]}>
-              <NoteRoll {...{
-                keysState, songData, noteRollY,
-              }} />
-              <PianoKeyboard keysState={keysState} songName={songData.name} />
-            </Group>
-          </Canvas>
+          <>
+            <Canvas style={{ width: screenWidth, height: screenHeight, flex: 1, overflow: 'hidden' }}>
+              <Group transform={[
+                // Center the game
+                { translateX: (screenWidth - gameWidth) / 2 },
+                { translateY: (screenHeight - gameHeight) / 2 },
+              ]}>
+                <NoteRoll {...{
+                  keysState, songData, noteRollY,
+                }} />
+                <PianoKeyboard keysState={keysState} songName={songData.name} />
+              </Group>
+            </Canvas>
+            <SparklesOverlay width={screenWidth} height={screenHeight} />
+          </>
         </GestureDetector>
       </View>
     );

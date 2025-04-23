@@ -8,7 +8,8 @@
       ]
     },
     "jsx": "react-jsx",
-    "jsxImportSource": "react"
+    "jsxImportSource": "react",
+    "types": ["@webgpu/types"]
   },
   "extends": "expo/tsconfig.base",
   "include": [

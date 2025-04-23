@@ -37,10 +37,13 @@
     "tailwind-merge": "^2.2.1",
     "tailwindcss": "^3.4.1",
     "tone": "^14.7.77",
-    "typescript": "~5.3.3"
+    "typegpu": "^0.5.6",
+    "typescript": "~5.3.3",
+    "wgpu-matrix": "^3.4.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0"
+    "@babel/core": "^7.20.0",
+    "@webgpu/types": "^0.1.60"
   },
   "private": true
 }
