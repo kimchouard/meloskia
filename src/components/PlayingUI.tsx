@@ -362,7 +362,7 @@ const PlayingUI = ({
                 <PianoKeyboard keysState={keysState} songName={songData.name} />
               </Group>
             </Canvas>
-            <SparklesOverlay screenWidth={screenWidth} width={gameWidth} height={screenHeight} />
+            <SparklesOverlay keysState={keysState} screenWidth={screenWidth} width={gameWidth} height={screenHeight} />
           </>
         </GestureDetector>
       </View>

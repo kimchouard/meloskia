@@ -3,6 +3,11 @@ import * as d from "typegpu/data";
 
 export const Uniforms = d.struct({
   projectionMat: d.mat4x4f,
+  modelMat: d.mat4x4f,
+});
+
+export const SimParams = d.struct({
+  deltaTime: d.f32,
 });
 
 export const Particle = d.struct({
@@ -12,28 +17,43 @@ export const Particle = d.struct({
   age: d.f32,
 });
 
-export const layout = tgpu.bindGroupLayout({
-  uniforms: { uniform: Uniforms },
-  particles: { storage: (n: number) => d.arrayOf(Particle, n) },
+export const updateLayout = tgpu.bindGroupLayout({
+  simParams: { uniform: SimParams },
+  particles: { storage: (n: number) => d.arrayOf(Particle, n), access: 'mutable' },
 });
 
-const purple = d.vec4f(0.769, 0.392, 1.0, 1);
-const blue = d.vec4f(0.114, 0.447, 0.941, 1);
+export const renderLayout = tgpu.bindGroupLayout({
+  uniforms: { uniform: Uniforms },
+  particles: { storage: (n: number) => d.arrayOf(Particle, n), access: 'readonly' },
+});
 
-const getGradientColor = tgpu['~unstable'].fn(
-  { ratio: d.f32 },
-  d.vec4f,
-)/* wgsl */`{
-  let color = mix(purple, blue, ratio);
-  return color;
-}`
-.$uses({ purple, blue })
-.$name('getGradientColor');
+export const update = tgpu['~unstable'].computeFn({
+  workgroupSize: [1],
+  in: { gid: d.builtin.globalInvocationId },
+})`{
+  let deltaTime = updateLayout.$.simParams.deltaTime;
+  var particle = updateLayout.$.particles[in.gid.x];
+
+  if (particle.age > 0) {
+    particle.age -= deltaTime;
+  }
+
+  particle.vel.y += -400 * deltaTime;
+  particle.pos += particle.vel * deltaTime;
+
+  updateLayout.$.particles[in.gid.x] = particle;
+}
+`.$uses({ updateLayout });
+
+const Varying = {
+  age: d.f32,
+  uv: d.vec2f,
+};
 
 export const mainVertex = tgpu['~unstable'].vertexFn({
   in: { vertexIndex: d.builtin.vertexIndex, instanceIdx: d.builtin.instanceIndex },
-  out: { outPos: d.builtin.position, uv: d.vec2f },
-})/* wgsl */`{
+  out: { outPos: d.builtin.position, ...Varying },
+})`{
   var pos = array<vec2f, 4>(
     vec2(1, 1), // top-right
     vec2(-1, 1), // top-left
@@ -48,19 +68,23 @@ export const mainVertex = tgpu['~unstable'].vertexFn({
     vec2(0.0, 0.0),
   );
 
-  let scale: f32 = 64.0;
+  let scale: f32 = 12.0;
 
-  let particle = layout.$.particles[in.instanceIdx];
-  let position = layout.$.uniforms.projectionMat * vec4f(particle.pos + pos[in.vertexIndex] * scale, 0.0, 1.0);
+  let particle = renderLayout.$.particles[in.instanceIdx];
+  let position = renderLayout.$.uniforms.projectionMat * renderLayout.$.uniforms.modelMat * vec4f(particle.pos + pos[in.vertexIndex] * scale, 0.0, 1.0);
 
-  return Out(position, uv[in.vertexIndex]);
+  return Out(position, particle.age, uv[in.vertexIndex]);
 }`
-.$uses({ layout });
+.$uses({ renderLayout });
 
 export const mainFragment = tgpu['~unstable'].fragmentFn({
-  in: { uv: d.vec2f },
+  in: Varying,
   out: d.vec4f,
-})/* wgsl */`{
-  return getGradientColor((in.uv[0] + in.uv[1]) / 2);
-}
-`.$uses({ getGradientColor });
+})`{
+  if (in.age <= 0) {
+    discard;
+  }
+  let sq_dist_to_center = clamp(1 - distance(in.uv, vec2f(.5, .5)) * 2., 0, 1);
+  let fadeOut = clamp(in.age * 0.5, 0, 1);
+  return mix(vec4f(0, 0, 0, 0), vec4f(1, 0, 0, 1) * sq_dist_to_center, fadeOut);
+}`;
