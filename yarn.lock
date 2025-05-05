@@ -1703,6 +1703,11 @@
   dependencies:
     "@sinonjs/commons" "^3.0.0"
 
+"@typegpu/noise@^0.0.6":
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/@typegpu/noise/-/noise-0.0.6.tgz#b6aef6af7f90d15cf1c3fd3e00053016d2e23008"
+  integrity sha512-2l+A9vZ//gGJ1gzx1HcY2+4lDB798D74MJGTklUgQhm+cul0k9KIKnRNSOgb0/xS+xhdc6+KRtddGQWaRRUC0Q==
+
 "@types/babel__core@^7.1.14":
   version "7.20.5"
   resolved "https://registry.yarnpkg.com/@types/babel__core/-/babel__core-7.20.5.tgz#3df15f27ba85319caa07ba08d0721889bb39c017"
