@@ -2,7 +2,6 @@ import tgpu, {
   StorageFlag,
   TgpuBindGroup,
   TgpuBuffer,
-  TgpuBufferUniform,
   TgpuComputePipeline,
   TgpuRenderPipeline,
   TgpuRoot,
@@ -10,7 +9,7 @@ import tgpu, {
 } from 'typegpu';
 import * as d from 'typegpu/data';
 
-type ComputeCtx<T extends d.AnyWgslData> = {
+export type ComputeCtx<T extends d.AnyWgslData> = {
   readonly $$: {
     readonly particles: d.Infer<Particle>[];
     readonly deltaTime: number;
@@ -19,7 +18,7 @@ type ComputeCtx<T extends d.AnyWgslData> = {
   };
 };
 
-type RenderCtx<T extends d.AnyWgslData> = {
+export type RenderCtx<T extends d.AnyWgslData> = {
   readonly presentationFormat: GPUTextureFormat;
   readonly $$: {
     readonly particles: d.Infer<Particle>[];
@@ -67,6 +66,21 @@ export const renderLayout = tgpu.bindGroupLayout({
   particles: { storage: (n: number) => d.arrayOf(Particle, n), access: 'readonly' },
 }).$name('renderLayout');
 
+const ageFn = tgpu['~unstable'].computeFn({
+  workgroupSize: [1],
+  in: { gid: d.builtin.globalInvocationId },
+})`{
+  let deltaTime = updateLayout.$.simParams.deltaTime;
+  var particle = updateLayout.$.particles[in.gid.x];
+
+  if (particle.age > 0) {
+    particle.age -= deltaTime;
+  }
+
+  updateLayout.$.particles[in.gid.x] = particle;
+}
+`.$uses({ updateLayout });
+
 class ParticleSystemInstance<T extends d.AnyWgslData> {
   #root: TgpuRoot;
   #getInitialPosition: (spawner: d.v2f) => d.v2f;
@@ -83,6 +97,7 @@ class ParticleSystemInstance<T extends d.AnyWgslData> {
   #updateBindGroup: TgpuBindGroup<typeof updateLayout['entries']>;
   #renderBindGroup: TgpuBindGroup<typeof renderLayout['entries']>;
   #computePipeline: TgpuComputePipeline;
+  #agePipeline: TgpuComputePipeline;
   #renderPipeline: TgpuRenderPipeline;
 
   readonly options: ParticleSystemOptions<T>;
@@ -142,6 +157,12 @@ class ParticleSystemInstance<T extends d.AnyWgslData> {
     // ...
     .with(updateLayout, this.#updateBindGroup);
 
+    this.#agePipeline = root['~unstable']
+      .withCompute(ageFn)
+      .createPipeline()
+      // ...
+      .with(updateLayout, this.#updateBindGroup);
+
     this.#renderPipeline = options.renderPipeline(root, {
       presentationFormat: outputFormat,
       $$: {
@@ -165,6 +186,7 @@ class ParticleSystemInstance<T extends d.AnyWgslData> {
 
   update(deltaTime: number) {
     this.#simParamsBuffer.write({ deltaTime });
+    this.#agePipeline.dispatchWorkgroups(this.options.maxCount);
     this.#computePipeline.dispatchWorkgroups(this.options.maxCount);
 
     this.#particlesToSpawnAggregate += this.options.spawnRate * deltaTime;
@@ -195,15 +217,10 @@ class ParticleSystemInstance<T extends d.AnyWgslData> {
     this.#particlesToSpawnAggregate %= 1; // resetting to fractional part
   }
 
-  render(outputView: GPUTextureView) {
-    this.#renderPipeline
-      .withColorAttachment({
-        view: outputView,
-        clearValue: [0, 0, 0, 0],
-        loadOp: 'clear',
-        storeOp: 'store',
-      })
-      .draw(4, this.options.maxCount);
+  // TODO: Replace `any` with RenderPass when it gets exported from 'typegpu'
+  draw(pass: any) {
+    pass.setPipeline(this.#renderPipeline);
+    pass.draw(4, this.options.maxCount);
   }
 }
 
