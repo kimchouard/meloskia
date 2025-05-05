@@ -1,16 +1,14 @@
 import tgpu from 'typegpu';
 import * as d from 'typegpu/data';
+import * as std from 'typegpu/std';
+import { randf } from '@typegpu/noise';
 import ParticleSystem, { RenderCtx } from './particleSystem';
+import { encroach } from './helpers';
 
 const UniformsSchema = d.struct({
   projectionMat: d.mat4x4f,
   modelMat: d.mat4x4f,
 })
-
-const Varying = {
-  age: d.f32,
-  uv: d.vec2f,
-};
 
 const AdditiveBlending = {
   color: {
@@ -25,39 +23,26 @@ const AdditiveBlending = {
   },
 } as const;
 
-const mainVertex = ($$: RenderCtx<typeof UniformsSchema>['$$']) =>
-  tgpu['~unstable'].vertexFn({
-    in: { vertexIndex: d.builtin.vertexIndex, instanceIdx: d.builtin.instanceIndex },
-    out: { outPos: d.builtin.position, ...Varying },
-  })`{
-    var pos = array<vec2f, 4>(
-      vec2(1, 1), // top-right
-      vec2(-1, 1), // top-left
-      vec2(1, -1), // bottom-right
-      vec2(-1, -1) // bottom-left
-    );
+const POS = tgpu['~unstable'].const(d.arrayOf(d.vec2f, 4), [
+  d.vec2f(1, 1), // top-right
+  d.vec2f(-1, 1), // top-left
+  d.vec2f(1, -1), // bottom-right
+  d.vec2f(-1, -1) // bottom-left
+]);
 
-    var uv = array<vec2f, 4>(
-      vec2(1.0, 1.0),
-      vec2(0.0, 1.0),
-      vec2(1.0, 0.0),
-      vec2(0.0, 0.0),
-    );
-
-    let scale: f32 = 12.0;
-
-    let particle = $$.particles[in.instanceIdx];
-    let position = $$.uniforms.projectionMat * $$.uniforms.modelMat * vec4f(particle.pos + pos[in.vertexIndex] * scale, 0.0, 1.0);
-
-    return Out(position, particle.age, uv[in.vertexIndex]);
-  }`
-  .$uses({ $$ });
+const UV = tgpu['~unstable'].const(d.arrayOf(d.vec2f, 4), [
+  d.vec2f(1.0, 1.0),
+  d.vec2f(0.0, 1.0),
+  d.vec2f(1.0, 0.0),
+  d.vec2f(0.0, 0.0),
+]);
 
 export const slowParticleSystem = new ParticleSystem<typeof UniformsSchema>({
   UniformsSchema,
-  maxCount: 100,
-  spawnRate: 10,
+  maxCount: 1000,
+  spawnRate: 200,
 
+  getInitialPosition: (spawner) => std.add(spawner, std.mul(20, d.vec2f(Math.random() - 0.5, Math.random() - 0.7))),
   getInitialVelocity: () => d.vec2f((Math.random() - 0.5) * 50, 200),
 
   computePipeline(root, { $$ }) {
@@ -68,12 +53,12 @@ export const slowParticleSystem = new ParticleSystem<typeof UniformsSchema>({
       let deltaTime = $$.deltaTime;
       var particle = $$.particles[in.gid.x];
     
-      particle.vel.y += -400 * deltaTime;
+      particle.vel.y = encroach(particle.vel.y, 0, 0.9, deltaTime * 20);
       particle.pos += particle.vel * deltaTime;
     
       $$.particles[in.gid.x] = particle;
     }
-    `.$uses({ $$ });
+    `.$uses({ $$, encroach });
     
     return root['~unstable']
       .withCompute(updateFn)
@@ -81,6 +66,26 @@ export const slowParticleSystem = new ParticleSystem<typeof UniformsSchema>({
   },
 
   renderPipeline(root, { presentationFormat, $$ }) {
+    const Varying = {
+      age: d.f32,
+      seed: d.f32,
+      uv: d.vec2f,
+    };
+    
+    const mainVertex = tgpu['~unstable'].vertexFn({
+      in: { vertexIndex: d.builtin.vertexIndex, instanceIdx: d.builtin.instanceIndex },
+      out: { outPos: d.builtin.position, ...Varying },
+    })`{
+      let particle = $$.particles[in.instanceIdx];
+      let fadein = clamp((1. - particle.age) * 10., 0, 1);
+      let fadeout = clamp(particle.age, 0, 1);
+      let scale: f32 = fadein * fadeout * 12.0;
+      let position = $$.uniforms.projectionMat * $$.uniforms.modelMat * vec4f(particle.pos + POS[in.vertexIndex] * scale, 0.0, 1.0);
+      
+      return Out(position, particle.age, particle.seed, UV[in.vertexIndex]);
+    }`
+    .$uses({ $$, POS, UV });
+  
     const mainFragment = tgpu['~unstable'].fragmentFn({
       in: Varying,
       out: d.vec4f,
@@ -89,12 +94,13 @@ export const slowParticleSystem = new ParticleSystem<typeof UniformsSchema>({
         discard;
       }
       let sq_dist_to_center = clamp(1 - distance(in.uv, vec2f(.5, .5)) * 2., 0, 1);
+      let ttt = pow(sq_dist_to_center, 2);
       let fadeOut = clamp(in.age * 0.5, 0, 1);
-      return vec4f(1, 0, 0, 1) * sq_dist_to_center * fadeOut;
+      return vec4f(0.4 + in.seed * 0.2, 0.9 - in.seed * 0.4, 1, 1) * ttt * fadeOut;
     }`;
     
     return root['~unstable']
-      .withVertex(mainVertex($$), {})
+      .withVertex(mainVertex, {})
       .withFragment(mainFragment, {
         format: presentationFormat,
         blend: AdditiveBlending,
@@ -109,8 +115,8 @@ export const slowParticleSystem = new ParticleSystem<typeof UniformsSchema>({
 
 export const turbulentParticleSystem = new ParticleSystem<typeof UniformsSchema>({
   UniformsSchema,
-  maxCount: 100,
-  spawnRate: 10,
+  maxCount: 500,
+  spawnRate: 50,
 
   getInitialVelocity: () => d.vec2f((Math.random() - 0.5) * 50, 200),
 
@@ -122,12 +128,17 @@ export const turbulentParticleSystem = new ParticleSystem<typeof UniformsSchema>
       let deltaTime = $$.deltaTime;
       var particle = $$.particles[in.gid.x];
     
-      particle.vel.y += -400 * deltaTime;
+      randf.seed2(vec2f(particle.seed, particle.age));
+      particle.vel.x += (randf.sample() - .5) * 100;
+      particle.vel.y += (randf.sample() - .5) * 100;
+      particle.vel.x = encroach(particle.vel.x, 0, 0.9, deltaTime * 100);
+      particle.vel.y = encroach(particle.vel.y, 0, 0.9, deltaTime * 100);
+      particle.vel.y += 10;
       particle.pos += particle.vel * deltaTime;
     
       $$.particles[in.gid.x] = particle;
     }
-    `.$uses({ $$ });
+    `.$uses({ $$, encroach, randf });
     
     return root['~unstable']
       .withCompute(updateFn)
@@ -135,6 +146,24 @@ export const turbulentParticleSystem = new ParticleSystem<typeof UniformsSchema>
   },
 
   renderPipeline(root, { presentationFormat, $$ }) {
+    const Varying = {
+      age: d.f32,
+      seed: d.f32,
+      uv: d.vec2f,
+    };
+    
+    const mainVertex = tgpu['~unstable'].vertexFn({
+      in: { vertexIndex: d.builtin.vertexIndex, instanceIdx: d.builtin.instanceIndex },
+      out: { outPos: d.builtin.position, ...Varying },
+    })`{
+      let scale: f32 = 4.0;
+      let particle = $$.particles[in.instanceIdx];
+      let position = $$.uniforms.projectionMat * $$.uniforms.modelMat * vec4f(particle.pos + POS[in.vertexIndex] * scale, 0.0, 1.0);
+  
+      return Out(position, particle.age, particle.seed, UV[in.vertexIndex]);
+    }`
+    .$uses({ $$, POS, UV });
+  
     const mainFragment = tgpu['~unstable'].fragmentFn({
       in: Varying,
       out: d.vec4f,
@@ -143,12 +172,13 @@ export const turbulentParticleSystem = new ParticleSystem<typeof UniformsSchema>
         discard;
       }
       let sq_dist_to_center = clamp(1 - distance(in.uv, vec2f(.5, .5)) * 2., 0, 1);
+      let ttt = pow(sq_dist_to_center, 0.5);
       let fadeOut = clamp(in.age * 0.5, 0, 1);
-      return vec4f(0, 1, 0, 1) * sq_dist_to_center * fadeOut;
+      return vec4f(0.4, 0.9 - in.seed * 0.4, 1, 1) * ttt * fadeOut;
     }`;
     
     return root['~unstable']
-      .withVertex(mainVertex($$), {})
+      .withVertex(mainVertex, {})
       .withFragment(mainFragment, {
         format: presentationFormat,
         blend: AdditiveBlending,
