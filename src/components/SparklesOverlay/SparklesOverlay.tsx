@@ -3,7 +3,7 @@ import * as d from 'typegpu/data';
 import { RefObject, useCallback, useEffect, useMemo, useRef } from 'react';
 import { mat4 } from 'wgpu-matrix';
 import { countdownBars, gameWidth, getBarsFromDist, getBarsFromTime, keyWidth, pianoKeyboardHeight } from '@/utils/utils';
-import { KeysState, progressAtom, startedPlayingAtAtom } from '@/hooks/useKeyboard';
+import { KeysState, progressAtom } from '@/hooks/useKeyboard';
 import { useRenderLoop } from './useRenderLoop';
 import { slowParticleSystem, turbulentParticleSystem } from './schemas';
 import { accidentalNames, keyboardKeyToNote, keyNames } from '../PianoKeyboard';

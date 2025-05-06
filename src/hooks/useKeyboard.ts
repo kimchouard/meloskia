@@ -22,7 +22,6 @@ type Progress = {
 };
 
 export const progressAtom = atom<Progress>({ playMode: 'stopped', noteRollY: 0 });
-export const startedPlayingAtAtom = atom(null as number | null);
 
 const useKeyboard = ({
   keyboardType,
