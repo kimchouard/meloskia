@@ -1,15 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
 import { Platform } from 'react-native';
+import { atom, PrimitiveAtom, useSetAtom } from 'jotai';
 import { router } from 'expo-router';
 import { accidentalNames, keyNames, noteToKeyboardKey } from '../components/PianoKeyboard';
 import { PlayMode } from '../components/PlayingUI';
 import { SongData } from '@/utils/songs';
 import { countdownBars, getBarsFromTime, getTimeFromBars } from '@/utils/utils';
+import { useReadAtom } from './useReadAtom';
 
 const verbose = false;
 
 export type KeysState = { [key:string]: true | false };
 type KeyboardListener = (e: KeyboardEvent) => void;
+
+export const startedPlayingAtAtom = atom(null as number | null);
 
 const useKeyboard = ({
   keyboardType,
@@ -28,7 +32,11 @@ const useKeyboard = ({
   //      Keyboard State
   // ==============================
 
-  const initKeysState:KeysState = {
+  const prevPlayModeRef = useRef(playMode);
+  const getStartedPlayingAt = useReadAtom(startedPlayingAtAtom);
+  const setStartedPlayingAt = useSetAtom(startedPlayingAtAtom);
+
+  const initKeysState: KeysState = {
     ...keyNames.reduce((acc, key) => ({ ...acc, [key]: false }), {}),
     ...accidentalNames.reduce((acc, key) => (key !== '') && ({ ...acc, [key]: false }), {}),
   };
@@ -159,7 +167,6 @@ const useKeyboard = ({
   // ==============================
 
   const autoPlayFrameAnimationRequest = useRef<number>();
-  const startedPlayingAt = useRef<number>();
   const currentPlayingNotes = useRef<number[]>([]);
 
   const stopAutoPlayLooper = () => {
@@ -168,7 +175,7 @@ const useKeyboard = ({
     // Stop current animation frame
     cancelAnimationFrame(autoPlayFrameAnimationRequest.current);
     autoPlayFrameAnimationRequest.current = null;
-    startedPlayingAt.current = null;
+    setStartedPlayingAt(null);
   };
 
   const playNotesFromBars = (currentTimeInBars: number) => {
@@ -241,10 +248,8 @@ const useKeyboard = ({
 
   // Check if there is are notes that needs to be started or stopped
   const autoPlayLooper = () => {
-    if (!startedPlayingAt.current) startedPlayingAt.current = Date.now();
-
     if (songData?.notes) {
-      const currentTimeInMs = Date.now() - startedPlayingAt.current;
+      const currentTimeInMs = Date.now() - getStartedPlayingAt();
       const currentTimeInBars = getBarsFromTime(currentTimeInMs, songData.bpm);
 
       playNotesFromBars(currentTimeInBars);
@@ -260,6 +265,17 @@ const useKeyboard = ({
   };
 
   useEffect(() => {
+    if (playMode === prevPlayModeRef.current) {
+      // Same as before
+      return;
+    }
+
+    prevPlayModeRef.current = playMode;
+
+    if (playMode === 'playback' || playMode === 'playing') {
+      setStartedPlayingAt(Date.now());
+    }
+
     if (playMode === 'playback') {
       // Use animationFrames to detect when to play the next note
       autoPlayFrameAnimationRequest.current = requestAnimationFrame(autoPlayLooper);
