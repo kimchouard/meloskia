@@ -45,7 +45,8 @@
   "devDependencies": {
     "@babel/core": "^7.20.0",
     "@typegpu/noise": "^0.0.6",
-    "@webgpu/types": "^0.1.60"
+    "@webgpu/types": "^0.1.60",
+    "unplugin-typegpu": "^0.1.0"
   },
   "private": true
 }

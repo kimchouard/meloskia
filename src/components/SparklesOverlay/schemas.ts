@@ -2,7 +2,7 @@ import tgpu from 'typegpu';
 import * as d from 'typegpu/data';
 import * as std from 'typegpu/std';
 import { randf } from '@typegpu/noise';
-import ParticleSystem, { RenderCtx } from './particleSystem';
+import ParticleSystem from './particleSystem';
 import { encroach } from './helpers';
 
 const UniformsSchema = d.struct({
@@ -23,6 +23,9 @@ const AdditiveBlending = {
   },
 } as const;
 
+/**
+ * Vertex positions of a quad using triangle-strip topology
+ */
 const POS = tgpu['~unstable'].const(d.arrayOf(d.vec2f, 4), [
   d.vec2f(1, 1), // top-right
   d.vec2f(-1, 1), // top-left
@@ -30,6 +33,9 @@ const POS = tgpu['~unstable'].const(d.arrayOf(d.vec2f, 4), [
   d.vec2f(-1, -1) // bottom-left
 ]);
 
+/**
+ * UV coordinates of a quad using triangle-strip topology
+ */
 const UV = tgpu['~unstable'].const(d.arrayOf(d.vec2f, 4), [
   d.vec2f(1.0, 1.0),
   d.vec2f(0.0, 1.0),
@@ -49,17 +55,14 @@ export const slowParticleSystem = new ParticleSystem<typeof UniformsSchema>({
     const updateFn = tgpu['~unstable'].computeFn({
       workgroupSize: [1],
       in: { gid: d.builtin.globalInvocationId },
-    })`{
-      let deltaTime = $$.deltaTime;
-      var particle = $$.particles[in.gid.x];
+    })((input) => {
+      const particle = $$.particles[input.gid.x];
+      particle.vel.y = encroach(particle.vel.y, 0, 0.1, $$.deltaTime);
+      particle.pos = std.add(particle.pos, std.mul($$.deltaTime, particle.vel));
     
-      particle.vel.y = encroach(particle.vel.y, 0, 0.9, deltaTime * 20);
-      particle.pos += particle.vel * deltaTime;
-    
-      $$.particles[in.gid.x] = particle;
-    }
-    `.$uses({ $$, encroach });
-    
+      $$.particles[input.gid.x] = particle;
+    });
+
     return root['~unstable']
       .withCompute(updateFn)
       .createPipeline();
@@ -131,8 +134,8 @@ export const turbulentParticleSystem = new ParticleSystem<typeof UniformsSchema>
       randf.seed2(vec2f(particle.seed, particle.age));
       particle.vel.x += (randf.sample() - .5) * 100;
       particle.vel.y += (randf.sample() - .5) * 100;
-      particle.vel.x = encroach(particle.vel.x, 0, 0.9, deltaTime * 100);
-      particle.vel.y = encroach(particle.vel.y, 0, 0.9, deltaTime * 100);
+      particle.vel.x = encroach(particle.vel.x, 0, 0.001, deltaTime);
+      particle.vel.y = encroach(particle.vel.y, 0, 0.001, deltaTime);
       particle.vel.y += 10;
       particle.pos += particle.vel * deltaTime;
     

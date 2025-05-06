@@ -1,13 +1,16 @@
 import tgpu from 'typegpu';
-import * as d from 'typegpu/data';
+import { f32 } from 'typegpu/data';
+import { pow, mix } from 'typegpu/std';
 
-export const encroach = tgpu['~unstable'].fn([d.f32, d.f32, d.f32, d.f32], d.f32)`(
-  start: f32,
-  end: f32,
-  factorPerSecond: f32,
-  deltaTime: f32,
-) -> f32 {
-  let diff = end - start;
-  let factor = pow(factorPerSecond, deltaTime);
-  return start + diff * (1 - factor);
-}`;
+/**
+ * Nudges `start` towards `end` at a rate such that the distance
+ * will be `abs(end-start) * factorPerSecond` after a second.
+ * 
+ * Can be used to dampen movement in a frame-independent way.
+ */
+export const encroach = tgpu['~unstable'].fn([f32, f32, f32, f32], f32)(
+  (start, end, factorPerSecond, deltaTime) => {
+    const factor = pow(factorPerSecond, deltaTime);
+    return mix(start, end, (1 - factor));
+  }
+);
