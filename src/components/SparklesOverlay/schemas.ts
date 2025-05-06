@@ -77,30 +77,35 @@ export const slowParticleSystem = new ParticleSystem<typeof UniformsSchema>({
     
     const mainVertex = tgpu['~unstable'].vertexFn({
       in: { vertexIndex: d.builtin.vertexIndex, instanceIdx: d.builtin.instanceIndex },
-      out: { outPos: d.builtin.position, ...Varying },
-    })`{
-      let particle = $$.particles[in.instanceIdx];
-      let fadein = clamp((1. - particle.age) * 10., 0, 1);
-      let fadeout = clamp(particle.age, 0, 1);
-      let scale: f32 = fadein * fadeout * 18.0;
-      let position = $$.uniforms.projectionMat * $$.uniforms.modelMat * vec4f(particle.pos + POS[in.vertexIndex] * scale, 0.0, 1.0);
+      out: { position: d.builtin.position, ...Varying },
+    })((input) => {
+      const particle = $$.particles[input.instanceIdx];
+      const fadein = std.clamp((1. - particle.age) * 10., 0, 1);
+      const fadeout = std.clamp(particle.age, 0, 1);
+      const scale = fadein * fadeout * 18.0;
+      const localPos = std.add(particle.pos, std.mul(scale, POS.value[input.vertexIndex]));
+      const position = std.mul(std.mul($$.uniforms.projectionMat, $$.uniforms.modelMat), d.vec4f(localPos, 0.0, 1.0));
       
-      return Out(position, particle.age, particle.seed, UV[in.vertexIndex]);
-    }`
-    .$uses({ $$, POS, UV });
+      return {
+        position,
+        age: particle.age,
+        seed: particle.seed,
+        uv: UV.value[input.vertexIndex],
+      };
+    });
   
     const mainFragment = tgpu['~unstable'].fragmentFn({
       in: Varying,
       out: d.vec4f,
-    })`{
-      if (in.age <= 0) {
-        discard;
+    })((input) => {
+      if (input.age <= 0) {
+        std.discard();
       }
-      let sq_dist_to_center = clamp(1 - distance(in.uv, vec2f(.5, .5)) * 2., 0, 1);
-      let ttt = pow(sq_dist_to_center, 2);
-      let fadeOut = clamp(in.age * 0.5, 0, 1);
-      return vec4f(0.4 + in.seed * 0.2, 0.9 - in.seed * 0.4, 1, 1) * ttt * fadeOut;
-    }`;
+      const sq_dist_to_center = std.clamp(1 - std.distance(input.uv, d.vec2f(.5, .5)) * 2., 0, 1);
+      const ttt = std.pow(sq_dist_to_center, 2);
+      const fadeOut = std.clamp(input.age * 0.5, 0, 1);
+      return std.mul(ttt * fadeOut, d.vec4f(0.4 + input.seed * 0.2, 0.9 - input.seed * 0.4, 1, 1));
+    });
     
     return root['~unstable']
       .withVertex(mainVertex, {})
@@ -127,21 +132,19 @@ export const turbulentParticleSystem = new ParticleSystem<typeof UniformsSchema>
     const updateFn = tgpu['~unstable'].computeFn({
       workgroupSize: [1],
       in: { gid: d.builtin.globalInvocationId },
-    })`{
-      let deltaTime = $$.deltaTime;
-      var particle = $$.particles[in.gid.x];
+    })((input) => {
+      const particle = $$.particles[input.gid.x];
     
-      randf.seed2(vec2f(particle.seed, particle.age));
+      randf.seed2(d.vec2f(particle.seed, particle.age));
       particle.vel.x += (randf.sample() - .5) * 100;
       particle.vel.y += (randf.sample() - .5) * 100;
-      particle.vel.x = encroach(particle.vel.x, 0, 0.001, deltaTime);
-      particle.vel.y = encroach(particle.vel.y, 0, 0.001, deltaTime);
+      particle.vel.x = encroach(particle.vel.x, 0, 0.001, $$.deltaTime);
+      particle.vel.y = encroach(particle.vel.y, 0, 0.001, $$.deltaTime);
       particle.vel.y += 10;
-      particle.pos += particle.vel * deltaTime;
+      particle.pos = std.add(particle.pos, std.mul($$.deltaTime, particle.vel));
     
-      $$.particles[in.gid.x] = particle;
-    }
-    `.$uses({ $$, encroach, randf });
+      $$.particles[input.gid.x] = particle;
+    });
     
     return root['~unstable']
       .withCompute(updateFn)
@@ -157,28 +160,33 @@ export const turbulentParticleSystem = new ParticleSystem<typeof UniformsSchema>
     
     const mainVertex = tgpu['~unstable'].vertexFn({
       in: { vertexIndex: d.builtin.vertexIndex, instanceIdx: d.builtin.instanceIndex },
-      out: { outPos: d.builtin.position, ...Varying },
-    })`{
-      let scale: f32 = 3.0;
-      let particle = $$.particles[in.instanceIdx];
-      let position = $$.uniforms.projectionMat * $$.uniforms.modelMat * vec4f(particle.pos + POS[in.vertexIndex] * scale, 0.0, 1.0);
+      out: { position: d.builtin.position, ...Varying },
+    })((input) => {
+      const scale = d.f32(3.0);
+      let particle = $$.particles[input.instanceIdx];
+      const localPos = std.add(particle.pos, std.mul(scale, POS.value[input.vertexIndex]));
+      const position = std.mul(std.mul($$.uniforms.projectionMat, $$.uniforms.modelMat), d.vec4f(localPos, 0.0, 1.0));
   
-      return Out(position, particle.age, particle.seed, UV[in.vertexIndex]);
-    }`
-    .$uses({ $$, POS, UV });
+      return {
+        position,
+        age: particle.age,
+        seed: particle.seed,
+        uv: UV.value[input.vertexIndex],
+      };
+    });
   
     const mainFragment = tgpu['~unstable'].fragmentFn({
       in: Varying,
       out: d.vec4f,
-    })`{
-      if (in.age <= 0) {
-        discard;
+    })((input) => {
+      if (input.age <= 0) {
+        std.discard();
       }
-      let sq_dist_to_center = clamp(1 - distance(in.uv, vec2f(.5, .5)) * 2., 0, 1);
-      let ttt = pow(sq_dist_to_center, 0.5);
-      let fadeOut = clamp(in.age * 0.5, 0, 1);
-      return vec4f(0.6, 0.9 - in.seed * 0.2, 1, 1) * ttt * fadeOut;
-    }`;
+      const sq_dist_to_center = std.clamp(1 - std.distance(input.uv, d.vec2f(.5, .5)) * 2., 0, 1);
+      const ttt = std.pow(sq_dist_to_center, 0.5);
+      const fadeOut = std.clamp(input.age * 0.5, 0, 1);
+      return std.mul(ttt * fadeOut, d.vec4f(0.6, 0.9 - input.seed * 0.2, 1, 1));
+    });
     
     return root['~unstable']
       .withVertex(mainVertex, {})
