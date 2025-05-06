@@ -42,7 +42,7 @@ export const slowParticleSystem = new ParticleSystem<typeof UniformsSchema>({
   maxCount: 1000,
   spawnRate: 200,
 
-  getInitialPosition: (spawner) => std.add(spawner, std.mul(20, d.vec2f(Math.random() - 0.5, Math.random() - 0.7))),
+  getInitialPosition: (spawner) => std.add(spawner, std.mul(30, d.vec2f(Math.random() - 0.5, Math.random() - 0.7))),
   getInitialVelocity: () => d.vec2f((Math.random() - 0.5) * 50, 200),
 
   computePipeline(root, { $$ }) {
@@ -79,7 +79,7 @@ export const slowParticleSystem = new ParticleSystem<typeof UniformsSchema>({
       let particle = $$.particles[in.instanceIdx];
       let fadein = clamp((1. - particle.age) * 10., 0, 1);
       let fadeout = clamp(particle.age, 0, 1);
-      let scale: f32 = fadein * fadeout * 12.0;
+      let scale: f32 = fadein * fadeout * 18.0;
       let position = $$.uniforms.projectionMat * $$.uniforms.modelMat * vec4f(particle.pos + POS[in.vertexIndex] * scale, 0.0, 1.0);
       
       return Out(position, particle.age, particle.seed, UV[in.vertexIndex]);
@@ -116,7 +116,7 @@ export const slowParticleSystem = new ParticleSystem<typeof UniformsSchema>({
 export const turbulentParticleSystem = new ParticleSystem<typeof UniformsSchema>({
   UniformsSchema,
   maxCount: 500,
-  spawnRate: 50,
+  spawnRate: 100,
 
   getInitialVelocity: () => d.vec2f((Math.random() - 0.5) * 50, 200),
 
@@ -156,7 +156,7 @@ export const turbulentParticleSystem = new ParticleSystem<typeof UniformsSchema>
       in: { vertexIndex: d.builtin.vertexIndex, instanceIdx: d.builtin.instanceIndex },
       out: { outPos: d.builtin.position, ...Varying },
     })`{
-      let scale: f32 = 4.0;
+      let scale: f32 = 3.0;
       let particle = $$.particles[in.instanceIdx];
       let position = $$.uniforms.projectionMat * $$.uniforms.modelMat * vec4f(particle.pos + POS[in.vertexIndex] * scale, 0.0, 1.0);
   
@@ -174,7 +174,7 @@ export const turbulentParticleSystem = new ParticleSystem<typeof UniformsSchema>
       let sq_dist_to_center = clamp(1 - distance(in.uv, vec2f(.5, .5)) * 2., 0, 1);
       let ttt = pow(sq_dist_to_center, 0.5);
       let fadeOut = clamp(in.age * 0.5, 0, 1);
-      return vec4f(0.4, 0.9 - in.seed * 0.4, 1, 1) * ttt * fadeOut;
+      return vec4f(0.6, 0.9 - in.seed * 0.2, 1, 1) * ttt * fadeOut;
     }`;
     
     return root['~unstable']
