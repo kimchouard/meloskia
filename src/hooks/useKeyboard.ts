@@ -13,6 +13,15 @@ const verbose = false;
 export type KeysState = { [key:string]: true | false };
 type KeyboardListener = (e: KeyboardEvent) => void;
 
+type Progress = {
+  playMode: 'playing' | 'playback';
+  startedPlayingAt: number;
+} | {
+  playMode: 'stopped' | 'restart';
+  noteRollY: number;
+};
+
+export const progressAtom = atom<Progress>({ playMode: 'stopped', noteRollY: 0 });
 export const startedPlayingAtAtom = atom(null as number | null);
 
 const useKeyboard = ({
@@ -32,9 +41,10 @@ const useKeyboard = ({
   //      Keyboard State
   // ==============================
 
-  const prevPlayModeRef = useRef(playMode);
-  const getStartedPlayingAt = useReadAtom(startedPlayingAtAtom);
-  const setStartedPlayingAt = useSetAtom(startedPlayingAtAtom);
+  const getProgress = useReadAtom(progressAtom);
+  const setProgress = useSetAtom(progressAtom);
+  // const getStartedPlayingAt = useReadAtom(startedPlayingAtAtom);
+  // const setStartedPlayingAt = useSetAtom(startedPlayingAtAtom);
 
   const initKeysState: KeysState = {
     ...keyNames.reduce((acc, key) => ({ ...acc, [key]: false }), {}),
@@ -175,7 +185,6 @@ const useKeyboard = ({
     // Stop current animation frame
     cancelAnimationFrame(autoPlayFrameAnimationRequest.current);
     autoPlayFrameAnimationRequest.current = null;
-    setStartedPlayingAt(null);
   };
 
   const playNotesFromBars = (currentTimeInBars: number) => {
@@ -248,8 +257,14 @@ const useKeyboard = ({
 
   // Check if there is are notes that needs to be started or stopped
   const autoPlayLooper = () => {
+    const progress = getProgress();
+
+    if (progress.playMode !== 'playback') {
+      return stopAutoPlayLooper();
+    }
+
     if (songData?.notes) {
-      const currentTimeInMs = Date.now() - getStartedPlayingAt();
+      const currentTimeInMs = Date.now() - progress.startedPlayingAt;
       const currentTimeInBars = getBarsFromTime(currentTimeInMs, songData.bpm);
 
       playNotesFromBars(currentTimeInBars);
@@ -259,21 +274,21 @@ const useKeyboard = ({
     }
 
     // Looping on next animation frame
-    if (playMode === 'playback') {
-      autoPlayFrameAnimationRequest.current = requestAnimationFrame(autoPlayLooper);
-    }
+    autoPlayFrameAnimationRequest.current = requestAnimationFrame(autoPlayLooper);
   };
 
   useEffect(() => {
-    if (playMode === prevPlayModeRef.current) {
+    const prevProgress = getProgress();
+    if (playMode === prevProgress.playMode) {
       // Same as before
       return;
     }
 
-    prevPlayModeRef.current = playMode;
-
     if (playMode === 'playback' || playMode === 'playing') {
-      setStartedPlayingAt(Date.now());
+      setProgress({ playMode, startedPlayingAt: Date.now() });
+    }
+    else {
+      setProgress({ playMode, noteRollY: 0 });
     }
 
     if (playMode === 'playback') {

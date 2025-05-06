@@ -1,16 +1,19 @@
-import tgpu, { TgpuRoot } from 'typegpu';
+import tgpu from 'typegpu';
 import * as d from 'typegpu/data';
-import { RefObject, useEffect, useMemo, useRef } from 'react';
+import { RefObject, useCallback, useEffect, useMemo, useRef } from 'react';
 import { mat4 } from 'wgpu-matrix';
-import { gameWidth, keyWidth, pianoKeyboardHeight } from '@/utils/utils';
-import { KeysState } from '@/hooks/useKeyboard';
+import { countdownBars, gameWidth, getBarsFromDist, getBarsFromTime, keyWidth, pianoKeyboardHeight } from '@/utils/utils';
+import { KeysState, progressAtom, startedPlayingAtAtom } from '@/hooks/useKeyboard';
 import { useRenderLoop } from './useRenderLoop';
 import { slowParticleSystem, turbulentParticleSystem } from './schemas';
-import { accidentalNames, keyNames } from '../PianoKeyboard';
+import { accidentalNames, keyboardKeyToNote, keyNames } from '../PianoKeyboard';
+import { SongData } from '@/utils/songs';
+import { useReadAtom } from '@/hooks/useReadAtom';
 
 interface State {
   readonly keysState: KeysState;
   readonly screenWidth: number;
+  getExpectedNotes(): readonly string[];
 }
 
 const keyPositions = Object.fromEntries([
@@ -21,16 +24,6 @@ const keyPositions = Object.fromEntries([
     return [keyName, (i) * keyWidth] as const;
   }),
 ]);
-
-function setupParticles(root: TgpuRoot) {
-  function update(deltaTime: number) {
-
-  }
-
-  return {
-    update,
-  };
-}
 
 function createSetup(stateRef: RefObject<State>) {
   return async function setup(canvas: HTMLCanvasElement, context: GPUCanvasContext) {
@@ -58,11 +51,12 @@ function createSetup(stateRef: RefObject<State>) {
 
         const modelMat = mat4.translation(d.vec3f((stateRef.current.screenWidth - gameWidth) / 2, 0, 0), d.mat4x4f());
 
-        const pressedKeys = Object.entries(stateRef.current.keysState)
-          .filter(([, pressed]) => pressed)
+        const expectedNotes = stateRef.current.getExpectedNotes();
+        const goodKeys = Object.entries(stateRef.current.keysState)
+          .filter(([keyName, pressed]) => pressed && expectedNotes.includes(keyboardKeyToNote[keyName]))
           .map(([key]) => key);
   
-        const spawners = pressedKeys.map((pressedKey) => d.vec2f(keyPositions[pressedKey] ?? 0, pianoKeyboardHeight));
+        const spawners = goodKeys.map((pressedKey) => d.vec2f(keyPositions[pressedKey] ?? 0, pianoKeyboardHeight));
         slowParticles.spawners = spawners;
         turbulentParticles.spawners = spawners;
 
@@ -101,19 +95,53 @@ function createSetup(stateRef: RefObject<State>) {
 }
 
 interface SparklesOverlayProps {
+  songData: SongData;
   keysState: KeysState;
   screenWidth: number;
   width: number;
   height: number;
 }
 
-const SparklesOverlay = ({ keysState, screenWidth, width, height }: SparklesOverlayProps) => {
-  const canvasRef = useRef<HTMLCanvasElement>();
+/**
+ * Returns a function that can be called to retrieve what notes
+ * are expected to be played by the player at a given point in time.
+ * 
+ * @param songData The song that is being played
+ * @returns A function that returns an array of note names
+ */
+function useGetExpectedNotes(songData: SongData): (() => string[]) {
+  const getProgress = useReadAtom(progressAtom);
 
-  const stateRef = useRef<State>({ keysState, screenWidth });
+  return useCallback(() => {
+    const progress = getProgress();
+
+    let currentTimeInBars = 0;
+    if (progress.playMode === 'playback' || progress.playMode === 'playing') {
+      const currentTimeInMs = Date.now() - progress.startedPlayingAt;
+      currentTimeInBars = getBarsFromTime(currentTimeInMs, songData.bpm);
+    } else if (progress.playMode === 'stopped' || progress.playMode === 'restart') {
+      currentTimeInBars = getBarsFromDist(progress.noteRollY, songData.bpm);
+    }
+
+    return songData.notes
+      .filter((note) => {
+        const noteStart = note.startAtBar + countdownBars;
+        const noteEnd = noteStart + note.durationInBars;
+        
+        return currentTimeInBars >= noteStart && currentTimeInBars < noteEnd;
+      })
+      .map(note => note.noteName);
+  }, [songData]);
+}
+
+const SparklesOverlay = ({ keysState, screenWidth, songData, width, height }: SparklesOverlayProps) => {
+  const canvasRef = useRef<HTMLCanvasElement>();
+  const getExpectedNotes = useGetExpectedNotes(songData);
+
+  const stateRef = useRef<State>({ keysState, screenWidth, getExpectedNotes });
   useEffect(() => {
-    stateRef.current = { keysState, screenWidth };
-  }, [keysState, screenWidth]);
+    stateRef.current = { keysState, screenWidth, getExpectedNotes };
+  }, [keysState, screenWidth, getExpectedNotes]);
 
   useRenderLoop(canvasRef, {
     init: useMemo(() => createSetup(stateRef), []),

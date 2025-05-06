@@ -21,11 +21,12 @@ import {
   countdownBars,
   gameHeight, gameWidth, getBarsFromDist, getDistFromBars, getDurationInBars, getOnPressKeyboardGestureHandler, getSongBarCountWithCountdownPlusClosing, getTimeFromBars, isGamePlaying, screenHeight, screenWidth,
 } from '../utils/utils';
-import useKeyboard from '../hooks/useKeyboard';
+import useKeyboard, { progressAtom } from '../hooks/useKeyboard';
 import KeyboardAudio from './KeyboardAudio';
 import SparklesOverlay from './SparklesOverlay/SparklesOverlay';
 import { SongData } from '../utils/songs';
 import BackingAudioManager from '@/components/BackingAudioManager';
+import { useSetAtom } from 'jotai';
 
 const verbose = false;
 
@@ -49,6 +50,7 @@ const PlayingUI = ({
     instrumental: 1,
     clicks: 1,
   });
+  const setProgress = useSetAtom(progressAtom);
 
   // Function to handle BPM changes
   const handleBpmChange = (newBpm: number) => {
@@ -159,6 +161,7 @@ const PlayingUI = ({
     if (translateX > 0 && translateX < translateEndLimit) {
       // We move the scene
       noteRollY.value = translateX;
+      setProgress({ playMode: playMode as 'stopped' | 'restart', noteRollY: translateX });
 
       // Play the notes as we scroll
       const currentTimeInBars = getBarsFromDist(translateX, songData.bpm);
@@ -362,7 +365,7 @@ const PlayingUI = ({
                 <PianoKeyboard keysState={keysState} songName={songData.name} />
               </Group>
             </Canvas>
-            <SparklesOverlay keysState={keysState} screenWidth={screenWidth} width={gameWidth} height={screenHeight} />
+            <SparklesOverlay keysState={keysState} screenWidth={screenWidth} width={gameWidth} height={screenHeight} songData={songData} />
           </>
         </GestureDetector>
       </View>
