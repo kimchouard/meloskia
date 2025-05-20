@@ -5,7 +5,7 @@ import { mat4 } from 'wgpu-matrix';
 import { countdownBars, gameWidth, getBarsFromDist, getBarsFromTime, keyWidth, pianoKeyboardHeight } from '@/utils/utils';
 import { KeysState, progressAtom } from '@/hooks/useKeyboard';
 import { useRenderLoop } from './useRenderLoop';
-import { slowParticleSystem, turbulentParticleSystem } from './schemas';
+import { slowParticleSystem, starParticleSystem, turbulentParticleSystem } from './schemas';
 import { accidentalNames, keyboardKeyToNote, keyNames } from '../PianoKeyboard';
 import { SongData } from '@/utils/songs';
 import { useReadAtom } from '@/hooks/useReadAtom';
@@ -38,6 +38,7 @@ function createSetup(stateRef: RefObject<State>) {
 
     const slowParticles = slowParticleSystem.create(root, presentationFormat);
     const turbulentParticles = turbulentParticleSystem.create(root, presentationFormat);
+    const starParticles = starParticleSystem.create(root, presentationFormat);
 
     const projectionMat = mat4.ortho(0, canvas.clientWidth, 0, canvas.clientHeight, -100, 100, d.mat4x4f());
 
@@ -59,14 +60,17 @@ function createSetup(stateRef: RefObject<State>) {
         const spawners = goodKeys.map((pressedKey) => d.vec2f(keyPositions[pressedKey] ?? 0, pianoKeyboardHeight));
         slowParticles.spawners = spawners;
         turbulentParticles.spawners = spawners;
+        starParticles.spawners = spawners;
 
         const outputView = context.getCurrentTexture().createView();
 
         slowParticles.setUniforms({ projectionMat, modelMat });
         turbulentParticles.setUniforms({ projectionMat, modelMat });
+        starParticles.setUniforms({ projectionMat, modelMat });
 
         slowParticles.update(deltaTime);
         turbulentParticles.update(deltaTime);
+        starParticles.update(deltaTime);
 
         root['~unstable'].beginRenderPass(
           {
@@ -82,6 +86,7 @@ function createSetup(stateRef: RefObject<State>) {
           (pass) => {
             slowParticles.draw(pass);
             turbulentParticles.draw(pass);
+            starParticles.draw(pass);
           },
         );
     
