@@ -23,6 +23,7 @@
     "expo-linking": "~7.0.5",
     "expo-router": "~4.0.17",
     "expo-status-bar": "~2.0.1",
+    "jotai": "^2.12.3",
     "nativewind": "^4.0.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
@@ -37,10 +38,15 @@
     "tailwind-merge": "^2.2.1",
     "tailwindcss": "^3.4.1",
     "tone": "^14.7.77",
-    "typescript": "~5.3.3"
+    "typegpu": "^0.5.6",
+    "typescript": "~5.3.3",
+    "wgpu-matrix": "^3.4.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0"
+    "@babel/core": "^7.20.0",
+    "@typegpu/noise": "^0.0.6",
+    "@webgpu/types": "^0.1.60",
+    "unplugin-typegpu": "^0.1.0"
   },
   "private": true
 }

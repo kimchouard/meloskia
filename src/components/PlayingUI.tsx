@@ -21,10 +21,12 @@ import {
   countdownBars,
   gameHeight, gameWidth, getBarsFromDist, getDistFromBars, getDurationInBars, getOnPressKeyboardGestureHandler, getSongBarCountWithCountdownPlusClosing, getTimeFromBars, isGamePlaying, screenHeight, screenWidth,
 } from '../utils/utils';
-import useKeyboard from '../hooks/useKeyboard';
+import useKeyboard, { progressAtom } from '../hooks/useKeyboard';
 import KeyboardAudio from './KeyboardAudio';
+import SparklesOverlay from './SparklesOverlay/SparklesOverlay';
 import { SongData } from '../utils/songs';
 import BackingAudioManager from '@/components/BackingAudioManager';
+import { useSetAtom } from 'jotai';
 
 const verbose = false;
 
@@ -38,7 +40,7 @@ const PlayingUI = ({
   // ==============================
   //    Playing State
 
-  const playingTimeout = useRef<NodeJS.Timeout>();
+  const playingTimeout = useRef<ReturnType<typeof setTimeout>>();
 
   const [playMode, setPlayMode] = useState<PlayMode>('stopped');
   const [userBpm, setUserBpm] = useState<number>(songData.bpm);
@@ -48,6 +50,7 @@ const PlayingUI = ({
     instrumental: 1,
     clicks: 1,
   });
+  const setProgress = useSetAtom(progressAtom);
 
   // Function to handle BPM changes
   const handleBpmChange = (newBpm: number) => {
@@ -158,6 +161,7 @@ const PlayingUI = ({
     if (translateX > 0 && translateX < translateEndLimit) {
       // We move the scene
       noteRollY.value = translateX;
+      setProgress({ playMode: playMode as 'stopped' | 'restart', noteRollY: translateX });
 
       // Play the notes as we scroll
       const currentTimeInBars = getBarsFromDist(translateX, songData.bpm);
@@ -334,7 +338,7 @@ const PlayingUI = ({
 
   if (songData) {
     return (
-      <View className="flex-1">
+      <View className="relative flex-1">
         {/* Header */}
         {renderHeader()}
 
@@ -348,18 +352,21 @@ const PlayingUI = ({
         <BackingAudioManager {...{ playMode, userBpm, songData, trackVolumes }} />
 
         <GestureDetector gesture={getOnPressKeyboardGestureHandler(keyPressed, releaseLastKey)}>
-          <Canvas style={{ width: screenWidth, height: screenHeight, flex: 1, overflow: 'hidden' }}>
-            <Group transform={[
-              // Center the game
-              { translateX: (screenWidth - gameWidth) / 2 },
-              { translateY: (screenHeight - gameHeight) / 2 },
-            ]}>
-              <NoteRoll {...{
-                keysState, songData, noteRollY,
-              }} />
-              <PianoKeyboard keysState={keysState} songName={songData.name} />
-            </Group>
-          </Canvas>
+          <>
+            <Canvas style={{ width: screenWidth, height: screenHeight, flex: 1, overflow: 'hidden' }}>
+              <Group transform={[
+                // Center the game
+                { translateX: (screenWidth - gameWidth) / 2 },
+                { translateY: (screenHeight - gameHeight) / 2 },
+              ]}>
+                <NoteRoll {...{
+                  keysState, songData, noteRollY,
+                }} />
+                <PianoKeyboard keysState={keysState} songName={songData.name} />
+              </Group>
+            </Canvas>
+            <SparklesOverlay keysState={keysState} screenWidth={screenWidth} width={gameWidth} height={screenHeight} songData={songData} />
+          </>
         </GestureDetector>
       </View>
     );
