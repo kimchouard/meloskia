@@ -24,6 +24,7 @@ import {
 } from '@/utils/utils';
 import useKeyboard from '@/hooks/useKeyboard';
 import usePlayback from '@/hooks/usePlayback';
+import { progressAtom } from '@/atoms/progressAtom';
 
 import NoteRoll from '../NoteRoll';
 import PianoKeyboard from '../PianoKeyboard';
@@ -35,6 +36,8 @@ import SongNotFound from './SongNotFound';
 import CanvasHeader from './CanvasHeader';
 import CanvasCTA from './CanvasCTA';
 import KeyboardAudio from '../KeyboardAudio';
+import SparklesOverlay from '../SparklesOverlay/SparklesOverlay';
+import { useSetAtom } from 'jotai';
 
 interface SongCanvasProps {
   song?: Song;
@@ -47,6 +50,8 @@ const SongCanvas: React.FC<SongCanvasProps> = ({ song }) => {
   const [keysState, setKeysState] = useState<Record<NoteName, boolean>>(
     getInitialKeyStates()
   );
+
+  const setProgress = useSetAtom(progressAtom);
 
   const audioContext = useMemo(() => new AudioContext(), []);
 
@@ -109,6 +114,10 @@ const SongCanvas: React.FC<SongCanvasProps> = ({ song }) => {
       const translateX = noteRollY.value - scrolledVerticallyBy;
 
       noteRollY.value = clamp(translateX, 0, songDistance);
+      setProgress({
+        playMode: state as 'stopped' | 'restart',
+        noteRollY: noteRollY.value,
+      });
 
       const progressInBars = getBarsFromDist(noteRollY.value, bpm);
 
@@ -144,7 +153,7 @@ const SongCanvas: React.FC<SongCanvasProps> = ({ song }) => {
 
       return false;
     },
-    [noteRollY, songDistance, state, bpm, song]
+    [noteRollY, songDistance, state, bpm, song, setProgress]
   );
 
   useEffect(() => {
@@ -245,6 +254,13 @@ const SongCanvas: React.FC<SongCanvasProps> = ({ song }) => {
         </Group>
       </Canvas>
       <KeyboardAudio keysState={keysState} playMode={state} />
+      <SparklesOverlay
+        songData={song}
+        width={gameWidth}
+        height={gameHeight}
+        keysState={keysState}
+        screenWidth={screenWidth}
+      />
       {!isPlaying(state) && <CanvasCTA />}
     </SongCanvasContext.Provider>
   );
