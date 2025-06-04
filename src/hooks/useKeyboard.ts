@@ -2,8 +2,8 @@ import { router } from 'expo-router';
 import { Platform } from 'react-native';
 import { SetStateAction, useCallback, useEffect } from 'react';
 
-import { accidentalNames, keyboardKeyToNote, keyNames } from '@/constants';
 import { getInitialKeyStates } from '@/components/SongCanvas/utils';
+import { accidentalNames, keyboardKeyToNote, keyNames } from '@/constants';
 import { KeysState, PlayerState } from '@/types';
 import Logger from '@/utils/Logger';
 
@@ -27,9 +27,6 @@ export default function useKeyboard(options: UseKeyboardOptions) {
     restartGame,
     setKeysState,
   } = options;
-
-  // const getProgress = useReadAtom(progressAtom);
-  // const setProgress = useSetAtom(progressAtom);
 
   const restartAndReleaseKeys = useCallback(() => {
     restartGame();
