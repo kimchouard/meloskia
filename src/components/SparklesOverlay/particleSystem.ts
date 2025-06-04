@@ -77,15 +77,14 @@ export const renderLayout = tgpu
 const ageFn = tgpu['~unstable'].computeFn({
   workgroupSize: [1],
   in: { gid: d.builtin.globalInvocationId },
-})`{
-  let deltaTime = updateLayout.$.simParams.deltaTime;
-  var particle = updateLayout.$.particles[in.gid.x];
+})(({ gid }) => {
+  const deltaTime = updateLayout.$.simParams.deltaTime;
+  const particle = updateLayout.$.particles[gid.x];
   if (particle.age > 0) {
     particle.age -= deltaTime;
   }
-  updateLayout.$.particles[in.gid.x] = particle;
-}
-`.$uses({ updateLayout });
+  updateLayout.$.particles[gid.x] = particle;
+});
 
 class ParticleSystemInstance<T extends d.AnyWgslData> {
   #root: TgpuRoot;
