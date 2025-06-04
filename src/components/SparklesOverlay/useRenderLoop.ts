@@ -4,7 +4,7 @@ export interface UseRenderLoopOptions {
   init(
     canvas: HTMLCanvasElement,
     context: GPUCanvasContext
-  ): Promise<{
+  ): Promise<undefined | {
     frame(): void;
     dispose(): void;
   }>;
@@ -31,6 +31,11 @@ export function useRenderLoop(
         onFrame = undefined;
         onDispose = undefined;
         init(lastCanvas, lastCanvas.getContext('webgpu')).then((result) => {
+          if (result === undefined) {
+            // Nothing to run or dispose.
+            return;
+          }
+
           if (!running) {
             result.dispose();
           } else {

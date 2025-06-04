@@ -42,6 +42,10 @@ function createSetup(stateRef: RefObject<State>) {
     canvas: HTMLCanvasElement,
     context: GPUCanvasContext
   ) {
+    if (typeof navigator.gpu === 'undefined') {
+      console.warn('WebGPU is not supported in this browser. Some functionality may be disabled.');
+      return;
+    }
     const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
     const root = await tgpu.init();
 
