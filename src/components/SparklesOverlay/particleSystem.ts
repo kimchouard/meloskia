@@ -13,8 +13,7 @@ export type ComputeCtx<T extends d.AnyWgslData> = {
   readonly $$: {
     readonly particles: d.Infer<Particle>[];
     readonly deltaTime: number;
-    // TODO: Change to d.InferGPU once it's exported
-    readonly uniforms: d.Infer<T>;
+    readonly uniforms: d.InferGPU<T>;
   };
 };
 
@@ -22,8 +21,7 @@ export type RenderCtx<T extends d.AnyWgslData> = {
   readonly presentationFormat: GPUTextureFormat;
   readonly $$: {
     readonly particles: d.Infer<Particle>[];
-    // TODO: Change to d.InferGPU once it's exported
-    readonly uniforms: d.Infer<T>;
+    readonly uniforms: d.InferGPU<T>;
   };
 };
 
@@ -164,8 +162,7 @@ class ParticleSystemInstance<T extends d.AnyWgslData> {
             return updateLayout.$.particles;
           },
           get uniforms() {
-            // TODO: Remove cast once d.InferGPU is available
-            return uniforms.value as d.Infer<T>;
+            return uniforms.value as d.InferGPU<T>;
           },
         },
       })
@@ -186,8 +183,7 @@ class ParticleSystemInstance<T extends d.AnyWgslData> {
             return renderLayout.$.particles;
           },
           get uniforms() {
-            // TODO: Remove cast once d.InferGPU is available
-            return uniforms.value as d.Infer<T>;
+            return uniforms.value as d.InferGPU<T>;
           },
         },
       })
@@ -195,7 +191,6 @@ class ParticleSystemInstance<T extends d.AnyWgslData> {
       .with(renderLayout, this.#renderBindGroup);
   }
 
-  // TODO: Change to d.InferGPU once it's exported
   setUniforms(values: d.Infer<T>) {
     this.#uniformsBuffer.write(values);
   }

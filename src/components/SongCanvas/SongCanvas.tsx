@@ -1,3 +1,4 @@
+import { useSetAtom } from 'jotai';
 import { Platform, Text } from 'react-native';
 import { Canvas, Group } from '@shopify/react-native-skia';
 import { memo, useCallback, useEffect, useMemo, useState, useRef } from 'react';
@@ -37,7 +38,6 @@ import CanvasHeader from './CanvasHeader';
 import CanvasCTA from './CanvasCTA';
 import KeyboardAudio from '../KeyboardAudio';
 import SparklesOverlay from '../SparklesOverlay/SparklesOverlay';
-import { useSetAtom } from 'jotai';
 
 interface SongCanvasProps {
   song?: Song;

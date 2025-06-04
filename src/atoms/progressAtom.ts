@@ -1,6 +1,4 @@
 import { atom } from 'jotai';
-// import { PrimitiveAtom, useSetAtom } from 'jotai';
-// import { useReadAtom } from '@/hooks/useReadAtom';
 
 export type Progress =
   | {
