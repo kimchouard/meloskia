@@ -8,9 +8,9 @@ import {
   dot,
   mul,
   sub,
-  length,
   clamp,
   distance,
+  sign,
 } from 'typegpu/std';
 
 /**
@@ -26,10 +26,6 @@ export const encroach = tgpu['~unstable'].fn(
   const factor = pow(factorPerSecond, deltaTime);
   return mix(start, end, 1 - factor);
 });
-
-const sign = tgpu['~unstable'].fn([f32], f32)`(a: f32) -> f32 {
-  return sign(a);
-}`;
 
 /**
  * Source: https://iquilezles.org/articles/distfunctions2d/

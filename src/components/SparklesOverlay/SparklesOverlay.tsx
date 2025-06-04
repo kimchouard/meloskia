@@ -12,7 +12,7 @@ import {
 } from '@/utils/utils';
 import { progressAtom } from '@/atoms/progressAtom';
 import { KeysState } from '@/types';
-import { keyNames, accidentalNames, keyboardKeyToNote } from '@/constants';
+import { keyNames, accidentalNames, noteToKeyboardKey } from '@/constants';
 import { InstrumentNote, Song } from '@/songs';
 import { useRenderLoop } from './useRenderLoop';
 import {
@@ -83,15 +83,8 @@ function createSetup(stateRef: RefObject<State>) {
 
         const expectedNotes = stateRef.current.getExpectedNotes();
         const goodKeys = Object.entries(stateRef.current.keysState)
-          .filter(([keyName, pressed]) => {
-            // return (
-            //   pressed && expectedNotes.includes(keyboardKeyToNote[keyName])
-            // );
-            return true;
-          })
-          .map(([key]) => key);
-
-        console.log(goodKeys.length, expectedNotes.length);
+        .filter(([note, pressed]) => pressed && expectedNotes.includes(note))
+        .map(([note]) => noteToKeyboardKey[note]);
 
         const spawners = goodKeys.map((pressedKey) =>
           d.vec2f(keyPositions[pressedKey] ?? 0, pianoKeyboardHeight)

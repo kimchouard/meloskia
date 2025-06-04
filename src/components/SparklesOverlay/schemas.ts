@@ -59,12 +59,12 @@ export const slowParticleSystem = new ParticleSystem<typeof UniformsSchema>({
     const updateFn = tgpu['~unstable'].computeFn({
       workgroupSize: [1],
       in: { gid: d.builtin.globalInvocationId },
-    })((input) => {
-      const particle = $$.particles[input.gid.x];
+    })(({ gid }) => {
+      const particle = $$.particles[gid.x];
       particle.vel.y = encroach(particle.vel.y, 0, 0.1, $$.deltaTime);
       particle.pos = std.add(particle.pos, std.mul($$.deltaTime, particle.vel));
 
-      $$.particles[input.gid.x] = particle;
+      $$.particles[gid.x] = particle;
     });
 
     return root['~unstable'].withCompute(updateFn).createPipeline();

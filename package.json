@@ -39,7 +39,7 @@
     "tailwind-merge": "^2.2.1",
     "tailwindcss": "^3.4.1",
     "tone": "^14.7.77",
-    "typegpu": "0.5.6",
+    "typegpu": "0.5.8",
     "typescript": "~5.3.3",
     "wgpu-matrix": "^3.4.0"
   },
@@ -49,14 +49,14 @@
     "@react-native/babel-preset": "^0.78.0",
     "@react-native/eslint-config": "^0.78.0",
     "@react-native/typescript-config": "^0.78.0",
-    "@typegpu/noise": "0.0.6",
+    "@typegpu/noise": "0.0.8",
     "@webgpu/types": "0.1.60",
     "eslint": "^8.57.0",
     "eslint-config-expo": "~8.0.1",
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-prettier": "^5.2.3",
     "prettier": "^3.5.3",
-    "unplugin-typegpu": "0.1.0"
+    "unplugin-typegpu": "0.1.2"
   },
   "private": true
 }
