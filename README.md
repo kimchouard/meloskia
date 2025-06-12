@@ -4,7 +4,7 @@ Open-source Music 2.5D Game to demonstrate the power of the "Final Tech Stack": 
 
 ![meloskia-final-tech-stack-sparkle-demo](https://github.com/user-attachments/assets/935e2cf5-d800-49bf-b1e1-130cb21bfe0d)
 
-👉 Try it live here: [meloskia.choaurd.kim](https://meloskia.chouard.kim/)
+👉 Try it live here: [meloskia.chouard.kim](https://meloskia.chouard.kim/)
 
 ## Tech Stack
 
