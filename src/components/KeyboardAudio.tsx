@@ -6,8 +6,6 @@ import { useSongCanvasContext } from './SongCanvas/SongCanvasContext';
 import { Piano } from '@/sounds';
 import Logger from '@/utils/Logger';
 
-// import { keyboardKeyToNote } from './PianoKeyboard';
-
 const Log = Logger.spawn('KeyboardAudio', false);
 
 interface KeyboardAudioProps {

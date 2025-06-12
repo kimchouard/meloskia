@@ -32,7 +32,7 @@ export default function App() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <View className="flex-1 bg-neutral-950 items-center justify-center">
+      <View className="flex-1 bg-neutral-950 items-center justify-center relative">
         <StatusBar style="auto" />
         <SongCanvas song={song} />
       </View>

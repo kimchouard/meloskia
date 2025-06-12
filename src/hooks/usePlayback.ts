@@ -1,11 +1,13 @@
+import { useSetAtom } from 'jotai';
 import { SetStateAction, useEffect, useMemo } from 'react';
 import { GainNode, AudioContext } from 'react-native-audio-api';
 
 import { Piano } from '@/sounds';
 import { PlayerState } from '@/types';
 import { NoteName, Song, SongNote } from '@/songs';
-import { getBarsFromTime, getTimeFromBars, countdownBars } from '@/utils/utils';
+import { progressAtom } from '@/atoms/progressAtom';
 import { isPlaying, clicksForBeat } from '@/components/SongCanvas/utils';
+import { getBarsFromTime, getTimeFromBars, countdownBars } from '@/utils/utils';
 import useLoadAssets, { AudioAsset } from './useLoadAssets';
 
 interface PlaybackOptions {
@@ -26,6 +28,7 @@ export default function usePlayback(options: PlaybackOptions) {
   const { bpm, setKeysState, state, song, metronome, audioContext } = options;
 
   const assets = useLoadAssets(audioContext, song.assets);
+  const setProgress = useSetAtom(progressAtom);
 
   const player = useMemo(
     () =>
@@ -49,14 +52,22 @@ export default function usePlayback(options: PlaybackOptions) {
   useEffect(() => {
     if (isPlaying(state) && !assets.isLoading) {
       player.start(state);
+      setProgress({
+        playMode: state,
+        startedPlayingAt: Date.now(),
+      });
     } else {
       player.stop();
+      setProgress({
+        playMode: state as 'stopped' | 'restart',
+        noteRollY: 0,
+      });
     }
 
     return () => {
       player.stop();
     };
-  }, [state, player, assets]);
+  }, [state, player, assets, setProgress]);
 }
 
 interface PlayerInitOptions {

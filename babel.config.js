@@ -6,6 +6,7 @@ module.exports = function (api) {
       'nativewind/babel',
     ],
     plugins: [
+      'unplugin-typegpu/babel',
       '@babel/plugin-proposal-export-namespace-from',
       'react-native-reanimated/plugin',
     ],
