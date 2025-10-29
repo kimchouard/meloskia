@@ -2,7 +2,7 @@ import tgpu, {
   StorageFlag,
   TgpuBindGroup,
   TgpuBuffer,
-  TgpuComputePipeline,
+  TgpuGuardedComputePipeline,
   TgpuRenderPipeline,
   TgpuRoot,
   UniformFlag,
@@ -32,7 +32,10 @@ export interface ParticleSystemOptions<T extends d.AnyWgslData> {
    */
   spawnRate: number;
   UniformsSchema: T;
-  computePipeline: (root: TgpuRoot, ctx: ComputeCtx<T>) => TgpuComputePipeline;
+  computePipeline: (
+    root: TgpuRoot,
+    ctx: ComputeCtx<T>
+  ) => TgpuGuardedComputePipeline;
   renderPipeline: (root: TgpuRoot, ctx: RenderCtx<T>) => TgpuRenderPipeline;
   getInitialPosition?: (spawner: d.v2f) => d.v2f;
   getInitialVelocity?: (spawner: d.v2f) => d.v2f;
@@ -55,39 +58,28 @@ export const SimParams = d.struct({
   deltaTime: d.f32,
 });
 
-export const updateLayout = tgpu
-  .bindGroupLayout({
-    simParams: { uniform: SimParams },
-    particles: {
-      storage: (n: number) => d.arrayOf(Particle, n),
-      access: 'mutable',
-    },
-  })
-  .$name('updateLayout');
+export const updateLayout = tgpu.bindGroupLayout({
+  simParams: { uniform: SimParams },
+  particles: { storage: d.arrayOf(Particle), access: 'mutable' },
+});
 
-export const renderLayout = tgpu
-  .bindGroupLayout({
-    particles: {
-      storage: (n: number) => d.arrayOf(Particle, n),
-      access: 'readonly',
-    },
-  })
-  .$name('renderLayout');
+export const renderLayout = tgpu.bindGroupLayout({
+  particles: { storage: d.arrayOf(Particle), access: 'readonly' },
+});
 
-const ageFn = tgpu['~unstable'].computeFn({
-  workgroupSize: [1],
-  in: { gid: d.builtin.globalInvocationId },
-})(({ gid }) => {
+const ageFn = (x: number) => {
+  'use gpu';
   const deltaTime = updateLayout.$.simParams.deltaTime;
-  const particle = updateLayout.$.particles[gid.x];
+  const particle = updateLayout.$.particles[x];
+
   if (particle.age > 0) {
     particle.age -= deltaTime;
   }
-  updateLayout.$.particles[gid.x] = particle;
-});
+
+  updateLayout.$.particles[x] = particle;
+};
 
 class ParticleSystemInstance<T extends d.AnyWgslData> {
-  #root: TgpuRoot;
   #getInitialPosition: (spawner: d.v2f) => d.v2f;
   #getInitialVelocity: (spawner: d.v2f) => d.v2f;
   #getInitialAge: (spawner: d.v2f) => number;
@@ -101,8 +93,8 @@ class ParticleSystemInstance<T extends d.AnyWgslData> {
   #uniformsBuffer: TgpuBuffer<T> & UniformFlag;
   #updateBindGroup: TgpuBindGroup<(typeof updateLayout)['entries']>;
   #renderBindGroup: TgpuBindGroup<(typeof renderLayout)['entries']>;
-  #computePipeline: TgpuComputePipeline;
-  #agePipeline: TgpuComputePipeline;
+  #computePipeline: TgpuGuardedComputePipeline;
+  #agePipeline: TgpuGuardedComputePipeline<[x: number]>;
   #renderPipeline: TgpuRenderPipeline;
 
   readonly options: ParticleSystemOptions<T>;
@@ -114,7 +106,6 @@ class ParticleSystemInstance<T extends d.AnyWgslData> {
     outputFormat: GPUTextureFormat,
     options: ParticleSystemOptions<T>
   ) {
-    this.#root = root;
     this.#getInitialPosition =
       options.getInitialPosition ?? DEFAULT_INIT_POSITION;
     this.#getInitialVelocity =
@@ -125,7 +116,7 @@ class ParticleSystemInstance<T extends d.AnyWgslData> {
     this.particlesBuffer = root
       .createBuffer(
         d.arrayOf(Particle, options.maxCount),
-        Array.from({ length: options.maxCount }, (_, i) => ({
+        Array.from({ length: options.maxCount }, () => ({
           pos: d.vec2f(),
           vel: d.vec2f(),
           age: -1,
@@ -166,13 +157,12 @@ class ParticleSystemInstance<T extends d.AnyWgslData> {
         },
       })
       // ...
-      .with(updateLayout, this.#updateBindGroup);
+      .with(this.#updateBindGroup);
 
     this.#agePipeline = root['~unstable']
-      .withCompute(ageFn)
-      .createPipeline()
+      .createGuardedComputePipeline(ageFn)
       // ...
-      .with(updateLayout, this.#updateBindGroup);
+      .with(this.#updateBindGroup);
 
     this.#renderPipeline = options
       .renderPipeline(root, {
@@ -182,12 +172,12 @@ class ParticleSystemInstance<T extends d.AnyWgslData> {
             return renderLayout.$.particles;
           },
           get uniforms() {
-            return uniforms.value as d.InferGPU<T>;
+            return uniforms.$;
           },
         },
       })
       // ...
-      .with(renderLayout, this.#renderBindGroup);
+      .with(this.#renderBindGroup);
   }
 
   setUniforms(values: d.Infer<T>) {
@@ -196,8 +186,8 @@ class ParticleSystemInstance<T extends d.AnyWgslData> {
 
   update(deltaTime: number) {
     this.#simParamsBuffer.write({ deltaTime });
-    this.#agePipeline.dispatchWorkgroups(this.options.maxCount);
-    this.#computePipeline.dispatchWorkgroups(this.options.maxCount);
+    this.#agePipeline.dispatchThreads(this.options.maxCount);
+    this.#computePipeline.dispatchThreads(this.options.maxCount);
 
     this.#particlesToSpawnAggregate += this.options.spawnRate * deltaTime;
     if (this.#particlesToSpawnAggregate < 1) {

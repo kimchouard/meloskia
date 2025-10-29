@@ -26,7 +26,7 @@ const AdditiveBlending = {
 /**
  * Vertex positions of a quad using triangle-strip topology
  */
-const POS = tgpu['~unstable'].const(d.arrayOf(d.vec2f, 4), [
+const POS = tgpu.const(d.arrayOf(d.vec2f, 4), [
   d.vec2f(1, 1), // top-right
   d.vec2f(-1, 1), // top-left
   d.vec2f(1, -1), // bottom-right
@@ -36,7 +36,7 @@ const POS = tgpu['~unstable'].const(d.arrayOf(d.vec2f, 4), [
 /**
  * UV coordinates of a quad using triangle-strip topology
  */
-const UV = tgpu['~unstable'].const(d.arrayOf(d.vec2f, 4), [
+const UV = tgpu.const(d.arrayOf(d.vec2f, 4), [
   d.vec2f(1.0, 1.0),
   d.vec2f(0.0, 1.0),
   d.vec2f(1.0, 0.0),
@@ -49,25 +49,20 @@ export const slowParticleSystem = new ParticleSystem<typeof UniformsSchema>({
   spawnRate: 200,
 
   getInitialPosition: (spawner) =>
-    std.add(
-      spawner,
-      std.mul(30, d.vec2f(Math.random() - 0.5, Math.random() - 0.7))
-    ),
+    spawner.add(d.vec2f(Math.random() - 0.5, Math.random() - 0.7).mul(30)),
   getInitialVelocity: () => d.vec2f((Math.random() - 0.5) * 50, 200),
 
   computePipeline(root, { $$ }) {
-    const updateFn = tgpu['~unstable'].computeFn({
-      workgroupSize: [1],
-      in: { gid: d.builtin.globalInvocationId },
-    })(({ gid }) => {
-      const particle = $$.particles[gid.x];
+    const updateFn = (x: number) => {
+      'use gpu';
+      const particle = $$.particles[x];
       particle.vel.y = encroach(particle.vel.y, 0, 0.1, $$.deltaTime);
-      particle.pos = std.add(particle.pos, std.mul($$.deltaTime, particle.vel));
+      particle.pos = particle.pos.add(particle.vel.mul($$.deltaTime));
 
-      $$.particles[gid.x] = particle;
-    });
+      $$.particles[x] = particle;
+    };
 
-    return root['~unstable'].withCompute(updateFn).createPipeline();
+    return root['~unstable'].createGuardedComputePipeline(updateFn);
   },
 
   renderPipeline(root, { presentationFormat, $$ }) {
@@ -88,14 +83,12 @@ export const slowParticleSystem = new ParticleSystem<typeof UniformsSchema>({
       const fadein = std.clamp((1 - particle.age) * 10, 0, 1);
       const fadeout = std.clamp(particle.age, 0, 1);
       const scale = fadein * fadeout * 18.0;
-      const localPos = std.add(
-        particle.pos,
-        std.mul(scale, POS.value[input.vertexIndex])
+      const localPos = particle.pos.add(
+        POS.value[input.vertexIndex].mul(scale)
       );
-      const position = std.mul(
-        std.mul($$.uniforms.projectionMat, $$.uniforms.modelMat),
-        d.vec4f(localPos, 0.0, 1.0)
-      );
+      const position = $$.uniforms.projectionMat
+        .mul($$.uniforms.modelMat)
+        .mul(d.vec4f(localPos, 0, 1));
 
       return {
         position,
@@ -117,12 +110,11 @@ export const slowParticleSystem = new ParticleSystem<typeof UniformsSchema>({
         0,
         1
       );
-      const ttt = std.pow(sq_dist_to_center, 2);
+      const ttt = sq_dist_to_center ** 2;
       const fadeOut = std.clamp(input.age * 0.5, 0, 1);
-      return std.mul(
-        ttt * fadeOut,
-        d.vec4f(0.4 + input.seed * 0.2, 0.9 - input.seed * 0.4, 1, 1)
-      );
+      return d
+        .vec4f(0.4 + input.seed * 0.2, 0.9 - input.seed * 0.4, 1, 1)
+        .mul(ttt * fadeOut);
     });
 
     return root['~unstable']
@@ -148,11 +140,9 @@ export const turbulentParticleSystem = new ParticleSystem<
   getInitialVelocity: () => d.vec2f((Math.random() - 0.5) * 50, 200),
 
   computePipeline(root, { $$ }) {
-    const updateFn = tgpu['~unstable'].computeFn({
-      workgroupSize: [1],
-      in: { gid: d.builtin.globalInvocationId },
-    })((input) => {
-      const particle = $$.particles[input.gid.x];
+    const updateFn = (x: number) => {
+      'use gpu';
+      const particle = $$.particles[x];
 
       randf.seed2(d.vec2f(particle.seed, particle.age));
       particle.vel.x += (randf.sample() - 0.5) * 100;
@@ -160,12 +150,12 @@ export const turbulentParticleSystem = new ParticleSystem<
       particle.vel.x = encroach(particle.vel.x, 0, 0.001, $$.deltaTime);
       particle.vel.y = encroach(particle.vel.y, 0, 0.001, $$.deltaTime);
       particle.vel.y += 10;
-      particle.pos = std.add(particle.pos, std.mul($$.deltaTime, particle.vel));
+      particle.pos = particle.pos.add(particle.vel.mul($$.deltaTime));
 
-      $$.particles[input.gid.x] = particle;
-    });
+      $$.particles[x] = particle;
+    };
 
-    return root['~unstable'].withCompute(updateFn).createPipeline();
+    return root['~unstable'].createGuardedComputePipeline(updateFn);
   },
 
   renderPipeline(root, { presentationFormat, $$ }) {
@@ -182,16 +172,14 @@ export const turbulentParticleSystem = new ParticleSystem<
       },
       out: { position: d.builtin.position, ...Varying },
     })((input) => {
-      const scale = d.f32(3.0);
-      let particle = $$.particles[input.instanceIdx];
-      const localPos = std.add(
-        particle.pos,
-        std.mul(scale, POS.value[input.vertexIndex])
+      const scale = d.f32(3);
+      const particle = $$.particles[input.instanceIdx];
+      const localPos = particle.pos.add(
+        POS.value[input.vertexIndex].mul(scale)
       );
-      const position = std.mul(
-        std.mul($$.uniforms.projectionMat, $$.uniforms.modelMat),
-        d.vec4f(localPos, 0.0, 1.0)
-      );
+      const position = $$.uniforms.projectionMat
+        .mul($$.uniforms.modelMat)
+        .mul(d.vec4f(localPos, 0, 1));
 
       return {
         position,
@@ -213,9 +201,9 @@ export const turbulentParticleSystem = new ParticleSystem<
         0,
         1
       );
-      const ttt = std.pow(sq_dist_to_center, 0.5);
+      const ttt = sq_dist_to_center ** 0.5;
       const fadeOut = std.clamp(input.age * 0.5, 0, 1);
-      return std.mul(ttt * fadeOut, d.vec4f(0.6, 0.9 - input.seed * 0.2, 1, 1));
+      return d.vec4f(0.6, 0.9 - input.seed * 0.2, 1, 1).mul(ttt * fadeOut);
     });
 
     return root['~unstable']
@@ -245,18 +233,16 @@ export const starParticleSystem = new ParticleSystem<typeof UniformsSchema>({
   getInitialVelocity: () => d.vec2f((Math.random() - 0.5) * 50, 50),
 
   computePipeline(root, { $$ }) {
-    const updateFn = tgpu['~unstable'].computeFn({
-      workgroupSize: [1],
-      in: { gid: d.builtin.globalInvocationId },
-    })((input) => {
-      const particle = $$.particles[input.gid.x];
+    const updateFn = (x: number) => {
+      'use gpu';
+      const particle = $$.particles[x];
       particle.vel.y = encroach(particle.vel.y, 0, 0.1, $$.deltaTime);
-      particle.pos = std.add(particle.pos, std.mul($$.deltaTime, particle.vel));
+      particle.pos = particle.pos.add(particle.vel.mul($$.deltaTime));
 
-      $$.particles[input.gid.x] = particle;
-    });
+      $$.particles[x] = particle;
+    };
 
-    return root['~unstable'].withCompute(updateFn).createPipeline();
+    return root['~unstable'].createGuardedComputePipeline(updateFn);
   },
 
   renderPipeline(root, { presentationFormat, $$ }) {
@@ -276,15 +262,13 @@ export const starParticleSystem = new ParticleSystem<typeof UniformsSchema>({
       const particle = $$.particles[input.instanceIdx];
       const fadein = std.clamp((1 - particle.age) * 20, 0, 1);
       const fadeout = std.clamp(particle.age * 2, 0, 1);
-      const scale = fadein * fadeout * 30.0;
-      const localPos = std.add(
-        particle.pos,
-        std.mul(scale, POS.value[input.vertexIndex])
+      const scale = fadein * fadeout * 30;
+      const localPos = particle.pos.add(
+        POS.value[input.vertexIndex].mul(scale)
       );
-      const position = std.mul(
-        std.mul($$.uniforms.projectionMat, $$.uniforms.modelMat),
-        d.vec4f(localPos, 0.0, 1.0)
-      );
+      const position = $$.uniforms.projectionMat
+        .mul($$.uniforms.modelMat)
+        .mul(d.vec4f(localPos, 0, 1));
 
       return {
         position,
@@ -306,11 +290,11 @@ export const starParticleSystem = new ParticleSystem<typeof UniformsSchema>({
 
       const star = sdPentagram(std.sub(input.uv, d.vec2f(0.5, 0.5)), 0.3);
       if (star < 0) {
-        return std.mul(fadeOut, albedo);
+        return albedo.mul(fadeOut);
       } else {
-        const t = std.clamp(1 - star * 4, 0, 1);
-        const ttt = std.pow(t, 4);
-        return std.mul(ttt * fadeOut, albedo);
+        const t = std.saturate(1 - star * 4);
+        const ttt = t ** 4;
+        return albedo.mul(ttt * fadeOut);
       }
     });
 
