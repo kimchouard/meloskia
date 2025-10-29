@@ -2373,11 +2373,6 @@
   resolved "https://registry.yarnpkg.com/@typegpu/noise/-/noise-0.7.0.tgz#9e6f51909e30656b2ace060b538da7d19b70e808"
   integrity sha512-4q3lN/m0F1pLKz0bJjTj8ukPl0uYsd5EWT4WjauXf19oQrGoHaHIO2lVkTkYTzOvjKf7WvDoSo/MIwv86DxZTg==
 
-"@typegpu/sdf@0.7.0":
-  version "0.7.0"
-  resolved "https://registry.yarnpkg.com/@typegpu/sdf/-/sdf-0.7.0.tgz#3ccc3463f68ef97a220285c72f868a8d57f8af4e"
-  integrity sha512-k4bKl4BuDXTTdbz2ZZP46B6qOfuxiZvqxugbPxbnNSkrYTo0oGkFMojsR0VC9zCQbMpiFqLRST/EVvytvi1gRQ==
-
 "@types/babel__core@^7.1.14":
   version "7.20.5"
   resolved "https://registry.yarnpkg.com/@types/babel__core/-/babel__core-7.20.5.tgz#3df15f27ba85319caa07ba08d0721889bb39c017"
@@ -6181,9 +6176,9 @@ magic-string-ast@^1.0.0:
     magic-string "^0.30.19"
 
 magic-string@^0.30.19:
-  version "0.30.19"
-  resolved "https://registry.yarnpkg.com/magic-string/-/magic-string-0.30.19.tgz#cebe9f104e565602e5d2098c5f2e79a77cc86da9"
-  integrity sha512-2N21sPY9Ws53PZvsEpVtNuSW+ScYbQdp4b9qUaL+9QkHUrGFKo56Lg9Emg5s9V/qrtNBmiR01sYhUOwu3H+VOw==
+  version "0.30.21"
+  resolved "https://registry.yarnpkg.com/magic-string/-/magic-string-0.30.21.tgz#56763ec09a0fa8091df27879fd94d19078c00d91"
+  integrity sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==
   dependencies:
     "@jridgewell/sourcemap-codec" "^1.5.5"
 
