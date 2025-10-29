@@ -50,7 +50,6 @@
     "@react-native/eslint-config": "^0.78.0",
     "@react-native/typescript-config": "^0.78.0",
     "@typegpu/noise": "0.7.0",
-    "@typegpu/sdf": "0.7.0",
     "@webgpu/types": "0.1.66",
     "eslint": "^8.57.0",
     "eslint-config-expo": "~8.0.1",
