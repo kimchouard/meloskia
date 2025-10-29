@@ -1,17 +1,5 @@
-import tgpu from 'typegpu';
-import { f32, vec2f } from 'typegpu/data';
-import {
-  pow,
-  mix,
-  abs,
-  max,
-  dot,
-  mul,
-  sub,
-  clamp,
-  distance,
-  sign,
-} from 'typegpu/std';
+import { type v2f, vec2f } from 'typegpu/data';
+import { abs, clamp, distance, dot, max, mix, sign } from 'typegpu/std';
 
 /**
  * Nudges `start` towards `end` at a rate such that the distance
@@ -19,21 +7,22 @@ import {
  *
  * Can be used to dampen movement in a frame-independent way.
  */
-export const encroach = tgpu['~unstable'].fn(
-  [f32, f32, f32, f32],
-  f32
-)((start, end, factorPerSecond, deltaTime) => {
-  const factor = pow(factorPerSecond, deltaTime);
+export const encroach = (
+  start: number,
+  end: number,
+  factorPerSecond: number,
+  deltaTime: number
+): number => {
+  'use gpu';
+  const factor = factorPerSecond ** deltaTime;
   return mix(start, end, 1 - factor);
-});
+};
 
 /**
  * Source: https://iquilezles.org/articles/distfunctions2d/
  */
-export const sdPentagram = tgpu['~unstable'].fn(
-  [vec2f, f32],
-  f32
-)((p, r) => {
+export const sdPentagram = (p: v2f, r: number): number => {
+  'use gpu';
   const k1x = 0.809016994; // cos(π/ 5) = ¼(√5+1)
   const k2x = 0.309016994; // sin(π/10) = ¼(√5-1)
   const k1y = 0.587785252; // sin(π/ 5) = ¼√(10-2√5)
@@ -45,12 +34,12 @@ export const sdPentagram = tgpu['~unstable'].fn(
 
   let pp = p;
   pp.x = abs(pp.x);
-  pp = sub(pp, mul(2.0 * max(dot(v1, pp), 0.0), v1));
-  pp = sub(pp, mul(2.0 * max(dot(v2, pp), 0.0), v2));
+  pp = pp.sub(v1.mul(2 * max(dot(v1, pp), 0)));
+  pp = pp.sub(v2.mul(2 * max(dot(v2, pp), 0)));
   pp.x = abs(pp.x);
   pp.y -= r;
   return (
-    distance(pp, mul(clamp(dot(pp, v3), 0.0, k1z * r), v3)) *
+    distance(pp, v3.mul(clamp(dot(pp, v3), 0, k1z * r))) *
     sign(pp.y * v3.x - pp.x * v3.y)
   );
-});
+};
