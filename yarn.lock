@@ -2368,10 +2368,10 @@
   dependencies:
     tslib "^2.4.0"
 
-"@typegpu/noise@0.7.0":
-  version "0.7.0"
-  resolved "https://registry.yarnpkg.com/@typegpu/noise/-/noise-0.7.0.tgz#9e6f51909e30656b2ace060b538da7d19b70e808"
-  integrity sha512-4q3lN/m0F1pLKz0bJjTj8ukPl0uYsd5EWT4WjauXf19oQrGoHaHIO2lVkTkYTzOvjKf7WvDoSo/MIwv86DxZTg==
+"@typegpu/noise@0.8.0":
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/@typegpu/noise/-/noise-0.8.0.tgz#a7f923fde76e4670f22ff1867c5bf31036f536a0"
+  integrity sha512-NScTVc06yIOcg8xAobGJ/YyXO2rsn2ir9MVcpZXSHBpc1OheN0B8JZdseZ1ja+tqxjT6uirff2xqAP/fwpYqWg==
 
 "@types/babel__core@^7.1.14":
   version "7.20.5"
@@ -8513,6 +8513,11 @@ tinyest@~0.1.1:
   resolved "https://registry.yarnpkg.com/tinyest/-/tinyest-0.1.1.tgz#c0f13357fb90e00b851364d4c5cec15c989c5910"
   integrity sha512-YNHlB8BOXgW6RPzrfqqAkgyY9xj33sjXJcJlOl3MwY0BXXx26m3JUqf5yV8iBdwJPNe51DmxypR9Zbbd266biQ==
 
+tinyest@~0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/tinyest/-/tinyest-0.1.2.tgz#2eb4e7dfe7c3c70c89635ec36e41f583ff755c18"
+  integrity sha512-aHRmouyowIq1P5jrTF+YK6pGX+WuvFtSCLbqk91yHnU3SWQRIcNIamZLM5XF6lLqB13AWz0PGPXRff2QGDsxIg==
+
 tinyglobby@^0.2.12:
   version "0.2.12"
   resolved "https://registry.yarnpkg.com/tinyglobby/-/tinyglobby-0.2.12.tgz#ac941a42e0c5773bd0b5d08f32de82e74a1a61b5"
@@ -8697,12 +8702,12 @@ typed-binary@^4.3.1:
   resolved "https://registry.yarnpkg.com/typed-binary/-/typed-binary-4.3.2.tgz#c13776390e838a40216b15bbc7aed1d24d1ac6de"
   integrity sha512-HT3pIBM2njCZUmeczDaQUUErGiM6GXFCqMsHegE12HCoBtvHCkfR10JJni0TeGOTnLilTd6YFyj+YhflqQDrDQ==
 
-typegpu@0.8.0-alpha.2:
-  version "0.8.0-alpha.2"
-  resolved "https://registry.yarnpkg.com/typegpu/-/typegpu-0.8.0-alpha.2.tgz#8cc1ca6b8217300cc9567c426555c46464a12d61"
-  integrity sha512-vS26waj6s3FSXqRBXMa7c3hWlFzXB3tDmqKeVtTO2KvGe2VNqwnIWS+1xQBVmb/DnBv2KB/SoXVo88z8/4Vrng==
+typegpu@0.8.0:
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/typegpu/-/typegpu-0.8.0.tgz#72dbda7d970ea0c5a3c3b590566a7f18ee2eafaf"
+  integrity sha512-tLJG2S4ev8oV2Y9u+bG5gP4qGrCFuen2PpmeK2VsqzVveSHHA6274C/vTyHFpGBwOTs35Y2YtXxEHKnjTpWNDA==
   dependencies:
-    tinyest "~0.1.1"
+    tinyest "~0.1.2"
     typed-binary "^4.3.1"
 
 typescript@~5.3.3:
@@ -8799,10 +8804,10 @@ unpipe@~1.0.0:
   resolved "https://registry.yarnpkg.com/unpipe/-/unpipe-1.0.0.tgz#b2bf4ee8514aae6165b4817829d21b2ef49904ec"
   integrity sha512-pjy2bYhSsufwWlKwPc+l3cN7+wuJlK6uz0YdJEOlQDbl6jo/YlPi4mb8agUkVC8BF7V8NuzeyPNqRksA3hztKQ==
 
-unplugin-typegpu@0.8.0-alpha.2:
-  version "0.8.0-alpha.2"
-  resolved "https://registry.yarnpkg.com/unplugin-typegpu/-/unplugin-typegpu-0.8.0-alpha.2.tgz#5af636b5bcc1ceef96654895c5b40b574be62c40"
-  integrity sha512-IVrJHKrNl55p/uRohv5h7WE7exPiVuUNXLMsSQKxWVJFFRzTIyKtjAdJi2phL7dIGGnLj2BuZbURjFihXJslhA==
+unplugin-typegpu@0.8.0:
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/unplugin-typegpu/-/unplugin-typegpu-0.8.0.tgz#e29ebd5f848d9692cdffce407fabb4694e387d51"
+  integrity sha512-VJHdXSXGOkAx0WhwFczhVUjAI6HyDkrQXk20HnwyuzIE3FdqE5l9sJTCYZzoVGo3z8i/IA5TMHCDzzP0Bc97Cw==
   dependencies:
     "@babel/standalone" "^7.27.0"
     defu "^6.1.4"
@@ -8810,7 +8815,7 @@ unplugin-typegpu@0.8.0-alpha.2:
     magic-string-ast "^1.0.0"
     pathe "^2.0.3"
     picomatch "^4.0.3"
-    tinyest "~0.1.1"
+    tinyest "~0.1.2"
     tinyest-for-wgsl "~0.1.3"
     unplugin "^2.3.5"
 
