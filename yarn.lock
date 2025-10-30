@@ -1763,6 +1763,14 @@
     "@jridgewell/sourcemap-codec" "^1.4.10"
     "@jridgewell/trace-mapping" "^0.3.24"
 
+"@jridgewell/remapping@^2.3.5":
+  version "2.3.5"
+  resolved "https://registry.yarnpkg.com/@jridgewell/remapping/-/remapping-2.3.5.tgz#375c476d1972947851ba1e15ae8f123047445aa1"
+  integrity sha512-LI9u/+laYG4Ds1TDKSJW2YPrIlcVYOwi2fUC6xB43lueCjgxV4lffOCZCtYFiH6TNOX+tQKXx97T4IKHbhyHEQ==
+  dependencies:
+    "@jridgewell/gen-mapping" "^0.3.5"
+    "@jridgewell/trace-mapping" "^0.3.24"
+
 "@jridgewell/resolve-uri@^3.1.0":
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/@jridgewell/resolve-uri/-/resolve-uri-3.1.2.tgz#7a0ee601f60f99a20c7c7c5ff0c80388c1189bd6"
@@ -1781,10 +1789,15 @@
     "@jridgewell/gen-mapping" "^0.3.5"
     "@jridgewell/trace-mapping" "^0.3.25"
 
-"@jridgewell/sourcemap-codec@^1.4.10", "@jridgewell/sourcemap-codec@^1.4.14", "@jridgewell/sourcemap-codec@^1.5.0":
+"@jridgewell/sourcemap-codec@^1.4.10", "@jridgewell/sourcemap-codec@^1.4.14":
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/@jridgewell/sourcemap-codec/-/sourcemap-codec-1.5.0.tgz#3188bcb273a414b0d215fd22a58540b989b9409a"
   integrity sha512-gv3ZRaISU3fjPAgNsriBRqGWQL6quFx04YMPW/zD8XMLsU32mhCCbfbO6KZFLjvYpCZ8zyDEgqsgf+PwPaM7GQ==
+
+"@jridgewell/sourcemap-codec@^1.5.5":
+  version "1.5.5"
+  resolved "https://registry.yarnpkg.com/@jridgewell/sourcemap-codec/-/sourcemap-codec-1.5.5.tgz#6912b00d2c631c0d15ce1a7ab57cd657f2a8f8ba"
+  integrity sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og==
 
 "@jridgewell/trace-mapping@^0.3.18", "@jridgewell/trace-mapping@^0.3.24", "@jridgewell/trace-mapping@^0.3.25":
   version "0.3.25"
@@ -2355,10 +2368,10 @@
   dependencies:
     tslib "^2.4.0"
 
-"@typegpu/noise@0.0.8":
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/@typegpu/noise/-/noise-0.0.8.tgz#807ab96959e82e20f2be23ecee53262f445ba223"
-  integrity sha512-bl6kN1YgCuaFEIh/vx4q1Hdx5X6AUPwQVinMzWCRC8XnPmFWfuUclr544IA8pvokgQDuIQH5IJAnNCILUCnwJw==
+"@typegpu/noise@0.8.0":
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/@typegpu/noise/-/noise-0.8.0.tgz#a7f923fde76e4670f22ff1867c5bf31036f536a0"
+  integrity sha512-NScTVc06yIOcg8xAobGJ/YyXO2rsn2ir9MVcpZXSHBpc1OheN0B8JZdseZ1ja+tqxjT6uirff2xqAP/fwpYqWg==
 
 "@types/babel__core@^7.1.14":
   version "7.20.5"
@@ -2734,10 +2747,10 @@
   resolved "https://registry.yarnpkg.com/@webgpu/types/-/types-0.1.21.tgz#b181202daec30d66ccd67264de23814cfd176d3a"
   integrity sha512-pUrWq3V5PiSGFLeLxoGqReTZmiiXwY3jRkIG5sLLKjyqNxrwm/04b4nw7LSmGWJcKk59XOM/YRTUwOzo4MMlow==
 
-"@webgpu/types@0.1.60":
-  version "0.1.60"
-  resolved "https://registry.yarnpkg.com/@webgpu/types/-/types-0.1.60.tgz#4f58e763ce060a81b03ab7ee1ad879c7024923fd"
-  integrity sha512-8B/tdfRFKdrnejqmvq95ogp8tf52oZ51p3f4QD5m5Paey/qlX4Rhhy5Y8tgFMi7Ms70HzcMMw3EQjH/jdhTwlA==
+"@webgpu/types@0.1.66":
+  version "0.1.66"
+  resolved "https://registry.yarnpkg.com/@webgpu/types/-/types-0.1.66.tgz#afba7a8f32494416643d6077ce0445fc45df4346"
+  integrity sha512-YA2hLrwLpDsRueNDXIMqN9NTzD6bCDkuXbOSe0heS+f8YE8usA6Gbv1prj81pzVHrbaAma7zObnIC+I6/sXJgA==
 
 "@xmldom/xmldom@^0.8.8":
   version "0.8.10"
@@ -2774,7 +2787,12 @@ acorn-jsx@^5.3.2:
   resolved "https://registry.yarnpkg.com/acorn-jsx/-/acorn-jsx-5.3.2.tgz#7ed5bb55908b3b2f1bc55c6af1653bada7f07937"
   integrity sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==
 
-acorn@^8.14.1, acorn@^8.8.2, acorn@^8.9.0:
+acorn@^8.15.0:
+  version "8.15.0"
+  resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.15.0.tgz#a360898bc415edaac46c8241f6383975b930b816"
+  integrity sha512-NZyJarBfL7nWwIq+FDL6Zp/yHEhePMNnnJ0y3qfieCrmNvYct8uvtiV41UvlSe6apAfk0fY1FbWx+NwfmpvtTg==
+
+acorn@^8.8.2, acorn@^8.9.0:
   version "8.14.1"
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.14.1.tgz#721d5dc10f7d5b5609a891773d47731796935dfb"
   integrity sha512-OvQ/2pUDKmgfCg++xsTX1wGxfTaszcHVcTctW4UJB4hibJx2HXxxO5UmVgyjMa+ZDsiaf5wWLXYpRWMmBI0QHg==
@@ -6150,19 +6168,19 @@ lru-cache@^5.1.1:
   dependencies:
     yallist "^3.0.2"
 
-magic-string-ast@^0.9.1:
-  version "0.9.1"
-  resolved "https://registry.yarnpkg.com/magic-string-ast/-/magic-string-ast-0.9.1.tgz#200a8e2bbcc16ed20b971563256ba5f552c2624c"
-  integrity sha512-18dv2ZlSSgJ/jDWlZGKfnDJx56ilNlYq9F7NnwuWTErsmYmqJ2TWE4l1o2zlUHBYUGBy3tIhPCC1gxq8M5HkMA==
+magic-string-ast@^1.0.0:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/magic-string-ast/-/magic-string-ast-1.0.3.tgz#51ef7832fd5c70a0188fb94627caa3b8c74ff9bf"
+  integrity sha512-CvkkH1i81zl7mmb94DsRiFeG9V2fR2JeuK8yDgS8oiZSFa++wWLEgZ5ufEOyLHbvSbD1gTRKv9NdX69Rnvr9JA==
   dependencies:
-    magic-string "^0.30.17"
+    magic-string "^0.30.19"
 
-magic-string@^0.30.17:
-  version "0.30.17"
-  resolved "https://registry.yarnpkg.com/magic-string/-/magic-string-0.30.17.tgz#450a449673d2460e5bbcfba9a61916a1714c7453"
-  integrity sha512-sNPKHvyjVf7gyjwS4xGTaW/mCnF8wnjtifKBEhxfZ7E/S8tQ0rssrwGNn6q8JH/ohItJfSQp9mBtQYuTlH5QnA==
+magic-string@^0.30.19:
+  version "0.30.21"
+  resolved "https://registry.yarnpkg.com/magic-string/-/magic-string-0.30.21.tgz#56763ec09a0fa8091df27879fd94d19078c00d91"
+  integrity sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==
   dependencies:
-    "@jridgewell/sourcemap-codec" "^1.5.0"
+    "@jridgewell/sourcemap-codec" "^1.5.5"
 
 make-dir@^2.0.0, make-dir@^2.1.0:
   version "2.1.0"
@@ -6995,6 +7013,11 @@ path-type@^4.0.0:
   resolved "https://registry.yarnpkg.com/path-type/-/path-type-4.0.0.tgz#84ed01c0a7ba380afe09d90a8c180dcd9d03043b"
   integrity sha512-gDKb8aZMDeD/tZWs9P6+q0J9Mwkdl6xMV8TjnGP3qJVJ06bdMgkbBlLU8IdfOsIsFz2BW1rNVT3XuNEl8zPAvw==
 
+pathe@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/pathe/-/pathe-2.0.3.tgz#3ecbec55421685b70a9da872b2cff3e1cbed1716"
+  integrity sha512-WUjGcAqP1gQacoQe+OBJsFA7Ld4DyXuUIjZ5cc75cLHvJ7dtNsTugphxIADwspS+AraAUePCKrSVtPLFj/F88w==
+
 picocolors@^1.0.0, picocolors@^1.0.1, picocolors@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/picocolors/-/picocolors-1.1.1.tgz#3d321af3eab939b083c8f929a1d12cda81c26b6b"
@@ -7014,6 +7037,11 @@ picomatch@^4.0.2:
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-4.0.2.tgz#77c742931e8f3b8820946c76cd0c1f13730d1dab"
   integrity sha512-M7BAV6Rlcy5u+m6oPhAPFgJTzAioX/6B0DxyvDlo9l8+T3nLKbrczg2WLUyzd45L8RqfUMyGPzekbMvX2Ldkwg==
+
+picomatch@^4.0.3:
+  version "4.0.3"
+  resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-4.0.3.tgz#796c76136d1eead715db1e7bad785dedd695a042"
+  integrity sha512-5gTmgEY/sqK6gFXLIsQNH19lWb4ebPDLA4SdLP7dsWkIXHWlG66oPuVvXSGFPppYZz8ZDZq0dYYrbHfBCVUb1Q==
 
 pify@^2.3.0:
   version "2.3.0"
@@ -8473,10 +8501,10 @@ tiny-invariant@^1.3.3:
   resolved "https://registry.yarnpkg.com/tiny-invariant/-/tiny-invariant-1.3.3.tgz#46680b7a873a0d5d10005995eb90a70d74d60127"
   integrity sha512-+FbBPE1o9QAYvviau/qC5SE3caw21q3xkvWKBtja5vgqOWIHHJ3ioaq1VPfn/Szqctz2bU/oYeKd9/z5BL+PVg==
 
-tinyest-for-wgsl@~0.1.2:
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/tinyest-for-wgsl/-/tinyest-for-wgsl-0.1.2.tgz#e9c8962f6007358942c1c94661cef6db85c93366"
-  integrity sha512-yJ49SoJIpEi4ADsBVNE54GVJ5JZMIAKNkRueeNpYhIiq0z1Nn9THJNMNP1b9HI0VQt7LzCrxT0ZP29muiUtcRg==
+tinyest-for-wgsl@~0.1.3:
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/tinyest-for-wgsl/-/tinyest-for-wgsl-0.1.3.tgz#76e8940731c6d47b822f295334364f5256089b9a"
+  integrity sha512-Wm5ADG1UyDxykf42S1gLYP4U9e1QP/TdtJeovQi6y68zttpiFLKqQGioHmPs9Mjysh7YMSAr/Lpuk0cD2MVdGA==
   dependencies:
     tinyest "~0.1.1"
 
@@ -8484,6 +8512,11 @@ tinyest@~0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/tinyest/-/tinyest-0.1.1.tgz#c0f13357fb90e00b851364d4c5cec15c989c5910"
   integrity sha512-YNHlB8BOXgW6RPzrfqqAkgyY9xj33sjXJcJlOl3MwY0BXXx26m3JUqf5yV8iBdwJPNe51DmxypR9Zbbd266biQ==
+
+tinyest@~0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/tinyest/-/tinyest-0.1.2.tgz#2eb4e7dfe7c3c70c89635ec36e41f583ff755c18"
+  integrity sha512-aHRmouyowIq1P5jrTF+YK6pGX+WuvFtSCLbqk91yHnU3SWQRIcNIamZLM5XF6lLqB13AWz0PGPXRff2QGDsxIg==
 
 tinyglobby@^0.2.12:
   version "0.2.12"
@@ -8669,12 +8702,12 @@ typed-binary@^4.3.1:
   resolved "https://registry.yarnpkg.com/typed-binary/-/typed-binary-4.3.2.tgz#c13776390e838a40216b15bbc7aed1d24d1ac6de"
   integrity sha512-HT3pIBM2njCZUmeczDaQUUErGiM6GXFCqMsHegE12HCoBtvHCkfR10JJni0TeGOTnLilTd6YFyj+YhflqQDrDQ==
 
-typegpu@0.5.8:
-  version "0.5.8"
-  resolved "https://registry.yarnpkg.com/typegpu/-/typegpu-0.5.8.tgz#8ad618a1833d0b590522c30dcfe87ed9510c63d8"
-  integrity sha512-4uyIxeY61YFYIrq8Cxt/RyuRg0BSO0VfP3EzCepGK+xpdtq7erlhg+42P2Eo1GUV2zrcvZEvupFeBN4BAwDahw==
+typegpu@0.8.0:
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/typegpu/-/typegpu-0.8.0.tgz#72dbda7d970ea0c5a3c3b590566a7f18ee2eafaf"
+  integrity sha512-tLJG2S4ev8oV2Y9u+bG5gP4qGrCFuen2PpmeK2VsqzVveSHHA6274C/vTyHFpGBwOTs35Y2YtXxEHKnjTpWNDA==
   dependencies:
-    tinyest "~0.1.1"
+    tinyest "~0.1.2"
     typed-binary "^4.3.1"
 
 typescript@~5.3.3:
@@ -8771,26 +8804,29 @@ unpipe@~1.0.0:
   resolved "https://registry.yarnpkg.com/unpipe/-/unpipe-1.0.0.tgz#b2bf4ee8514aae6165b4817829d21b2ef49904ec"
   integrity sha512-pjy2bYhSsufwWlKwPc+l3cN7+wuJlK6uz0YdJEOlQDbl6jo/YlPi4mb8agUkVC8BF7V8NuzeyPNqRksA3hztKQ==
 
-unplugin-typegpu@0.1.2:
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/unplugin-typegpu/-/unplugin-typegpu-0.1.2.tgz#4ec6d4ebd60f265620b115a444cfc80e6596dfd3"
-  integrity sha512-3YhpY+8TjdwvTTSxek7OqyeGOOkdfuy4eIuQd/gk0sJcS55UycKXrMUdiED+N8XSTgv8UGpSZplrMhtDjOnkTQ==
+unplugin-typegpu@0.8.0:
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/unplugin-typegpu/-/unplugin-typegpu-0.8.0.tgz#e29ebd5f848d9692cdffce407fabb4694e387d51"
+  integrity sha512-VJHdXSXGOkAx0WhwFczhVUjAI6HyDkrQXk20HnwyuzIE3FdqE5l9sJTCYZzoVGo3z8i/IA5TMHCDzzP0Bc97Cw==
   dependencies:
     "@babel/standalone" "^7.27.0"
     defu "^6.1.4"
     estree-walker "^3.0.3"
-    magic-string-ast "^0.9.1"
-    picomatch "^4.0.2"
-    tinyest-for-wgsl "~0.1.2"
-    unplugin "^2.3.1"
+    magic-string-ast "^1.0.0"
+    pathe "^2.0.3"
+    picomatch "^4.0.3"
+    tinyest "~0.1.2"
+    tinyest-for-wgsl "~0.1.3"
+    unplugin "^2.3.5"
 
-unplugin@^2.3.1:
-  version "2.3.5"
-  resolved "https://registry.yarnpkg.com/unplugin/-/unplugin-2.3.5.tgz#c689d806e2a15c95aeb794f285356c6bcdea4a2e"
-  integrity sha512-RyWSb5AHmGtjjNQ6gIlA67sHOsWpsbWpwDokLwTcejVdOjEkJZh7QKu14J00gDDVSh8kGH4KYC/TNBceXFZhtw==
+unplugin@^2.3.5:
+  version "2.3.10"
+  resolved "https://registry.yarnpkg.com/unplugin/-/unplugin-2.3.10.tgz#15e75fec9384743335be7e54e5c88b5c187a3e94"
+  integrity sha512-6NCPkv1ClwH+/BGE9QeoTIl09nuiAt0gS28nn1PvYXsGKRwM2TCbFA2QiilmehPDTXIe684k4rZI1yl3A1PCUw==
   dependencies:
-    acorn "^8.14.1"
-    picomatch "^4.0.2"
+    "@jridgewell/remapping" "^2.3.5"
+    acorn "^8.15.0"
+    picomatch "^4.0.3"
     webpack-virtual-modules "^0.6.2"
 
 update-browserslist-db@^1.1.1:

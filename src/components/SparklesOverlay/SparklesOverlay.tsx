@@ -43,7 +43,9 @@ function createSetup(stateRef: RefObject<State>) {
     context: GPUCanvasContext
   ) {
     if (typeof navigator.gpu === 'undefined') {
-      console.warn('WebGPU is not supported in this browser. Some functionality may be disabled.');
+      console.warn(
+        'WebGPU is not supported in this browser. Some functionality may be disabled.'
+      );
       return;
     }
     const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
@@ -87,8 +89,8 @@ function createSetup(stateRef: RefObject<State>) {
 
         const expectedNotes = stateRef.current.getExpectedNotes();
         const goodKeys = Object.entries(stateRef.current.keysState)
-        .filter(([note, pressed]) => pressed && expectedNotes.includes(note))
-        .map(([note]) => noteToKeyboardKey[note]);
+          .filter(([note, pressed]) => pressed && expectedNotes.includes(note))
+          .map(([note]) => noteToKeyboardKey[note]);
 
         const spawners = goodKeys.map((pressedKey) =>
           d.vec2f(keyPositions[pressedKey] ?? 0, pianoKeyboardHeight)
